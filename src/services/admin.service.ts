@@ -1,0 +1,252 @@
+/**
+ * 관리자 도메인 로직.
+ *
+ * 코드 발급·상품 시드·재고 집계는 원래 `scripts/` 안에 있던 로직을 2단계에서 이곳으로
+ * 옮긴 것입니다. 관리자 화면(5단계)과 CLI 가 같은 함수를 호출하게 되므로,
+ * 분배 계획 검증이나 배치 중복 방지 같은 규칙이 한쪽에만 적용되는 일이 없습니다.
+ * 스크립트는 이제 인자 파싱과 출력만 담당하는 얇은 어댑터입니다.
+ */
+import { db } from "../lib/db";
+import { DEFAULT_PLAN, PRODUCTS, planTotal } from "../lib/catalog";
+import { randomCode, shuffle } from "../lib/code-generator";
+import { kstDayRange } from "../lib/date";
+import { AppError, ERROR_CODES } from "../lib/errors";
+import { signAdminToken, verifyPassword } from "../lib/admin-auth";
+import { productRepository } from "../repositories/product.repository";
+import { rewardRepository } from "../repositories/reward.repository";
+import { REWARD_STATUS } from "../types/reward";
+import type {
+  AdminLoginResponse,
+  CreateProductRequest,
+  DashboardResponse,
+  IssueCodesResponse,
+  IssuedCodeDto,
+  StockRowDto,
+  UpdateProductRequest,
+} from "../types/dto";
+
+/** 코드 생성 재시도 한계. 이 횟수 안에 중복 없는 집합을 못 만들면 코드 공간이 포화된 것입니다. */
+const CODE_RETRY_ROUNDS = 10;
+const RECENT_RECEIPT_LIMIT = 10;
+
+export const adminService = {
+  /* ── 인증 ──────────────────────────────────────────────── */
+
+  /**
+   * 비밀번호를 확인하고 토큰을 발급합니다.
+   * 실패 사유(비밀번호 틀림 / 미설정)를 구분해 알려주지 않습니다.
+   */
+  login(password: string): AdminLoginResponse {
+    if (!password || !verifyPassword(password)) {
+      throw new AppError(ERROR_CODES.UNAUTHORIZED, "비밀번호가 올바르지 않습니다.");
+    }
+    const { token, expiresAt } = signAdminToken();
+    return { token, expiresAt: expiresAt.toISOString() };
+  },
+
+  /* ── 대시보드 ──────────────────────────────────────────── */
+
+  async getDashboard(): Promise<DashboardResponse> {
+    // "오늘"은 서버 로컬 시간이 아니라 한국 시간 기준입니다. (lib/date.ts 참고)
+    const { from, to } = kstDayRange();
+
+    const [todayRegistered, todayReceived, totalReceived, remaining, stock, recent] =
+      await Promise.all([
+        rewardRepository.countUsedBetween(db, from, to),
+        rewardRepository.countReceivedBetween(db, from, to),
+        rewardRepository.countByStatus(db, REWARD_STATUS.RECEIVED),
+        rewardRepository.countByStatus(db, REWARD_STATUS.UNUSED),
+        adminService.getStock(),
+        rewardRepository.recentReceived(db, RECENT_RECEIPT_LIMIT),
+      ]);
+
+    return {
+      todayRegistered,
+      todayReceived,
+      totalReceived,
+      remaining,
+      stock,
+      recentReceived: recent.map((r) => ({
+        rewardId: r.id,
+        rewardCode: r.rewardCode,
+        productName: r.product.name,
+        userName: r.user?.name ?? "(알 수 없음)",
+        receivedAt: (r.receivedAt ?? r.createdAt).toISOString(),
+      })),
+    };
+  },
+
+  /** 상품별 재고. 저장된 카운터가 아니라 reward_codes 를 세어서 만듭니다. */
+  async getStock(): Promise<StockRowDto[]> {
+    const [products, grouped] = await Promise.all([
+      productRepository.listActive(db),
+      rewardRepository.groupByProductStatus(db),
+    ]);
+
+    return products.map((p) => {
+      const at = (status: string) =>
+        grouped.find((g) => g.productId === p.id && g.status === status)?._count._all ?? 0;
+
+      const unused = at(REWARD_STATUS.UNUSED);
+      const used = at(REWARD_STATUS.USED);
+      const received = at(REWARD_STATUS.RECEIVED);
+
+      return {
+        productId: p.id,
+        name: p.name,
+        rank: p.rank,
+        issued: unused + used + received,
+        unused,
+        used,
+        received,
+      };
+    });
+  },
+
+  /* ── 상품 관리 ─────────────────────────────────────────── */
+
+  listProducts(includeDeleted = false) {
+    return includeDeleted ? productRepository.listAll(db) : productRepository.listActive(db);
+  },
+
+  createProduct(input: CreateProductRequest) {
+    if (!input.name?.trim()) {
+      throw new AppError(ERROR_CODES.VALIDATION_ERROR, "상품명을 입력해 주세요.");
+    }
+    return productRepository.create(db, { ...input, name: input.name.trim() });
+  },
+
+  async updateProduct(id: string, input: UpdateProductRequest) {
+    const existing = await productRepository.findById(db, id);
+    if (!existing) throw new AppError(ERROR_CODES.NOT_FOUND, "상품을 찾을 수 없습니다.");
+    return productRepository.update(db, id, input);
+  },
+
+  /** soft delete. 이미 발급된 코드의 상품 참조를 살려두기 위해 물리 삭제하지 않습니다. */
+  async deleteProduct(id: string): Promise<void> {
+    const deleted = await productRepository.softDelete(db, id, new Date());
+    if (deleted === 0) {
+      throw new AppError(ERROR_CODES.NOT_FOUND, "이미 삭제되었거나 존재하지 않는 상품입니다.");
+    }
+  },
+
+  async restoreProduct(id: string): Promise<void> {
+    const restored = await productRepository.restore(db, id);
+    if (restored === 0) {
+      throw new AppError(ERROR_CODES.CONFLICT, "삭제 상태인 상품이 아닙니다.");
+    }
+  },
+
+  /** 고정 id 카탈로그를 DB에 반영합니다. 여러 번 실행해도 안전합니다. */
+  async seedProducts(): Promise<number> {
+    for (const p of PRODUCTS) {
+      // image 를 undefined 로 넘기면 Prisma 가 "건드리지 않음"으로 해석해,
+      // 카탈로그에서 사진을 뺀 상품의 옛 경로가 DB에 남습니다. 명시적으로 null 을 씁니다.
+      await productRepository.upsert(db, { ...p, image: p.image ?? null });
+    }
+    return productRepository.countActive(db);
+  },
+
+  /* ── 리워드 코드 발급 ──────────────────────────────────── */
+
+  /**
+   * 배치 단위로 코드를 발급합니다.
+   *
+   * 사전 배정 모델이라 **발급 시점에 상품이 확정**됩니다. 등록 시점에 추첨하지 않으므로,
+   * 여기서 만든 분배가 곧 당첨 확률입니다.
+   *
+   * `dryRun` 이면 DB에 쓰지 않고 결과만 계산해 돌려줍니다.
+   */
+  async issueCodes(params: {
+    batch: string;
+    plan?: Record<string, number>;
+    dryRun?: boolean;
+  }): Promise<IssueCodesResponse> {
+    const batch = params.batch?.trim();
+    const plan = params.plan ?? DEFAULT_PLAN;
+    const dryRun = params.dryRun ?? false;
+    const total = planTotal(plan);
+
+    if (!batch) {
+      throw new AppError(ERROR_CODES.VALIDATION_ERROR, "배치 이름을 입력해 주세요.");
+    }
+    if (total <= 0) {
+      throw new AppError(ERROR_CODES.VALIDATION_ERROR, "발급 수량이 0입니다. 분배 계획을 확인해 주세요.");
+    }
+
+    // 1) 배치 중복 방지 — 발급은 멱등하지 않습니다.
+    const existing = await rewardRepository.countByBatch(db, batch);
+    if (existing > 0) {
+      throw new AppError(
+        ERROR_CODES.CONFLICT,
+        `배치 '${batch}' 에 이미 ${existing}개의 코드가 발급되어 있습니다. 다른 이름을 쓰세요.`,
+      );
+    }
+
+    // 2) 계획에 적힌 상품이 실제로 있는지 확인
+    const productIds = Object.keys(plan);
+    const found = await productRepository.findActiveIdsIn(db, productIds);
+    const missing = productIds.filter((id) => !found.some((f) => f.id === id));
+    if (missing.length > 0) {
+      throw new AppError(
+        ERROR_CODES.VALIDATION_ERROR,
+        `등록되지 않은 상품이 있습니다: ${missing.join(", ")}`,
+      );
+    }
+
+    // 3) 상품 배정 목록을 만들고 셔플
+    //    셔플하지 않으면 발급 순서대로 인쇄했을 때 상자 앞쪽 패드가 전부 1등이 됩니다.
+    const assignments = shuffle(
+      Object.entries(plan).flatMap(([productId, n]) =>
+        Array.from({ length: n }, () => productId),
+      ),
+    );
+
+    // 4) 중복 없는 코드 생성 — 메모리 내 Set 으로 자체 중복을 걸러낸 뒤 DB 기존 코드와 대조
+    const codes = new Set<string>();
+    let cleared = false;
+    for (let round = 0; round < CODE_RETRY_ROUNDS && !cleared; round++) {
+      while (codes.size < total) codes.add(randomCode());
+      const taken = await rewardRepository.findExistingCodes(db, [...codes]);
+      if (taken.length === 0) cleared = true;
+      else for (const t of taken) codes.delete(t.rewardCode);
+    }
+    if (!cleared) {
+      throw new AppError(
+        ERROR_CODES.CONFLICT,
+        "코드 생성 재시도 한계를 넘었습니다. 코드 공간이 포화됐을 수 있습니다.",
+      );
+    }
+
+    const rows: IssuedCodeDto[] = [...codes].map((rewardCode, i) => ({
+      rewardCode,
+      productId: assignments[i],
+    }));
+
+    if (dryRun) return { batch, total, dryRun: true, rows };
+
+    // 5) 저장 — 전부 성공하거나 전부 실패.
+    //    배치 중복 검사를 트랜잭션 안에서 한 번 더 합니다. 위 1)번 이후 다른 관리자가
+    //    같은 배치명으로 발급을 끝냈을 수 있습니다.
+    await db.$transaction(async (tx) => {
+      const raced = await rewardRepository.countByBatch(tx, batch);
+      if (raced > 0) {
+        throw new AppError(
+          ERROR_CODES.CONFLICT,
+          `배치 '${batch}' 가 방금 다른 곳에서 발급되었습니다. 다른 이름을 쓰세요.`,
+        );
+      }
+      await rewardRepository.createMany(
+        tx,
+        rows.map((r) => ({ ...r, batch })),
+      );
+    });
+
+    return { batch, total, dryRun: false, rows };
+  },
+
+  /** 발급된 배치 목록과 각 수량 */
+  listBatches() {
+    return rewardRepository.listBatches(db);
+  },
+};
