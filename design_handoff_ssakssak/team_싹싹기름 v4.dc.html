@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', system-ui, -apple-system, sans-serif; color: #17211C; }
+  a { color: #1E8E5A; text-decoration: none; }
+  a:hover { color: #17603D; }
+  .ssak-scroll::-webkit-scrollbar { display: none; }
+  .ssak-scroll { scrollbar-width: none; }
+  @keyframes ssakSpin { 0% { transform: rotate(0) scale(1);} 50%{transform:rotate(180deg) scale(1.12);} 100%{transform:rotate(360deg) scale(1);} }
+  @keyframes ssakPop { 0% { transform: scale(.4); opacity:0;} 60%{transform:scale(1.08);opacity:1;} 100%{transform:scale(1);} }
+  @keyframes ssakFloat { 0%,100% { transform: translateY(0);} 50%{transform:translateY(-7px);} }
+  @keyframes ssakFall { 0% { transform: translateY(-20px) rotate(0); opacity:0;} 10%{opacity:1;} 100%{transform:translateY(360px) rotate(320deg); opacity:0;} }
+  @keyframes ssakPulse { 0%,100%{opacity:.5;} 50%{opacity:1;} }
+  @keyframes ssakIntroLogo {
+    0%   { top:50%; left:50%; transform:translate(-50%,-50%) scale(1); opacity:0; }
+    14%  { top:50%; left:50%; transform:translate(-50%,-50%) scale(1); opacity:1; }
+    52%  { top:50%; left:50%; transform:translate(-50%,-50%) scale(1); opacity:1; }
+    100% { top:26px; left:22px; transform:translate(0,0) scale(.56); opacity:1; }
+  }
+  input::placeholder { color: rgba(255,255,255,.72); font-weight: 500; }
+  @keyframes ssakIntroUp { 0% { opacity:0; transform:translateY(14px);} 100%{opacity:1;transform:translateY(0);} }
+</style>
+</helmet>
+
+<div style="min-height:100vh;background:#E4EBE5;display:flex;justify-content:center;align-items:flex-start;">
+  <div style="position:relative;width:100%;max-width:440px;height:100vh;height:100dvh;background:#F5F8F5;overflow:hidden;box-shadow:0 20px 60px rgba(23,33,28,.14);display:flex;flex-direction:column;">
+
+    <!-- ===== INTRO / SPLASH ===== -->
+    <sc-if value="{{ isIntro }}" hint-placeholder-val="{{ true }}">
+    <div style="{{ introWrapStyle }}">
+      <img src="assets/intro-bg.png" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;">
+      <div style="position:absolute;inset:0;box-shadow:inset 0 0 90px 30px rgba(8,18,12,.55), inset 0 0 200px 60px rgba(8,18,12,.35);"></div>
+      <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(8,18,12,.35) 0%,rgba(8,18,12,.05) 38%,rgba(8,18,12,.62) 100%);"></div>
+
+      <div style="position:absolute;width:240px;top:26px;left:22px;transform:translate(0,0) scale(.56);transform-origin:left top;display:flex;flex-direction:column;align-items:flex-start;gap:16px;filter:drop-shadow(0 6px 20px rgba(0,0,0,.35));animation:ssakIntroLogo 2.6s cubic-bezier(.65,0,.35,1) forwards;">
+        <img src="assets/logo-amiyu.png" alt="아미유" style="width:220px;height:auto;display:block;">
+        <img src="assets/logo-fruit3.png" alt="사랑의열매 사회복지공동모금회" style="width:186px;height:auto;display:block;">
+      </div>
+
+      <button onClick="{{ openMenu }}" aria-label="menu" style="{{ introMenuStyle }}">
+        <svg width="22" height="22" viewBox="0 0 24 24"><g stroke="#ffffff" stroke-width="2" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"></line><line x1="4" y1="12" x2="20" y2="12"></line><line x1="4" y1="17" x2="20" y2="17"></line></g></svg>
+      </button>
+
+      <div style="{{ introCtaStyle }}">
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <span style="font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.68);font-weight:600;">team_싹싹기름</span>
+          <p style="margin:0;font-size:22px;line-height:1.45;font-weight:700;color:#fff;text-wrap:pretty;">기름 한 방울부터<br>지구는 달라집니다.<br></p>
+        </div>
+        <button onClick="{{ enterApp }}" style="width:100%;height:56px;border:1.5px solid rgba(255,255,255,.75);border-radius:16px;background:transparent;color:#fff;font-family:inherit;font-size:16px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .2s,border-color .2s;" style-hover="background:rgba(255,255,255,.14);border-color:#fff;" style-active="background:rgba(255,255,255,.22);">
+          지금 시작하기
+          <svg width="18" height="18" viewBox="0 0 24 24"><g stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="13,6 19,12 13,18"></polyline></g></svg>
+        </button>
+      </div>
+    </div>
+    </sc-if>
+
+    <div style="{{ appPanelStyle }}">
+
+    <!-- ===== HOME HEADER ===== -->
+    <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+    <header style="{{ homeHeaderStyle }}">
+      <img src="assets/logo-r14.png" alt="싹싹기름 로고" style="height:34px;width:auto;border-radius:8px;object-fit:contain;">
+      <span style="{{ homeBrandStyle }}">team_싹싹기름</span>
+    </header>
+    </sc-if>
+
+    <!-- ===== SUBPAGE HEADER ===== -->
+    <sc-if value="{{ isSub }}" hint-placeholder-val="{{ false }}">
+    <header style="position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;height:58px;padding:0 8px 0 6px;background:rgba(245,248,245,.9);backdrop-filter:blur(12px);border-bottom:1px solid #E6ECE7;">
+      <button onClick="{{ goHome }}" aria-label="back" style="width:44px;height:44px;border:none;background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><polyline points="15 5 8 12 15 19" stroke="#17211C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></polyline></svg>
+      </button>
+      <span style="font-size:15px;font-weight:700;letter-spacing:-.02em;">{{ subTitle }}</span>
+      <div style="width:44px;"></div>
+    </header>
+    </sc-if>
+
+    <!-- ===== HOME BODY ===== -->
+    <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+    <main ref="{{ mainRef }}" class="ssak-scroll" style="flex:1;min-height:0;overflow-y:auto;padding:0 0 0;display:block;">
+
+      <!-- Hero + code input (morphing background) -->
+      <section style="position:relative;margin-top:-60px;padding:76px 20px 20px;color:#fff;overflow:hidden;background:linear-gradient(170deg,rgba(14,58,36,.34),rgba(8,36,24,.44));">
+        <div style="position:absolute;inset:0;background:linear-gradient(178deg,rgba(8,40,24,.14) 0%,rgba(9,44,27,.24) 46%,rgba(8,36,22,.34) 100%);"></div>
+        <div style="position:relative;">
+          <span style="display:inline-block;font-size:10.5px;font-weight:800;letter-spacing:.14em;color:#5FD39A;">CLIMATE ACTION</span>
+          <p style="margin:9px 0 0;font-size:13px;line-height:1.55;color:rgba(255,255,255,.86);max-width:19em;">패드에 인쇄된 영문 코드를 입력하여<br>당첨된 경품을 확인하세요.</p>
+
+          <div style="margin-top:18px;padding-top:16px;border-top:1px solid rgba(255,255,255,.22);">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+              <div style="width:22px;height:22px;border-radius:6px;background:rgba(255,255,255,.94);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><rect x="4" y="4" width="7" height="7" rx="1.4" stroke="#14663F" stroke-width="2"></rect><rect x="13" y="4" width="7" height="7" rx="1.4" stroke="#14663F" stroke-width="2"></rect><rect x="4" y="13" width="7" height="7" rx="1.4" stroke="#14663F" stroke-width="2"></rect><rect x="15" y="15" width="4" height="4" fill="#14663F"></rect></svg>
+              </div>
+              <span style="font-size:10.5px;font-weight:800;letter-spacing:.14em;color:#5FD39A;">ENTER CODE</span>
+            </div>
+            <input value="{{ code }}" onInput="{{ onCodeInput }}" placeholder="패드 코드를 입력하세요" spellcheck="false" style="width:100%;height:46px;border:1px solid rgba(255,255,255,.34);border-radius:10px;background:rgba(255,255,255,.18);backdrop-filter:blur(6px);padding:0 15px;font-size:16px;font-weight:600;letter-spacing:.08em;font-family:'SFMono-Regular',ui-monospace,monospace;color:#ffffff;text-transform:uppercase;outline:none;">
+            <button onClick="{{ submitCode }}" style="width:100%;height:46px;margin-top:9px;border-radius:10px;background:rgba(30,142,90,.42);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.3);color:#fff;font-size:15px;font-weight:800;letter-spacing:-.01em;cursor:pointer;font-family:inherit;" style-active="transform:scale(.99)">당첨 확인하기</button>
+            <p style="margin:10px 2px 0;font-size:11.5px;color:rgba(255,255,255,.62);line-height:1.5;">코드는 1회만 사용할 수 있어요. 입력 즉시 경품 당첨 여부가 공개됩니다.</p>
+          </div>
+
+          <div style="display:flex;gap:26px;margin-top:18px;padding-top:16px;border-top:1px solid rgba(255,255,255,.16);">
+            <div><div style="font-size:24px;font-weight:800;line-height:1;letter-spacing:-.02em;">{{ winCountLabel }}</div><div style="font-size:10.5px;font-weight:700;letter-spacing:.1em;color:rgba(255,255,255,.6);margin-top:6px;">내 당첨</div></div>
+            <div><div style="font-size:24px;font-weight:800;line-height:1;letter-spacing:-.02em;">{{ usedCountLabel }}</div><div style="font-size:10.5px;font-weight:700;letter-spacing:.1em;color:rgba(255,255,255,.6);margin-top:6px;">사용한 코드</div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- How it works (coverflow) -->
+      <section style="background:rgba(255,255,255,.4);border-bottom:1px solid rgba(230,236,231,.55);padding:24px 0 26px;">
+        <div style="font-size:10.5px;font-weight:800;letter-spacing:.14em;color:#1E8E5A;margin:0 18px 4px;">HOW IT WORKS</div>
+        <h2 style="margin:0 18px 18px;font-size:19px;font-weight:800;letter-spacing:-.03em;">세 단계로 끝나요</h2>
+        <div style="position:relative;height:300px;perspective:1100px;overflow:hidden;">
+          <sc-for list="{{ flowCards }}" as="c" hint-placeholder-count="3">
+            <div onClick="{{ c.go }}" style="{{ c.style }}">
+              <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(6,26,16,.1) 0%,rgba(6,26,16,.3) 44%,rgba(6,26,16,.86) 100%);"></div>
+              <div style="position:absolute;left:0;right:0;bottom:0;padding:16px 16px 18px;">
+                <div style="font-size:10.5px;font-weight:800;letter-spacing:.14em;color:#8FE6B8;">{{ c.no }}</div>
+                <div style="margin-top:6px;font-size:17px;font-weight:800;letter-spacing:-.02em;color:#fff;line-height:1.3;">{{ c.title }}</div>
+                <div style="margin-top:5px;font-size:11.5px;line-height:1.5;color:rgba(255,255,255,.78);">{{ c.desc }}</div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="display:flex;justify-content:center;gap:6px;margin-top:14px;">
+          <sc-for list="{{ flowDots }}" as="d" hint-placeholder-count="3">
+            <span style="{{ d.style }}"></span>
+          </sc-for>
+        </div>
+      </section>
+
+      <!-- Promo carousel (3 slots) -->
+      <sc-if value="{{ showEvent }}" hint-placeholder-val="{{ true }}">
+      <section style="position:relative;padding:26px 16px 6px;">
+        <div style="display:flex;align-items:baseline;justify-content:space-between;margin:0 2px 13px;">
+          <div>
+            <div style="font-size: 10.5px; font-weight: 800; letter-spacing: .14em; color: #1B5E20">GUIDE</div>
+            <h2 style="margin:6px 0 0;font-size:21px;font-weight:800;letter-spacing:-.03em;">환경을 지키는 습관</h2>
+          </div>
+          <span style="font-size:11.5px;font-weight:700;color:#8A9A90;"><br></span>
+        </div>
+        <div ref="{{ promoRef }}" class="ssak-scroll" style="display:flex;overflow-x:auto;scroll-snap-type:x mandatory;border-radius:20px;box-shadow:0 10px 26px rgba(23,33,28,.16);">
+
+          <div class="promo-slide" style="scroll-snap-align:center;flex:0 0 100%;aspect-ratio:2/1;overflow:hidden;position:relative;background:oklch(30% 0.07 152);">
+            <div class="promo-scale" style="position:absolute;top:0;left:0;transform-origin:top left;width:2160px;height:1080px;position:relative;overflow:hidden;background:oklch(30% 0.07 152);font-family:'Noto Sans KR',sans-serif;box-sizing:border-box;display:flex;flex-direction:column;padding:100px;">
+  <div style="position:absolute;right:-160px;bottom:-180px;width:620px;height:620px;border-radius:50%;background:#14663F;opacity:0.35;"></div>
+  <div style="position:absolute;left:-140px;top:-160px;width:460px;height:460px;border-radius:50%;background:#1E8E5A;opacity:0.18;"></div>
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:52px;text-align:center;position:relative;z-index:2;">
+    
+    <div style="font-size:140px;font-weight:900;color:#ffffff;line-height:1.24;letter-spacing:-0.01em;">몇 년째 자취했는데,<br>사실 이거 <span style="color:#5FD39A;">다 틀렸다</span>고?</div>
+    <div style="font-size:50px;font-weight:500;color:rgba(255,255,255,0.72);">분리수거 오해부터 숨은 에너지 낭비까지</div>
+  </div>
+</div>
+          </div>
+
+          <div class="promo-slide" style="scroll-snap-align:center;flex:0 0 100%;aspect-ratio:2/1;overflow:hidden;position:relative;background:#F2F6F3;">
+            <div class="promo-scale" style="position:absolute;top:0;left:0;transform-origin:top left;width:2160px;height:1080px;position:relative;overflow:hidden;background:#F2F6F3;font-family:'Noto Sans KR',sans-serif;box-sizing:border-box;display:flex;flex-direction:column;padding:100px;">
+  <div style="position:absolute;right:-140px;bottom:-160px;width:560px;height:560px;border-radius:50%;background:#E3EFE7;"></div>
+  <div style="position:absolute;top:64px;left:100px;z-index:3;display:flex;align-items:center;gap:20px;background:#0E2A1C;padding:18px 44px;border-radius:999px;"><span style="width:18px;height:18px;border-radius:50%;background:#5FD39A;"></span><span style="font-size:34px;font-weight:800;color:#ffffff;letter-spacing:0.12em;">CONTENTS</span></div>
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:60px;text-align:center;position:relative;z-index:2;padding-top:60px;">
+    <div style="font-size:112px;font-weight:900;color:#17211C;line-height:1.24;letter-spacing:-0.01em;">분리수거 열심히 했는데<br>다 <span style="color:#1E8E5A;">반려</span>되고 있었다면?</div>
+    <div style="display:flex;flex-direction:column;gap:28px;width:100%;max-width:1700px;">
+      <div style="display:flex;align-items:center;gap:36px;background:#ffffff;border:2px solid #E6ECE7;border-radius:28px;padding:44px 52px;">
+        <div style="width:88px;height:88px;border-radius:50%;background:#0E2A1C;display:flex;align-items:center;justify-content:center;font-size:52px;flex-shrink:0;color:#ffffff;font-weight:900;">1</div>
+        <span style="font-size:54px;font-weight:700;color:#17211C;text-align:left;">오해하기 쉬운 분리수거, 4가지</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:36px;background:#ffffff;border:2px solid #E6ECE7;border-radius:28px;padding:44px 52px;">
+        <div style="width:88px;height:88px;border-radius:50%;background:#1E8E5A;display:flex;align-items:center;justify-content:center;font-size:52px;flex-shrink:0;color:#ffffff;font-weight:900;">2</div>
+        <span style="font-size:54px;font-weight:700;color:#17211C;text-align:left;">숨은 에너지 낭비 잡는 법, 2가지</span>
+      </div>
+    </div>
+  </div>
+</div>
+          </div>
+
+          <div class="promo-slide" style="scroll-snap-align:center;flex:0 0 100%;aspect-ratio:2/1;overflow:hidden;position:relative;background:#F2F6F3;">
+            <div class="promo-scale" style="position:absolute;top:0;left:0;transform-origin:top left;width:2160px;height:1080px;position:relative;overflow:hidden;background:#F2F6F3;font-family:'Noto Sans KR',sans-serif;box-sizing:border-box;display:flex;flex-direction:column;padding:100px;">
+  <div style="position:absolute;right:-140px;bottom:-160px;width:560px;height:560px;border-radius:50%;background:#E3EFE7;"></div>
+  <div style="position:absolute;top:64px;left:100px;z-index:3;display:flex;align-items:center;gap:20px;background:#0E2A1C;padding:18px 44px;border-radius:999px;"><span style="width:18px;height:18px;border-radius:50%;background:#5FD39A;"></span><span style="font-size:34px;font-weight:800;color:#ffffff;letter-spacing:0.12em;">TIP 01 · 종이팩</span></div>
+  <div style="position:absolute;right:100px;bottom:66px;z-index:3;font-size:30px;font-weight:600;color:#8A9A90;">종이팩 재활용률 약 13%</div>
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:60px;position:relative;z-index:2;text-align:center;padding-top:60px;">
+    <div style="display:flex;flex-direction:column;gap:26px;">
+      <div style="font-size:112px;font-weight:900;color:#17211C;line-height:1.24;letter-spacing:-0.01em;">우유팩·두유팩도<br>따로 <span style="color:#1E8E5A;">버려야</span> 해요</div>
+      <div style="font-size:50px;font-weight:500;color:#55665C;">종이류함에 넣으면 재활용되지 않습니다</div>
+    </div>
+    <div style="display:flex;gap:48px;width:100%;max-width:1700px;">
+      <div style="flex:1;background:#ffffff;border:2px solid #E6ECE7;border-radius:32px;padding:52px 48px;display:flex;flex-direction:column;gap:26px;">
+        <div style="display:flex;align-items:center;gap:20px;"><div style="width:64px;height:64px;border-radius:50%;background:#EBF0EC;display:flex;align-items:center;justify-content:center;font-size:40px;font-weight:900;color:#8A9A90;">✕</div><span style="font-size:40px;font-weight:800;color:#8A9A90;">일반 종이류함</span></div>
+        <div style="font-size:52px;font-weight:700;color:#3C4B43;line-height:1.4;text-align:left;">코팅층 때문에 선별되지 못하고 그대로 소각돼요.</div>
+      </div>
+      <div style="flex:1;background:#0E2A1C;border:2px solid #0E2A1C;border-radius:32px;padding:52px 48px;display:flex;flex-direction:column;gap:26px;">
+        <div style="display:flex;align-items:center;gap:20px;"><div style="width:64px;height:64px;border-radius:50%;background:#1E8E5A;display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:900;color:#ffffff;">○</div><span style="font-size:40px;font-weight:800;color:#5FD39A;">종이팩 수거함</span></div>
+        <div style="font-size:52px;font-weight:700;color:#ffffff;line-height:1.4;text-align:left;">헹궈서 펼쳐 배출하면 화장지 원료로 재탄생해요.</div>
+      </div>
+    </div>
+  </div>
+</div>
+          </div>
+
+          <div class="promo-slide" style="scroll-snap-align:center;flex:0 0 100%;aspect-ratio:2/1;overflow:hidden;position:relative;background:#F2F6F3;">
+            <div class="promo-scale" style="position:absolute;top:0;left:0;transform-origin:top left;width:2160px;height:1080px;position:relative;overflow:hidden;background:#F2F6F3;font-family:'Noto Sans KR',sans-serif;box-sizing:border-box;display:flex;flex-direction:column;padding:100px;">
+  <div style="position:absolute;right:-140px;bottom:-160px;width:560px;height:560px;border-radius:50%;background:#E3EFE7;"></div>
+  <div style="position:absolute;top:64px;left:100px;z-index:3;display:flex;align-items:center;gap:20px;background:#0E2A1C;padding:18px 44px;border-radius:999px;"><span style="width:18px;height:18px;border-radius:50%;background:#5FD39A;"></span><span style="font-size:34px;font-weight:800;color:#ffffff;letter-spacing:0.12em;">TIP 02 · 페트병</span></div>
+  <div style="position:absolute;right:100px;bottom:66px;z-index:3;font-size:30px;font-weight:600;color:#8A9A90;">라벨·뚜껑을 분리하면 원료 등급이 올라갑니다</div>
+  <div style="flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:80px;position:relative;z-index:1;">
+    <div style="text-align:center;font-size:112px;font-weight:900;color:#17211C;line-height:1.24;letter-spacing:-0.01em;">투명 페트병, <span style="color:#1E8E5A;">4단계</span>만<br>기억하세요</div>
+    <div style="display:flex;align-items:center;justify-content:center;gap:0;">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:20px;width:260px;">
+        <div style="width:160px;height:160px;border-radius:50%;background:#0E2A1C;color:#fff;display:flex;align-items:center;justify-content:center;font-size:66px;font-weight:900;">01</div>
+        <div style="font-size:46px;font-weight:800;color:#17211C;text-align:center;">내용물<br>비우기</div>
+      </div>
+      <div style="width:80px;height:100px;display:flex;align-items:center;justify-content:center;font-size:76px;font-weight:900;color:#B9CCC0;">→</div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:20px;width:260px;">
+        <div style="width:160px;height:160px;border-radius:50%;background:#14663F;color:#fff;display:flex;align-items:center;justify-content:center;font-size:66px;font-weight:900;">02</div>
+        <div style="font-size:46px;font-weight:800;color:#17211C;text-align:center;">라벨<br>제거</div>
+      </div>
+      <div style="width:80px;height:100px;display:flex;align-items:center;justify-content:center;font-size:76px;font-weight:900;color:#B9CCC0;">→</div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:20px;width:260px;">
+        <div style="width:160px;height:160px;border-radius:50%;background:#1E8E5A;color:#fff;display:flex;align-items:center;justify-content:center;font-size:66px;font-weight:900;">03</div>
+        <div style="font-size:46px;font-weight:800;color:#17211C;text-align:center;">찌그러<br>뜨리기</div>
+      </div>
+      <div style="width:80px;height:100px;display:flex;align-items:center;justify-content:center;font-size:76px;font-weight:900;color:#B9CCC0;">→</div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:20px;width:260px;">
+        <div style="width:160px;height:160px;border-radius:50%;background:#5FD39A;color:#0E2A1C;display:flex;align-items:center;justify-content:center;font-size:66px;font-weight:900;">04</div>
+        <div style="font-size:46px;font-weight:800;color:#17211C;text-align:center;">뚜껑<br>닫기</div>
+      </div>
+    </div>
+    <div style="text-align:center;font-size:44px;font-weight:500;color:#55665C;">이 순서만 지키면 고품질 재활용 원료로 다시 태어나요</div>
+  </div>
+</div>
+          </div>
+
+          <div class="promo-slide" style="scroll-snap-align:center;flex:0 0 100%;aspect-ratio:2/1;overflow:hidden;position:relative;background:#F2F6F3;">
+            <div class="promo-scale" style="position:absolute;top:0;left:0;transform-origin:top left;width:2160px;height:1080px;position:relative;overflow:hidden;background:#F2F6F3;font-family:'Noto Sans KR',sans-serif;box-sizing:border-box;display:flex;flex-direction:column;padding:100px;">
+  <div style="position:absolute;right:-140px;bottom:-160px;width:560px;height:560px;border-radius:50%;background:#E3EFE7;"></div>
+  <div style="position:absolute;top:64px;left:100px;z-index:3;display:flex;align-items:center;gap:20px;background:#0E2A1C;padding:18px 44px;border-radius:999px;"><span style="width:18px;height:18px;border-radius:50%;background:#5FD39A;"></span><span style="font-size:34px;font-weight:800;color:#ffffff;letter-spacing:0.12em;">TIP 03 · 택배 상자</span></div>
+  <div style="position:absolute;right:100px;bottom:66px;z-index:3;font-size:30px;font-weight:600;color:#8A9A90;">이물질이 섞이면 상자 한 묶음이 통째로 반려됩니다</div>
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:60px;position:relative;z-index:2;text-align:center;padding-top:60px;">
+    <div style="display:flex;flex-direction:column;gap:26px;">
+      <div style="font-size:112px;font-weight:900;color:#17211C;line-height:1.24;letter-spacing:-0.01em;">송장 스티커 남으면<br>재활용 <span style="color:#1E8E5A;">불가</span>예요</div>
+      <div style="font-size:50px;font-weight:500;color:#55665C;">깨끗이 씻는 것만으로는 부족합니다</div>
+    </div>
+    <div style="display:flex;gap:48px;width:100%;max-width:1700px;">
+      <div style="flex:1;background:#ffffff;border:2px solid #E6ECE7;border-radius:32px;padding:52px 48px;display:flex;flex-direction:column;gap:26px;">
+        <div style="display:flex;align-items:center;gap:20px;"><div style="width:64px;height:64px;border-radius:50%;background:#EBF0EC;display:flex;align-items:center;justify-content:center;font-size:40px;font-weight:900;color:#8A9A90;">✕</div><span style="font-size:40px;font-weight:800;color:#8A9A90;">접어서 그대로</span></div>
+        <div style="font-size:52px;font-weight:700;color:#3C4B43;line-height:1.4;text-align:left;">테이프와 운송장이 붙은 채로는 선별장에서 걸러져요.</div>
+      </div>
+      <div style="flex:1;background:#0E2A1C;border:2px solid #0E2A1C;border-radius:32px;padding:52px 48px;display:flex;flex-direction:column;gap:26px;">
+        <div style="display:flex;align-items:center;gap:20px;"><div style="width:64px;height:64px;border-radius:50%;background:#1E8E5A;display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:900;color:#ffffff;">○</div><span style="font-size:40px;font-weight:800;color:#5FD39A;">모두 떼고 배출</span></div>
+        <div style="font-size:52px;font-weight:700;color:#ffffff;line-height:1.4;text-align:left;">테이프·송장·스테이플러심까지 제거하면 그대로 재활용돼요.</div>
+      </div>
+    </div>
+  </div>
+</div>
+          </div>
+
+          <div class="promo-slide" style="scroll-snap-align:center;flex:0 0 100%;aspect-ratio:2/1;overflow:hidden;position:relative;background:#F2F6F3;">
+            <div class="promo-scale" style="position:absolute;top:0;left:0;transform-origin:top left;width:2160px;height:1080px;position:relative;overflow:hidden;background:#F2F6F3;font-family:'Noto Sans KR',sans-serif;box-sizing:border-box;display:flex;flex-direction:column;padding:100px;">
+  <div style="position:absolute;right:-140px;bottom:-160px;width:560px;height:560px;border-radius:50%;background:#E3EFE7;"></div>
+  <div style="position:absolute;top:64px;left:100px;z-index:3;display:flex;align-items:center;gap:20px;background:#0E2A1C;padding:18px 44px;border-radius:999px;"><span style="width:18px;height:18px;border-radius:50%;background:#5FD39A;"></span><span style="font-size:34px;font-weight:800;color:#ffffff;letter-spacing:0.12em;">TIP 04 · 폐의약품</span></div>
+  <div style="position:absolute;right:100px;bottom:66px;z-index:3;font-size:30px;font-weight:600;color:#8A9A90;">약국·보건소·주민센터에서 상시 수거</div>
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:60px;position:relative;z-index:2;text-align:center;padding-top:60px;">
+    <div style="display:flex;flex-direction:column;gap:26px;">
+      <div style="font-size:112px;font-weight:900;color:#17211C;line-height:1.24;letter-spacing:-0.01em;">먹다 남은 약,<br>그냥 버리면 <span style="color:#1E8E5A;">안 돼요</span></div>
+      <div style="font-size:50px;font-weight:500;color:#55665C;">하천으로 흘러 수질오염으로 이어집니다</div>
+    </div>
+    <div style="background:#ffffff;border:2px solid #E6ECE7;border-radius:32px;padding:56px 68px;max-width:1700px;font-size:56px;font-weight:700;color:#3C4B43;line-height:1.5;">알약은 포장을 벗겨 알맹이만, 물약은 한 병에 모아<br><span style="color:#1E8E5A;">폐의약품 수거함</span>에 넣어주세요.</div>
+  </div>
+</div>
+          </div>
+
+          <div class="promo-slide" style="scroll-snap-align:center;flex:0 0 100%;aspect-ratio:2/1;overflow:hidden;position:relative;background:#F2F6F3;">
+            <div class="promo-scale" style="position:absolute;top:0;left:0;transform-origin:top left;width:2160px;height:1080px;position:relative;overflow:hidden;background:#F2F6F3;font-family:'Noto Sans KR',sans-serif;box-sizing:border-box;display:flex;flex-direction:column;padding:100px;">
+  <div style="position:absolute;right:-140px;bottom:-160px;width:560px;height:560px;border-radius:50%;background:#E3EFE7;"></div>
+  <div style="position:absolute;top:64px;left:100px;z-index:3;display:flex;align-items:center;gap:20px;background:#0E2A1C;padding:18px 44px;border-radius:999px;"><span style="width:18px;height:18px;border-radius:50%;background:#5FD39A;"></span><span style="font-size:34px;font-weight:800;color:#ffffff;letter-spacing:0.12em;">TIP 05 · 난방</span></div>
+  <div style="position:absolute;right:100px;bottom:66px;z-index:3;font-size:30px;font-weight:600;color:#8A9A90;">외출 2~3시간 이내 기준</div>
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:60px;position:relative;z-index:2;text-align:center;padding-top:60px;">
+    <div style="display:flex;flex-direction:column;gap:26px;">
+      <div style="font-size:112px;font-weight:900;color:#17211C;line-height:1.24;letter-spacing:-0.01em;">짧은 외출엔<br>보일러 <span style="color:#1E8E5A;">끄지 마세요</span></div>
+      <div style="font-size:50px;font-weight:500;color:#55665C;">껐다 켜는 쪽이 오히려 에너지를 더 씁니다</div>
+    </div>
+    <div style="display:flex;gap:48px;width:100%;max-width:1700px;">
+      <div style="flex:1;background:#ffffff;border:2px solid #E6ECE7;border-radius:32px;padding:52px 48px;display:flex;flex-direction:column;gap:26px;">
+        <div style="display:flex;align-items:center;gap:20px;"><div style="width:64px;height:64px;border-radius:50%;background:#EBF0EC;display:flex;align-items:center;justify-content:center;font-size:40px;font-weight:900;color:#8A9A90;">✕</div><span style="font-size:40px;font-weight:800;color:#8A9A90;">완전히 끄기</span></div>
+        <div style="font-size:52px;font-weight:700;color:#3C4B43;line-height:1.4;text-align:left;">식은 집을 다시 데우는 데 더 많은 연료가 들어가요.</div>
+      </div>
+      <div style="flex:1;background:#0E2A1C;border:2px solid #0E2A1C;border-radius:32px;padding:52px 48px;display:flex;flex-direction:column;gap:26px;">
+        <div style="display:flex;align-items:center;gap:20px;"><div style="width:64px;height:64px;border-radius:50%;background:#1E8E5A;display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:900;color:#ffffff;">○</div><span style="font-size:40px;font-weight:800;color:#5FD39A;">외출 모드 유지</span></div>
+        <div style="font-size:52px;font-weight:700;color:#ffffff;line-height:1.4;text-align:left;">낮은 온도로 계속 두면 재가동 부담 없이 절약돼요.</div>
+      </div>
+    </div>
+  </div>
+</div>
+          </div>
+
+          <div class="promo-slide" style="scroll-snap-align:center;flex:0 0 100%;aspect-ratio:2/1;overflow:hidden;position:relative;background:#F2F6F3;">
+            <div class="promo-scale" style="position:absolute;top:0;left:0;transform-origin:top left;width:2160px;height:1080px;position:relative;overflow:hidden;background:#F2F6F3;font-family:'Noto Sans KR',sans-serif;box-sizing:border-box;display:flex;flex-direction:column;padding:100px;">
+  <div style="position:absolute;right:-140px;bottom:-160px;width:560px;height:560px;border-radius:50%;background:#E3EFE7;"></div>
+  <div style="position:absolute;top:64px;left:100px;z-index:3;display:flex;align-items:center;gap:20px;background:#0E2A1C;padding:18px 44px;border-radius:999px;"><span style="width:18px;height:18px;border-radius:50%;background:#5FD39A;"></span><span style="font-size:34px;font-weight:800;color:#ffffff;letter-spacing:0.12em;">TIP 06 · 단열</span></div>
+  <div style="position:absolute;right:100px;bottom:66px;z-index:3;font-size:30px;font-weight:600;color:#8A9A90;">문풍지·문틈 스펀지 1만 원 이내</div>
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:60px;position:relative;z-index:2;text-align:center;padding-top:60px;">
+    <div style="display:flex;flex-direction:column;gap:26px;">
+      <div style="font-size:112px;font-weight:900;color:#17211C;line-height:1.24;letter-spacing:-0.01em;">진짜 찬바람은<br><span style="color:#1E8E5A;">문틈</span>에서 새요</div>
+      <div style="font-size:50px;font-weight:500;color:#55665C;">창문 자체보다 틈새 열손실이 큽니다</div>
+    </div>
+    <div style="background:#ffffff;border:2px solid #E6ECE7;border-radius:32px;padding:56px 68px;max-width:1700px;font-size:56px;font-weight:700;color:#3C4B43;line-height:1.5;">창틀과 현관문 틈을 먼저 막아보세요.<br>난방을 올리지 않아도 <span style="color:#1E8E5A;">체감 온도가 달라집니다.</span></div>
+  </div>
+</div>
+          </div>
+
+        </div>
+        <div style="display:flex;justify-content:center;gap:5px;margin-top:12px;">
+          <sc-for list="{{ dots }}" as="d" hint-placeholder-count="8">
+            <div style="{{ d.style }}"></div>
+          </sc-for>
+        </div>
+      </section>
+      </sc-if>
+
+      <!-- Prize grid -->
+      <section style="background:rgba(255,255,255,.4);border-top:1px solid rgba(230,236,231,.55);margin-top:26px;padding:26px 16px 32px;">
+        <div style="display:flex;align-items:baseline;justify-content:space-between;margin:0 2px 16px;padding-bottom:13px;border-bottom:1px solid #E6ECE7;">
+          <div>
+            <div style="font-size:10.5px;font-weight:800;letter-spacing:.14em;color:#1E8E5A;">REWARDS</div>
+            <h2 style="margin:6px 0 0;font-size:21px;font-weight:800;letter-spacing:-.03em;">당첨 가능 경품</h2>
+          </div>
+          <span style="font-size:11.5px;color:#8A9A90;font-weight:700;">{{ rewardCountLabel }}</span>
+        </div>
+        <div style="{{ gridStyle }}">
+          <sc-for list="{{ rewards }}" as="r" hint-placeholder-count="6">
+            <div style="position:relative;border-radius:14px;overflow:hidden;background:rgba(255,255,255,.5);border:1px solid rgba(230,236,231,.62);">
+              <button onClick="{{ r.open }}" aria-label="더보기" style="position:absolute;top:8px;right:8px;z-index:2;width:30px;height:30px;border:none;border-radius:8px;background:rgba(255,255,255,.94);display:flex;align-items:center;justify-content:center;cursor:pointer;" style-active="transform:scale(.9)">
+                <svg width="16" height="16" viewBox="0 0 24 24"><g stroke="#17211C" stroke-width="2.2" stroke-linecap="round"><line x1="12" y1="6" x2="12" y2="18"></line><line x1="6" y1="12" x2="18" y2="12"></line></g></svg>
+              </button>
+              <button onClick="{{ r.open }}" style="display:block;width:100%;text-align:left;border:none;padding:0;background:transparent;cursor:pointer;">
+                <div style="height:96px;{{ r.imgStyle }};display:flex;align-items:center;justify-content:center;">
+                  <span style="font-size:10px;font-weight:600;letter-spacing:.06em;color:rgba(23,33,28,.35);font-family:ui-monospace,monospace;">상품 이미지</span>
+                </div>
+                <div style="padding:12px 12px 14px;">
+                  <span style="font-size:9.5px;font-weight:800;letter-spacing:.08em;color:#1E8E5A;">{{ r.cat }}</span>
+                  <div style="margin-top:7px;font-size:13px;font-weight:700;line-height:1.4;min-height:36px;letter-spacing:-.01em;">{{ r.title }}</div>
+                  <div style="margin-top:4px;font-size:10.5px;font-weight:800;letter-spacing:.06em;color:#8A9A90;">당첨 확률 {{ r.oddsLabel }}</div>
+                </div>
+              </button>
+            </div>
+          </sc-for>
+        </div>
+      </section>
+
+      <!-- Footer -->
+      <footer style="background:rgba(14,42,28,.7);color:#fff;padding:32px 20px 34px;">
+        <div style="display:flex;align-items:center;gap:9px;">
+          <img src="assets/logo-r14.png" alt="싹싹기름 로고" style="height:28px;width:auto;border-radius:7px;object-fit:contain;">
+          <span style="font-size:14px;font-weight:800;letter-spacing:-.02em;">team_싹싹기름</span>
+        </div>
+        <p style="margin:14px 0 0;font-size:12.5px;line-height:1.7;color:rgba(255,255,255,.64);max-width:22em;">가정에서 버려지는 식용유를 흡수 패드로 처리하고, 그 실천을 즉석 경품으로 돌려드리는 기후행동 프로젝트입니다.</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px 16px;margin-top:24px;padding-top:20px;border-top:1px solid rgba(255,255,255,.16);">
+          <sc-for list="{{ footerLinks }}" as="l" hint-placeholder-count="4">
+            <button onClick="{{ l.go }}" style="text-align:left;border:none;background:transparent;padding:5px 0;font-family:inherit;font-size:12.5px;font-weight:600;color:rgba(255,255,255,.82);cursor:pointer;" style-hover="color:#5FD39A">{{ l.label }}</button>
+          </sc-for>
+        </div>
+        <div style="margin-top:24px;padding-top:18px;border-top:1px solid rgba(255,255,255,.16);font-size:11px;line-height:1.7;color:rgba(255,255,255,.42);">
+          기후변화대응 공모전 출품작<br>© 2026 team_싹싹기름. All rights reserved.
+        </div>
+      </footer>
+
+    </main>
+    </sc-if>
+
+    <!-- ===== ABOUT ===== -->
+    <sc-if value="{{ isAbout }}" hint-placeholder-val="{{ false }}">
+    <main class="ssak-scroll" style="flex:1;min-height:0;overflow-y:auto;display:block;">
+
+      <section style="position:relative;padding:30px 20px 26px;color:#fff;overflow:hidden;background:linear-gradient(172deg,rgba(8,40,24,.5) 0%,rgba(9,44,27,.78) 50%,rgba(8,36,22,.94) 100%),url('assets/photo-delivery.png') center/cover no-repeat;">
+        <div style="font-size:10.5px;font-weight:800;letter-spacing:.14em;color:#5FD39A;">ABOUT US</div>
+        <p style="margin:12px 0 0;font-size:12.5px;font-weight:600;color:rgba(255,255,255,.72);letter-spacing:-.01em;">아미유 주최 기후 변화 대응 공모전 싹싹기름팀</p>
+        <h1 style="margin:9px 0 0;font-size:25px;font-weight:800;line-height:1.32;letter-spacing:-.035em;text-wrap:pretty;">배달용기의 잔여 기름을<br>세척하는 기름 흡수 패드 제작</h1>
+      </section>
+
+      <section style="background:rgba(255,255,255,.4);border-bottom:1px solid rgba(230,236,231,.55);padding:26px 18px 28px;">
+        <div style="font-size:10.5px;font-weight:800;letter-spacing:.14em;color:#1E8E5A;">BACKGROUND</div>
+        <h2 style="margin:7px 0 0;font-size:20px;font-weight:800;letter-spacing:-.03em;">아이디어 배경</h2>
+        <p style="margin:14px 0 20px;font-size:13.5px;font-weight:700;line-height:1.6;color:#17211C;letter-spacing:-.01em;">그야말로 배달의 민족인 대한민국 사람들</p>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <sc-for list="{{ aboutChain }}" as="c" hint-placeholder-count="4">
+            <div style="display:flex;align-items:flex-start;gap:12px;padding:14px 15px;border-radius:12px;background:rgba(245,248,245,.55);border:1px solid rgba(230,236,231,.8);">
+              <span style="{{ c.numStyle }}">{{ c.no }}</span>
+              <span style="{{ c.textStyle }}">{{ c.text }}</span>
+            </div>
+          </sc-for>
+        </div>
+        <div style="margin-top:16px;padding:15px 16px;border-radius:12px;background:rgba(14,42,28,.7);color:#fff;font-size:14px;font-weight:800;letter-spacing:-.015em;">그래서 만들었습니다.</div>
+      </section>
+
+      <section style="padding:26px 18px 34px;">
+        <div style="font-size:10.5px;font-weight:800;letter-spacing:.14em;color:#1E8E5A;">TEAM</div>
+        <h2 style="margin:7px 0 16px;font-size:20px;font-weight:800;letter-spacing:-.03em;">팀원 소개</h2>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <sc-for list="{{ aboutTeam }}" as="t" hint-placeholder-count="4">
+            <div style="display:flex;align-items:center;gap:13px;padding:13px 15px;background:rgba(255,255,255,.5);border:1px solid rgba(230,236,231,.62);border-radius:12px;">
+              <div style="{{ t.avatarStyle }}">{{ t.initial }}</div>
+              <div style="flex:1;min-width:0;">
+                <div style="font-size:14.5px;font-weight:700;letter-spacing:-.01em;">{{ t.name }}</div>
+                <div style="{{ t.roleStyle }}">{{ t.role }}</div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </section>
+
+    </main>
+    </sc-if>
+
+    <!-- ===== TIP ===== -->
+    <sc-if value="{{ isTip }}" hint-placeholder-val="{{ false }}">
+    <main class="ssak-scroll" style="flex:1;min-height:0;overflow-y:auto;display:block;">
+
+      <section style="position:relative;padding:30px 20px 26px;color:#fff;overflow:hidden;background:linear-gradient(172deg,rgba(8,40,24,.5) 0%,rgba(9,44,27,.78) 50%,rgba(8,36,22,.94) 100%),url('assets/photo-recycle.png') center/cover no-repeat;">
+        <div style="font-size:10.5px;font-weight:800;letter-spacing:.14em;color:#5FD39A;">SEPARATE COLLECTION</div>
+        <h1 style="margin:9px 0 0;font-size:25px;font-weight:800;line-height:1.32;letter-spacing:-.035em;text-wrap:pretty;">헷갈리는 분리배출,<br>13가지만 기억하세요</h1>
+        <p style="margin:14px 0 0;font-size:12.5px;font-weight:500;line-height:1.65;color:rgba(255,255,255,.78);text-wrap:pretty;">분리배출은 '잘 버리는 것'만큼 '잘 놓는 것'도 중요합니다. 일반 주택가에서는 수거 전까지 바람에 날리지 않도록 종이는 묶고, 비닐은 입구를 단단히 묶어 배출하세요.</p>
+      </section>
+
+      <section style="background:rgba(255,255,255,.4);border-top:1px solid rgba(230,236,231,.55);padding:24px 16px 34px;">
+        <div style="display:flex;align-items:baseline;justify-content:space-between;margin:0 2px 16px;padding-bottom:13px;border-bottom:1px solid #E6ECE7;">
+          <div>
+            <div style="font-size:10.5px;font-weight:800;letter-spacing:.14em;color:#1E8E5A;">CHECKLIST</div>
+            <h2 style="margin:6px 0 0;font-size:20px;font-weight:800;letter-spacing:-.03em;">자주 틀리는 13가지</h2>
+          </div>
+          <span style="font-size:11.5px;color:#8A9A90;font-weight:700;">01 — 13</span>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:10px;">
+
+          <div style="display:flex;gap:13px;padding:16px 15px;border-radius:14px;background:rgba(255,255,255,.5);border:1px solid rgba(230,236,231,.62);">
+            <span style="flex-shrink:0;font-size:11px;font-weight:800;letter-spacing:.06em;color:#1E8E5A;font-family:ui-monospace,monospace;padding-top:2px;">01</span>
+            <div style="min-width:0;">
+              <div style="font-size:14.5px;font-weight:800;letter-spacing:-.02em;color:#17211C;line-height:1.4;">영수증은 종이류가 아니다</div>
+              <p style="margin:7px 0 0;font-size:12.5px;line-height:1.6;color:#55665C;text-wrap:pretty;">대부분 감열지(Thermal Paper)라 종이 재활용 대상이 아닙니다.<br>일반쓰레기로 버려야 합니다.</p>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:13px;padding:16px 15px;border-radius:14px;background:rgba(255,255,255,.5);border:1px solid rgba(230,236,231,.62);">
+            <span style="flex-shrink:0;font-size:11px;font-weight:800;letter-spacing:.06em;color:#1E8E5A;font-family:ui-monospace,monospace;padding-top:2px;">02</span>
+            <div style="min-width:0;">
+              <div style="font-size:14.5px;font-weight:800;letter-spacing:-.02em;color:#17211C;line-height:1.4;">종이컵도 대부분 재활용되지 않는다</div>
+              <p style="margin:7px 0 0;font-size:12.5px;line-height:1.6;color:#55665C;text-wrap:pretty;">내부가 플라스틱 코팅되어 있습니다.<br>전용 수거함이 없는 경우 일반쓰레기로 버리는 것이 원칙입니다.</p>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:13px;padding:16px 15px;border-radius:14px;background:rgba(255,255,255,.5);border:1px solid rgba(230,236,231,.62);">
+            <span style="flex-shrink:0;font-size:11px;font-weight:800;letter-spacing:.06em;color:#1E8E5A;font-family:ui-monospace,monospace;padding-top:2px;">03</span>
+            <div style="min-width:0;">
+              <div style="font-size:14.5px;font-weight:800;letter-spacing:-.02em;color:#17211C;line-height:1.4;">스티로폼도 아무거나 재활용되는 게 아니다</div>
+              <p style="margin:7px 0 0;font-size:12.5px;line-height:1.6;color:#55665C;text-wrap:pretty;">깨끗한 스티로폼만 가능합니다.<br>음식물이 묻었거나 색상이 있는 것, 테이프가 많이 붙은 것은 일반쓰레기인 경우가 많습니다.</p>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:13px;padding:16px 15px;border-radius:14px;background:rgba(255,255,255,.5);border:1px solid rgba(230,236,231,.62);">
+            <span style="flex-shrink:0;font-size:11px;font-weight:800;letter-spacing:.06em;color:#1E8E5A;font-family:ui-monospace,monospace;padding-top:2px;">04</span>
+            <div style="min-width:0;">
+              <div style="font-size:14.5px;font-weight:800;letter-spacing:-.02em;color:#17211C;line-height:1.4;">유리병은 깨져도 재활용될까?</div>
+              <p style="margin:7px 0 0;font-size:12.5px;line-height:1.6;color:#55665C;text-wrap:pretty;">깨진 유리는 재활용 공정에서 위험합니다.<br>신문지 등에 싸서 일반쓰레기(또는 지자체 기준)에 배출하는 경우가 많습니다.<br>깨끗한 병은 뚜껑을 분리해 유리병으로 배출합니다.</p>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:13px;padding:16px 15px;border-radius:14px;background:rgba(255,255,255,.5);border:1px solid rgba(230,236,231,.62);">
+            <span style="flex-shrink:0;font-size:11px;font-weight:800;letter-spacing:.06em;color:#1E8E5A;font-family:ui-monospace,monospace;padding-top:2px;">05</span>
+            <div style="min-width:0;">
+              <div style="font-size:14.5px;font-weight:800;letter-spacing:-.02em;color:#17211C;line-height:1.4;">깨진 도자기와 유리는 다르다</div>
+              <p style="margin:7px 0 0;font-size:12.5px;line-height:1.6;color:#55665C;text-wrap:pretty;">도자기, 사기그릇, 내열유리, 거울은 일반 유리병과 재질이 달라 함께 재활용되지 않습니다.<br>일반쓰레기 또는 불연성 폐기물로 분류됩니다.</p>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:13px;padding:16px 15px;border-radius:14px;background:rgba(255,255,255,.5);border:1px solid rgba(230,236,231,.62);">
+            <span style="flex-shrink:0;font-size:11px;font-weight:800;letter-spacing:.06em;color:#1E8E5A;font-family:ui-monospace,monospace;padding-top:2px;">06</span>
+            <div style="min-width:0;">
+              <div style="font-size:14.5px;font-weight:800;letter-spacing:-.02em;color:#17211C;line-height:1.4;">빨대는 플라스틱이어도 대부분 일반쓰레기</div>
+              <p style="margin:7px 0 0;font-size:12.5px;line-height:1.6;color:#55665C;text-wrap:pretty;">크기가 너무 작아 선별 과정에서 걸러지지 않습니다.<br>플라스틱이라도 일반쓰레기로 버리는 경우가 대부분입니다.</p>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:13px;padding:16px 15px;border-radius:14px;background:rgba(255,255,255,.5);border:1px solid rgba(230,236,231,.62);">
+            <span style="flex-shrink:0;font-size:11px;font-weight:800;letter-spacing:.06em;color:#1E8E5A;font-family:ui-monospace,monospace;padding-top:2px;">07</span>
+            <div style="min-width:0;">
+              <div style="font-size:14.5px;font-weight:800;letter-spacing:-.02em;color:#17211C;line-height:1.4;">칫솔은 플라스틱이 아니다</div>
+              <p style="margin:7px 0 0;font-size:12.5px;line-height:1.6;color:#55665C;text-wrap:pretty;">여러 재질이 결합되어 있어 재활용이 어렵습니다.<br>일반쓰레기로 배출합니다.</p>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:13px;padding:16px 15px;border-radius:14px;background:rgba(255,255,255,.5);border:1px solid rgba(230,236,231,.62);">
+            <span style="flex-shrink:0;font-size:11px;font-weight:800;letter-spacing:.06em;color:#1E8E5A;font-family:ui-monospace,monospace;padding-top:2px;">08</span>
+            <div style="min-width:0;">
+              <div style="font-size:14.5px;font-weight:800;letter-spacing:-.02em;color:#17211C;line-height:1.4;">비닐도 깨끗해야 재활용 가능</div>
+              <p style="margin:7px 0 0;font-size:12.5px;line-height:1.6;color:#55665C;text-wrap:pretty;">과자봉지, 라면봉지처럼 음식물이 묻은 비닐은 일반쓰레기입니다.<br>깨끗한 비닐만 비닐류로 배출합니다.</p>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:13px;padding:16px 15px;border-radius:14px;background:rgba(255,255,255,.5);border:1px solid rgba(230,236,231,.62);">
+            <span style="flex-shrink:0;font-size:11px;font-weight:800;letter-spacing:.06em;color:#1E8E5A;font-family:ui-monospace,monospace;padding-top:2px;">09</span>
+            <div style="min-width:0;">
+              <div style="font-size:14.5px;font-weight:800;letter-spacing:-.02em;color:#17211C;line-height:1.4;">알약 포장재(PTP)는 재활용되지 않는다</div>
+              <p style="margin:7px 0 0;font-size:12.5px;line-height:1.6;color:#55665C;text-wrap:pretty;">플라스틱과 알루미늄이 붙어 있습니다.<br>일반쓰레기로 배출합니다.</p>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:13px;padding:16px 15px;border-radius:14px;background:rgba(255,255,255,.5);border:1px solid rgba(230,236,231,.62);">
+            <span style="flex-shrink:0;font-size:11px;font-weight:800;letter-spacing:.06em;color:#1E8E5A;font-family:ui-monospace,monospace;padding-top:2px;">10</span>
+            <div style="min-width:0;">
+              <div style="font-size:14.5px;font-weight:800;letter-spacing:-.02em;color:#17211C;line-height:1.4;">아이스팩은 내용물에 따라 다르다</div>
+              <p style="margin:7px 0 0;font-size:12.5px;line-height:1.6;color:#55665C;text-wrap:pretty;">물이 들어간 아이스팩은 물을 버리고 비닐은 비닐류로 분리 가능한 경우가 있습니다.<br>젤 타입은 대부분 일반쓰레기입니다.</p>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:13px;padding:16px 15px;border-radius:14px;background:rgba(255,255,255,.5);border:1px solid rgba(230,236,231,.62);">
+            <span style="flex-shrink:0;font-size:11px;font-weight:800;letter-spacing:.06em;color:#1E8E5A;font-family:ui-monospace,monospace;padding-top:2px;">11</span>
+            <div style="min-width:0;">
+              <div style="font-size:14.5px;font-weight:800;letter-spacing:-.02em;color:#17211C;line-height:1.4;">우산은 통째로 버리면 안 된다</div>
+              <p style="margin:7px 0 0;font-size:12.5px;line-height:1.6;color:#55665C;text-wrap:pretty;">천, 플라스틱, 금속을 분리할 수 있으면 분리합니다.<br>일반적으로 대형폐기물이 아닌 일반쓰레기 또는 불연성 폐기물 기준을 따릅니다.</p>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:13px;padding:16px 15px;border-radius:14px;background:rgba(255,255,255,.5);border:1px solid rgba(230,236,231,.62);">
+            <span style="flex-shrink:0;font-size:11px;font-weight:800;letter-spacing:.06em;color:#1E8E5A;font-family:ui-monospace,monospace;padding-top:2px;">12</span>
+            <div style="min-width:0;">
+              <div style="font-size:14.5px;font-weight:800;letter-spacing:-.02em;color:#17211C;line-height:1.4;">페트병 뚜껑의 고리는 떼지 않아도 된다</div>
+              <p style="margin:7px 0 0;font-size:12.5px;line-height:1.6;color:#55665C;text-wrap:pretty;">최근에는 병과 함께 재활용 공정에서 처리하는 경우가 많습니다.<br>다만 뚜껑은 분리하는 것이 원칙입니다.</p>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:13px;padding:16px 15px;border-radius:14px;background:rgba(255,255,255,.5);border:1px solid rgba(230,236,231,.62);">
+            <span style="flex-shrink:0;font-size:11px;font-weight:800;letter-spacing:.06em;color:#1E8E5A;font-family:ui-monospace,monospace;padding-top:2px;">13</span>
+            <div style="min-width:0;">
+              <div style="font-size:14.5px;font-weight:800;letter-spacing:-.02em;color:#17211C;line-height:1.4;">컵라면 용기는 재활용이 어려운 경우가 많다</div>
+              <p style="margin:7px 0 0;font-size:12.5px;line-height:1.6;color:#55665C;text-wrap:pretty;">국물이나 기름이 남아 있으면 일반쓰레기입니다.<br>깨끗이 씻어도 재질에 따라 일반쓰레기인 경우가 있으므로 지역 기준을 확인하는 것이 좋습니다.</p>
+            </div>
+          </div>
+
+        </div>
+
+        <div style="margin-top:18px;padding:15px 16px;border-radius:12px;background:rgba(14,42,28,.7);color:#fff;">
+          <div style="font-size:11px;font-weight:800;letter-spacing:.1em;color:#5FD39A;">NOTE</div>
+          <p style="margin:7px 0 0;font-size:12.5px;line-height:1.6;color:rgba(255,255,255,.82);text-wrap:pretty;">품목별 기준은 지자체마다 다를 수 있습니다. 헷갈릴 때는 거주 지역의 배출 기준을 확인하세요.</p>
+        </div>
+      </section>
+
+    </main>
+    </sc-if>
+
+    <!-- ===== MYPAGE ===== -->
+    <sc-if value="{{ isMypage }}" hint-placeholder-val="{{ false }}">
+    <main class="ssak-scroll" style="flex:1;overflow-y:auto;padding:20px 18px 40px;">
+      <div style="display:flex;align-items:center;gap:14px;padding:4px 4px 20px;">
+        <div style="width:56px;height:56px;border-radius:50%;background:#E7F2EC;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:#1E8E5A;">싹</div>
+        <div>
+          <div style="font-size:17px;font-weight:800;">싹싹러 님</div>
+          <div style="font-size: 12.5px; color: #1B5E20; margin-top: 2px">에코 실천 32일째</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div style="border-radius:18px;background:rgba(255,255,255,.5);border:1px solid rgba(230,236,231,.62);padding:16px;">
+          <div style="font-size:12px;color:#8A9A90;font-weight:600;">당첨 경품</div>
+          <div style="margin-top:6px;font-size:24px;font-weight:800;color:#1E8E5A;">{{ winCountLabel }}</div>
+        </div>
+        <div style="border-radius:18px;background:rgba(255,255,255,.5);border:1px solid rgba(230,236,231,.62);padding:16px;">
+          <div style="font-size:12px;color:#8A9A90;font-weight:600;">사용한 코드</div>
+          <div style="margin-top:6px;font-size:24px;font-weight:800;">{{ usedCountLabel }}</div>
+        </div>
+      </div>
+      <h3 style="margin:24px 2px 10px;font-size:14px;font-weight:800;">내 경품함</h3>
+      <sc-if value="{{ hasWins }}" hint-placeholder-val="{{ true }}">
+      <div style="border-radius:18px;background:rgba(255,255,255,.5);border:1px solid rgba(230,236,231,.62);overflow:hidden;">
+        <sc-for list="{{ myWins }}" as="w" hint-placeholder-count="3">
+          <div style="display:flex;align-items:center;gap:12px;padding:13px 16px;border-bottom:1px solid #F0F3F0;">
+            <div style="width:44px;height:44px;border-radius:12px;flex-shrink:0;{{ w.imgStyle }};"></div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:13.5px;font-weight:700;line-height:1.3;">{{ w.title }}</div>
+              <div style="font-size:11.5px;color:#8A9A90;margin-top:2px;">{{ w.date }} · {{ w.code }}</div>
+            </div>
+            <span style="{{ w.badgeStyle }}">{{ w.badge }}</span>
+          </div>
+        </sc-for>
+      </div>
+      </sc-if>
+      <sc-if value="{{ noWins }}" hint-placeholder-val="{{ false }}">
+      <div style="border-radius:18px;background:rgba(255,255,255,.5);border:1px solid rgba(230,236,231,.62);padding:34px 20px;text-align:center;">
+        <div style="font-size:13px;color:#8A9A90;line-height:1.6;">아직 당첨된 경품이 없어요.<br>패드 코드를 입력하고 경품을 받아보세요!</div>
+      </div>
+      </sc-if>
+    </main>
+    </sc-if>
+
+    <!-- ===== SUPPORT ===== -->
+    <sc-if value="{{ isSupport }}" hint-placeholder-val="{{ false }}">
+    <main class="ssak-scroll" style="flex:1;overflow-y:auto;padding:20px 18px 40px;">
+      <div style="border-radius:18px;background:rgba(255,255,255,.5);border:1px solid rgba(230,236,231,.62);padding:18px;display:flex;flex-direction:column;gap:12px;">
+        <button style="height:52px;border:none;border-radius:13px;background:#1E8E5A;color:#fff;font-size:14.5px;font-weight:700;cursor:pointer;font-family:inherit;" style-active="transform:scale(.98)">1:1 문의하기</button>
+        <button style="height:52px;border:1.5px solid #E1E8E2;border-radius:13px;background:#fff;color:#17211C;font-size:14.5px;font-weight:700;cursor:pointer;font-family:inherit;">카카오톡 채널 문의</button>
+      </div>
+      <h3 style="margin:24px 2px 10px;font-size:14px;font-weight:800;">자주 묻는 질문</h3>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <sc-for list="{{ faqs }}" as="q" hint-placeholder-count="4">
+          <details style="border-radius:16px;background:rgba(255,255,255,.5);border:1px solid rgba(230,236,231,.62);padding:14px 16px;">
+            <summary style="font-size:13.5px;font-weight:700;cursor:pointer;list-style:none;">Q. {{ q.q }}</summary>
+            <p style="margin:10px 0 0;font-size:12.5px;line-height:1.6;color:#5A6A62;">{{ q.a }}</p>
+          </details>
+        </sc-for>
+      </div>
+    </main>
+    </sc-if>
+
+    <!-- ===== OVERLAY ===== -->
+    </div>
+
+    <div onClick="{{ closeAll }}" style="left: -5px; top: 4px; position: absolute"></div>
+
+    <!-- ===== DRAWER ===== -->
+    <aside style="{{ drawerStyle }}">
+      <div style="display:flex;align-items:center;justify-content:space-between;height:58px;padding:0 10px 0 18px;border-bottom:1px solid #E6ECE7;">
+        <span style="font-size:15px;font-weight:800;">전체 메뉴</span>
+        <button onClick="{{ closeAll }}" aria-label="close" style="width:44px;height:44px;border:none;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;">
+          <svg width="22" height="22" viewBox="0 0 24 24"><g stroke="#17211C" stroke-width="2" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"></line><line x1="18" y1="6" x2="6" y2="18"></line></g></svg>
+        </button>
+      </div>
+      <nav style="padding:10px 12px;display:flex;flex-direction:column;gap:4px;">
+        <sc-for list="{{ menuItems }}" as="m" hint-placeholder-count="3">
+          <button onClick="{{ m.go }}" style="display:flex;align-items:center;justify-content:space-between;width:100%;text-align:left;padding:15px 12px;border:none;background:transparent;border-radius:13px;cursor:pointer;font-family:inherit;" style-hover="background:#EEF3EF">
+            <span>
+              <span style="display:block;font-size:15px;font-weight:700;color:#17211C;">{{ m.label }}</span>
+              <span style="display:block;font-size:12px;color:#8A9A90;margin-top:3px;">{{ m.desc }}</span>
+            </span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><polyline points="9 6 15 12 9 18" stroke="#B7C2BB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></polyline></svg>
+          </button>
+        </sc-for>
+      </nav>
+      <div style="margin-top:auto;padding:18px;border-top:1px solid #F0F3F0;">
+        <div style="font-size:12px;color:#8A9A90;line-height:1.6;">기후변화대응 공모전 출품작<br>© team_싹싹기름 · v2.0</div>
+      </div>
+    </aside>
+
+    <!-- ===== PRIZE INFO BOTTOM SHEET ===== -->
+    <div style="{{ sheetStyle }}">
+      <sc-if value="{{ sheet }}" hint-placeholder-val="{{ false }}">
+      <div style="width:38px;height:4px;border-radius:3px;background:#DBE3DD;margin:12px auto 4px;"></div>
+      <button onClick="{{ closeAll }}" aria-label="close" style="position:absolute;top:14px;right:14px;width:34px;height:34px;border:none;border-radius:11px;background:#F0F3F0;cursor:pointer;display:flex;align-items:center;justify-content:center;">
+        <svg width="18" height="18" viewBox="0 0 24 24"><g stroke="#17211C" stroke-width="2" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"></line><line x1="18" y1="6" x2="6" y2="18"></line></g></svg>
+      </button>
+      <div style="padding:8px 20px 24px;">
+        <div style="height:170px;border-radius:18px;{{ sheet.imgStyle }};display:flex;align-items:center;justify-content:center;margin-bottom:18px;">
+          <span style="font-size:11px;font-weight:600;letter-spacing:.06em;color:rgba(23,33,28,.35);font-family:ui-monospace,monospace;">상품 이미지</span>
+        </div>
+        <span style="font-size:11px;font-weight:700;color:#1E8E5A;background:#E7F2EC;padding:4px 9px;border-radius:7px;">{{ sheet.cat }}</span>
+        <h2 style="margin:11px 0 0;font-size:20px;font-weight:800;letter-spacing:-.02em;">{{ sheet.title }}</h2>
+        <div style="margin-top:6px;font-size:14px;font-weight:700;color:#1E8E5A;">당첨 확률 {{ sheet.oddsLabel }}</div>
+        <p style="margin:14px 0 0;font-size:13px;line-height:1.65;color:#5A6A62;">{{ sheet.desc }}</p>
+        <div style="display:flex;align-items:center;gap:9px;margin-top:18px;padding:14px 16px;border-radius:14px;background:#F5F8F5;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="flex-shrink:0;"><circle cx="12" cy="12" r="9" stroke="#1E8E5A" stroke-width="1.8"></circle><path d="M12 8v5" stroke="#1E8E5A" stroke-width="2" stroke-linecap="round"></path><circle cx="12" cy="16" r="1.1" fill="#1E8E5A"></circle></svg>
+          <span style="font-size:12px;color:#5A6A62;line-height:1.5;">패드 코드를 입력하면 이 경품에 자동 응모됩니다.</span>
+        </div>
+        <button onClick="{{ closeAll }}" style="width:100%;height:54px;margin-top:16px;border:none;border-radius:15px;background:#1E8E5A;color:#fff;font-size:16px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 8px 18px rgba(30,142,90,.3);" style-active="transform:scale(.98)">코드 입력하러 가기</button>
+      </div>
+      </sc-if>
+    </div>
+
+    <!-- ===== REVEAL / RESULT MODAL ===== -->
+    <div style="{{ revealWrapStyle }}">
+      <!-- suspense -->
+      <sc-if value="{{ isRevealing }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;flex-direction:column;align-items:center;">
+        <div style="width:110px;height:110px;border-radius:30px;background:linear-gradient(140deg,#1E8E5A,#14663F);display:flex;align-items:center;justify-content:center;box-shadow:0 16px 40px rgba(20,102,63,.4);animation:ssakSpin 1s linear infinite;">
+          <svg width="54" height="54" viewBox="0 0 24 24" fill="none"><path d="M4 14c0-5 4-9 15-10-1 11-5 15-10 15-3 0-5-2-5-5z" fill="#fff"></path></svg>
+        </div>
+        <div style="margin-top:22px;font-size:16px;font-weight:800;color:#fff;animation:ssakPulse 1.1s ease-in-out infinite;">경품을 추첨하고 있어요…</div>
+        <div style="margin-top:6px;font-size:12.5px;color:rgba(255,255,255,.7);">{{ revealCodeLabel }}</div>
+      </div>
+      </sc-if>
+
+      <!-- result -->
+      <sc-if value="{{ hasResult }}" hint-placeholder-val="{{ false }}">
+      <div style="position:relative;width:86%;max-width:340px;">
+        <div style="{{ confettiStyle }}">
+          <sc-for list="{{ confetti }}" as="c" hint-placeholder-count="0">
+            <span style="{{ c.style }}"></span>
+          </sc-for>
+        </div>
+        <div style="position:relative;background:#fff;border-radius:26px;padding:26px 22px 22px;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,.3);animation:ssakPop .5s cubic-bezier(.22,1,.36,1);">
+          <sc-if value="{{ resultWin }}" hint-placeholder-val="{{ true }}">
+          <div style="font-size:13px;font-weight:800;letter-spacing:.06em;color:#1E8E5A;">🎉 축하합니다!</div>
+          <div style="margin:16px auto 0;width:150px;height:150px;border-radius:22px;{{ result.imgStyle }};display:flex;align-items:center;justify-content:center;animation:ssakFloat 2.4s ease-in-out infinite;">
+            <span style="font-size:10px;font-weight:600;letter-spacing:.06em;color:rgba(23,33,28,.4);font-family:ui-monospace,monospace;">상품 이미지</span>
+          </div>
+          <span style="display:inline-block;margin-top:16px;font-size:11px;font-weight:700;color:#1E8E5A;background:#E7F2EC;padding:4px 9px;border-radius:7px;">{{ result.cat }} 당첨</span>
+          <h2 style="margin:9px 0 0;font-size:21px;font-weight:800;letter-spacing:-.02em;line-height:1.3;">{{ result.title }}</h2>
+          <p style="margin:9px 0 0;font-size:12.5px;color:#8A9A90;line-height:1.5;">경품함에 저장되었어요. 마이페이지에서 확인하세요.</p>
+          <button onClick="{{ closeReveal }}" style="width:100%;height:52px;margin-top:20px;border:none;border-radius:14px;background:#1E8E5A;color:#fff;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 8px 18px rgba(30,142,90,.3);" style-active="transform:scale(.98)">경품함에 담기</button>
+          </sc-if>
+
+          <sc-if value="{{ resultMiss }}" hint-placeholder-val="{{ false }}">
+          <div style="margin:8px auto 0;width:96px;height:96px;border-radius:50%;background:#EEF3EF;display:flex;align-items:center;justify-content:center;">
+            <svg width="46" height="46" viewBox="0 0 24 24" fill="none"><path d="M4 14c0-5 4-9 15-10-1 11-5 15-10 15-3 0-5-2-5-5z" fill="#C7D3CB"></path></svg>
+          </div>
+          <h2 style="margin:18px 0 0;font-size:20px;font-weight:800;letter-spacing:-.02em;">아쉽게 다음 기회에!</h2>
+          <p style="margin:10px 0 0;font-size:13px;color:#5A6A62;line-height:1.6;">이번엔 당첨되지 않았지만<br>패드 사용만으로 이미 지구를 지켰어요 🌊</p>
+          <button onClick="{{ closeReveal }}" style="width:100%;height:52px;margin-top:20px;border:none;border-radius:14px;background:#17211C;color:#fff;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;" style-active="transform:scale(.98)">확인</button>
+          </sc-if>
+        </div>
+      </div>
+      </sc-if>
+    </div>
+
+    <!-- ===== TOAST ===== -->
+    <div style="{{ toastStyle }}">
+      <div style="display:flex;align-items:center;gap:9px;background:#17211C;color:#fff;padding:13px 18px;border-radius:14px;box-shadow:0 10px 26px rgba(23,33,28,.3);max-width:88%;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="flex-shrink:0;"><circle cx="12" cy="12" r="9" stroke="#5FD39A" stroke-width="2"></circle><polyline points="8 12 11 15 16 9" stroke="#5FD39A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></polyline></svg>
+        <span style="font-size:13.5px;font-weight:700;">{{ toast }}</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:440,&quot;height&quot;:900},&quot;showEventBanner&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;콘텐츠&quot;},&quot;rewardLayout&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;grid&quot;,&quot;list&quot;],&quot;default&quot;:&quot;grid&quot;,&quot;tsType&quot;:&quot;'grid' | 'list'&quot;,&quot;section&quot;:&quot;콘텐츠&quot;}}">
+class Component extends DCLogic {
+  state = {
+    intro: true,
+    entered: false,
+    flowIdx: 1,
+    view: 'home',
+    menuOpen: false,
+    sheetId: null,
+    code: '',
+    phase: 'idle',      // idle | revealing | result
+    result: null,        // prize object or { miss:true }
+    promoIdx: 0,
+    headerSolid: false,
+    heroIdx: 0,
+    usedCodes: ['OCEAN-7X2K', 'WAVE-K3M9'],
+    wins: [
+      { id: 2, title: '편의점 모바일상품권 5,000원', cat: '상품권', hue: 210, date: '2026.07.09', code: 'WAVE-K3M9', used: false },
+    ],
+    toast: null,
+  };
+
+  prizeData() {
+    return [
+      { id: 1, cat: '카페', title: '스타벅스 아메리카노 T', hue: 150, odds: '15%', rank: '3등', desc: '전국 스타벅스 매장에서 사용 가능한 모바일 교환권입니다. 발급 후 30일 이내 사용해 주세요.' },
+      { id: 2, cat: '상품권', title: '편의점 모바일상품권 5,000원', hue: 210, odds: '10%', rank: '2등', desc: 'GS25·CU·세븐일레븐 등 전국 편의점에서 현금처럼 사용할 수 있는 모바일 금액권입니다.' },
+      { id: 3, cat: '카페', title: '스타벅스 기프트카드 5만원', hue: 20, odds: '1%', rank: '1등', desc: '이번 주 최고 경품! 스타벅스 5만원 충전 기프트카드입니다.' },
+      { id: 4, cat: '배달', title: '배달앱 3,000원 할인쿠폰', hue: 40, odds: '25%', rank: '4등', desc: '최소 주문금액 12,000원 이상 결제 시 사용 가능한 배달 할인 쿠폰입니다.' },
+      { id: 5, cat: '상품권', title: '문화상품권 10,000원', hue: 265, odds: '5%', rank: '2등', desc: '온·오프라인 가맹점에서 폭넓게 사용 가능한 문화상품권 핀번호를 발급해 드립니다.' },
+      { id: 6, cat: '굿즈', title: '싹싹기름 리사이클 에코백', hue: 165, odds: '30%', rank: '참가상', desc: '폐페트병을 재활용한 원단으로 만든 친환경 에코백입니다. 색상은 랜덤 발송됩니다.' },
+    ];
+  }
+
+  imgFor(hue) {
+    return `background:repeating-linear-gradient(135deg, hsl(${hue} 32% 92%) 0 11px, hsl(${hue} 32% 88%) 11px 22px)`;
+  }
+
+  hash(str) {
+    let h = 0;
+    for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) >>> 0;
+    return h;
+  }
+
+  // deterministic outcome per code: ~1 in 6 is a miss, otherwise a prize
+  outcomeFor(code) {
+    const h = this.hash(code.toUpperCase());
+    if (h % 6 === 0) return { miss: true };
+    const pool = this.prizeData();
+    return pool[h % pool.length];
+  }
+
+  scalePromos = () => {
+    const el = this._promo;
+    if (!el || !el.clientWidth) return;
+    const s = el.clientWidth / 2160;
+    el.querySelectorAll('.promo-scale').forEach(n => { n.style.transform = 'scale(' + s + ')'; });
+  };
+
+  goPromo(dir) {
+    const el = this._promo;
+    if (!el || !el.clientWidth) return;
+    const n = this._pn || 8;
+    const cur = Math.round(el.scrollLeft / el.clientWidth);
+    this._pi = (cur + dir + n) % n;
+    el.scrollTo({ left: this._pi * el.clientWidth, behavior: 'smooth' });
+  }
+
+  onWinScroll = () => {
+    const el = this._main;
+    const y = el ? el.scrollTop : (window.scrollY || document.documentElement.scrollTop || 0);
+    const past = y > 90;
+    if (past !== this.state.headerSolid) this.setState({ headerSolid: past });
+  };
+
+  componentDidMount() {
+    window.addEventListener('scroll', this.onWinScroll, { passive: true });
+    if (this._main) this._main.addEventListener('scroll', this.onWinScroll, { passive: true });
+    this.onWinScroll();
+    this._hero = setInterval(() => {
+      this.setState(st => ({ heroIdx: (st.heroIdx + 1) % 3 }));
+    }, 6000);
+    this._pn = 8;
+    this._pi = 0;
+    this.scalePromos();
+    this._st1 = setTimeout(this.scalePromos, 120);
+    this._st2 = setTimeout(this.scalePromos, 600);
+    window.addEventListener('resize', this.scalePromos);
+    const el = this._promo;
+    if (el) el.addEventListener('scroll', this._onScroll = () => {
+      if (!el.clientWidth) return;
+      const idx = Math.round(el.scrollLeft / el.clientWidth);
+      if (idx !== this.state.promoIdx) this.setState({ promoIdx: idx });
+    }, { passive: true });
+    this._iv = setInterval(() => {
+      if (!el || !el.clientWidth) return;
+      this._pi = (this._pi + 1) % this._pn;
+      el.scrollTo({ left: this._pi * el.clientWidth, behavior: 'smooth' });
+    }, 3800);
+  }
+  componentWillUnmount() {
+    window.removeEventListener('scroll', this.onWinScroll);
+    if (this._main) this._main.removeEventListener('scroll', this.onWinScroll);
+    clearInterval(this._hero);
+    clearInterval(this._iv);
+    clearTimeout(this._st1); clearTimeout(this._st2);
+    window.removeEventListener('resize', this.scalePromos);
+    if (this._promo && this._onScroll) this._promo.removeEventListener('scroll', this._onScroll);
+  }
+
+  showToast(msg) {
+    this.setState({ toast: msg });
+    clearTimeout(this._t);
+    this._t = setTimeout(() => this.setState({ toast: null }), 2200);
+  }
+
+  renderVals() {
+    const s = this.state;
+
+    const decorate = (r) => ({
+      ...r,
+      oddsLabel: r.odds,
+      rankLabel: r.rank,
+      imgStyle: this.imgFor(r.hue),
+      open: () => this.setState({ sheetId: r.id, menuOpen: false }),
+    });
+    const rewards = this.prizeData().map(decorate);
+    const sheetRaw = this.prizeData().find(r => r.id === s.sheetId);
+    const sheet = sheetRaw ? decorate(sheetRaw) : null;
+
+    const myWins = s.wins.map(w => ({
+      ...w,
+      imgStyle: this.imgFor(w.hue),
+      badge: w.used ? '사용완료' : '사용가능',
+      badgeStyle: {
+        fontSize: '10.5px', fontWeight: 700, padding: '4px 9px', borderRadius: '20px', flexShrink: 0, whiteSpace: 'nowrap',
+        color: w.used ? '#8A9A90' : '#1E8E5A', background: w.used ? '#F0F3F0' : '#E7F2EC',
+      },
+    }));
+
+    const result = s.result;
+    const resultWin = !!(result && !result.miss);
+    const resultMiss = !!(result && result.miss);
+
+    // confetti
+    const colors = ['#5FD39A', '#1E8E5A', '#FFD666', '#FF8A5C', '#7CC4FF'];
+    const confetti = resultWin ? Array.from({ length: 26 }).map((_, i) => {
+      const left = (i * 37 % 100);
+      const delay = (i % 8) * 0.12;
+      const dur = 1.4 + (i % 5) * 0.25;
+      const col = colors[i % colors.length];
+      const size = 6 + (i % 3) * 3;
+      return { style: {
+        position: 'absolute', top: '-10px', left: left + '%', width: size + 'px', height: (size + 3) + 'px',
+        background: col, borderRadius: '2px', opacity: 0,
+        animation: `ssakFall ${dur}s linear ${delay}s infinite`,
+      } };
+    }) : [];
+
+    const overlayOn = s.menuOpen || !!sheetRaw;
+    const overlayStyle = {
+      position: 'absolute', inset: 0, zIndex: 30, background: 'rgba(23,33,28,.42)',
+      opacity: overlayOn ? 1 : 0, pointerEvents: overlayOn ? 'auto' : 'none',
+      transition: 'opacity .28s ease',
+    };
+    const drawerStyle = {
+      position: 'absolute', top: 0, right: 0, bottom: 0, zIndex: 40, width: '80%', maxWidth: '320px',
+      background: '#F5F8F5', display: 'flex', flexDirection: 'column',
+      boxShadow: '-14px 0 40px rgba(23,33,28,.18)',
+      transform: s.menuOpen ? 'translateX(0)' : 'translateX(102%)',
+      transition: 'transform .32s cubic-bezier(.22,1,.36,1)',
+    };
+    const sheetStyle = {
+      position: 'absolute', left: 0, right: 0, bottom: 0, zIndex: 40,
+      background: '#fff', borderRadius: '26px 26px 0 0', maxHeight: '88%', overflowY: 'auto',
+      boxShadow: '0 -14px 40px rgba(23,33,28,.2)',
+      transform: sheetRaw ? 'translateY(0)' : 'translateY(102%)',
+      transition: 'transform .34s cubic-bezier(.22,1,.36,1)',
+    };
+    const revealOn = s.phase === 'revealing' || s.phase === 'result';
+    const revealWrapStyle = {
+      position: 'absolute', inset: 0, zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center',
+      padding: '20px', background: s.phase === 'result' ? 'rgba(23,33,28,.55)' : 'rgba(20,102,63,.9)',
+      opacity: revealOn ? 1 : 0, pointerEvents: revealOn ? 'auto' : 'none',
+      transition: 'opacity .3s ease',
+    };
+    const toastStyle = {
+      position: 'absolute', left: 0, right: 0, bottom: '30px', zIndex: 60,
+      display: 'flex', justifyContent: 'center',
+      opacity: s.toast ? 1 : 0, transform: s.toast ? 'translateY(0)' : 'translateY(14px)',
+      pointerEvents: 'none', transition: 'all .26s ease',
+    };
+    const confettiStyle = { position: 'absolute', inset: '-30px -10px 0', overflow: 'hidden', pointerEvents: 'none', zIndex: 0 };
+
+    return {
+      mainRef: (el) => { this._main = el; },
+
+      heroLayers: ['photo-delivery', 'photo-greasy', 'photo-recycle'].map((name, i) => {
+        const on = i === s.heroIdx;
+        return { style: {
+          position: 'absolute', inset: 0,
+          background: `url('assets/${name}.png') center/contain no-repeat`,
+          backgroundColor: '#0A2C1B',
+          opacity: on ? 1 : 0,
+          transform: on ? 'scale(1.08)' : 'scale(0.98)',
+          transition: 'opacity 1.6s ease-in-out, transform 7.5s linear',
+        } };
+      }),
+
+      homeHeaderStyle: {
+        position: 'sticky', top: 0, zIndex: 20, display: 'flex', alignItems: 'center',
+        justifyContent: 'flex-start', gap: '10px', height: '60px', padding: '0 18px', flexShrink: 0,
+        background: s.headerSolid ? 'rgba(245,248,245,.72)' : 'linear-gradient(180deg,rgba(8,40,24,.45),rgba(8,40,24,0))',
+        backdropFilter: s.headerSolid ? 'blur(12px)' : 'none',
+        borderBottom: s.headerSolid ? '1px solid #E6ECE7' : '1px solid transparent',
+        transition: 'background .25s ease, border-color .25s ease',
+      },
+      homeBrandStyle: {
+        fontSize: '15px', fontWeight: 700, letterSpacing: '-.02em',
+        color: s.headerSolid ? '#17211C' : '#fff',
+        textShadow: s.headerSolid ? 'none' : '0 1px 8px rgba(0,0,0,.4)',
+        transition: 'color .25s ease',
+      },
+      homeIconColor: s.headerSolid ? '#17211C' : '#ffffff',
+
+      isHome: s.view === 'home',
+      isIntro: true,
+      introWrapStyle: 'position:absolute;inset:0;z-index:' + (s.entered ? 5 : 60) + ';overflow:hidden;background:#0D1A12;',
+      introCtaStyle: 'position:absolute;left:0;right:0;bottom:0;padding:0 26px 46px;display:flex;flex-direction:column;gap:18px;'
+        + 'transition:opacity .45s ease, transform .55s ease;'
+        + (s.entered
+            ? 'opacity:0;transform:translateY(24px);pointer-events:none;'
+            : 'animation:ssakIntroUp .8s ease 2.2s both;'),
+      introMenuStyle: 'position:absolute;top:20px;right:16px;z-index:8;width:42px;height:42px;border:none;cursor:pointer;'
+        + 'border-radius:12px;background:rgba(10,30,20,.28);backdrop-filter:blur(6px);'
+        + 'display:flex;align-items:center;justify-content:center;'
+        + 'transition:opacity .4s ease .25s;'
+        + (s.entered ? 'opacity:1;pointer-events:auto;' : 'opacity:0;pointer-events:none;'),
+      appPanelStyle: 'position:absolute;left:0;right:0;top:68px;bottom:0;z-index:30;display:flex;flex-direction:column;'
+        + 'background:rgba(245,248,245,.34);backdrop-filter:blur(8px);border-radius:24px 24px 0 0;overflow:hidden;'
+        + 'box-shadow:0 -20px 50px rgba(4,16,10,.5);'
+        + 'transition:transform .72s cubic-bezier(.22,1,.36,1);'
+        + (s.entered ? 'transform:translateY(0);' : 'transform:translateY(104%);'),
+      enterApp: () => this.setState({ entered: true, view: 'home' }),
+      isSub: s.view !== 'home',
+      isAbout: s.view === 'about',
+      isMypage: s.view === 'mypage',
+      isSupport: s.view === 'support',
+      isTip: s.view === 'tip',
+      subTitle: { about: 'About us', mypage: '마이페이지', support: '고객센터 문의', tip: '분리배출 tip' }[s.view] || '',
+
+      code: s.code,
+      rewards,
+      sheet,
+      toast: s.toast,
+      rewardCountLabel: '총 ' + rewards.length + '종',
+      winCountLabel: s.wins.length + '개',
+      usedCountLabel: s.usedCodes.length + '개',
+      myWins,
+      hasWins: s.wins.length > 0,
+      noWins: s.wins.length === 0,
+
+      isRevealing: s.phase === 'revealing',
+      hasResult: s.phase === 'result',
+      resultWin, resultMiss, result,
+      confetti, confettiStyle,
+      revealCodeLabel: s.code ? s.code.toUpperCase() : '',
+
+      showEvent: this.props.showEventBanner ?? true,
+      promoRef: (el) => { this._promo = el; },
+      promoPrev: () => this.goPromo(-1),
+      promoNext: () => this.goPromo(1),
+      promoCounter: String(Math.min(8, (s.promoIdx || 0) + 1)).padStart(2, '0') + ' / 08',
+      dots: Array.from({ length: 8 }).map((_, i) => ({
+        style: {
+          width: i === s.promoIdx ? '22px' : '10px', height: '3px', borderRadius: '3px',
+          background: i === s.promoIdx ? '#1E8E5A' : '#D3DCD6', transition: 'all .3s ease',
+        },
+      })),
+
+      gridStyle: (this.props.rewardLayout ?? 'grid') === 'list'
+        ? 'display:flex;flex-direction:column;gap:12px'
+        : 'display:grid;grid-template-columns:1fr 1fr;gap:12px',
+
+      flowCards: [
+        { no: '01', title: '패드로 기름 흡수', desc: '배달 용기에 남은 기름을 패드로 닦아내요.', img: 'photo-greasy' },
+        { no: '02', title: 'QR·코드 입력', desc: '패드에 인쇄된 코드를 앱에 입력해요.', img: 'photo-delivery' },
+        { no: '03', title: '즉석 당첨 확인', desc: '그 자리에서 경품 당첨 여부가 공개돼요.', img: 'photo-recycle' },
+      ].map((c, i) => {
+        const d = i - (s.flowIdx ?? 1);
+        const ad = Math.abs(d);
+        return Object.assign({}, c, {
+          go: () => this.setState({ flowIdx: i }),
+          style: {
+            position: 'absolute', top: '8px', left: '50%', width: '206px', height: '275px',
+            marginLeft: '-103px', borderRadius: '18px', overflow: 'hidden', cursor: 'pointer',
+            background: "url('assets/" + c.img + ".png') center/cover no-repeat, #0A2C1B",
+            transform: 'translateX(' + (d * 126) + 'px) rotateY(' + (d * -34) + 'deg) scale(' + (ad ? 0.87 : 1) + ')',
+            opacity: ad > 1 ? 0 : 1,
+            zIndex: 10 - ad,
+            boxShadow: ad ? '0 8px 20px rgba(10,44,27,.18)' : '0 18px 38px rgba(10,44,27,.32)',
+            transition: 'transform .55s cubic-bezier(.22,1,.36,1), opacity .45s ease, box-shadow .45s ease',
+          },
+        });
+      }),
+      flowDots: [0, 1, 2].map((i) => ({
+        style: {
+          width: i === (s.flowIdx ?? 1) ? '20px' : '7px', height: '7px', borderRadius: '7px',
+          background: i === (s.flowIdx ?? 1) ? '#1E8E5A' : '#D3DCD6', transition: 'all .3s ease',
+        },
+      })),
+      aboutChain: [
+        '배달을 많이 시켜먹는다',
+        '버려지는 배달 용기 증가',
+        '하지만 제대로 세척이 되지 않은 용기가 많아 재활용률은 저조',
+      ].map((text, i) => ({
+        no: '0' + (i + 1),
+        text,
+        numStyle: { fontSize: '10.5px', fontWeight: 800, letterSpacing: '.06em', color: '#1E8E5A', paddingTop: '2px', flexShrink: 0 },
+        textStyle: { fontSize: '13px', fontWeight: 600, lineHeight: 1.55, color: '#3C4A43', letterSpacing: '-.01em' },
+      })),
+      aboutTeam: [
+        { name: '서장원', role: '팀장' },
+        { name: '임성민', role: '팀원' },
+        { name: '박다섭', role: '팀원' },
+        { name: '한민우', role: '팀원' },
+      ].map(t => ({
+        ...t,
+        initial: t.name.charAt(0),
+        avatarStyle: {
+          width: '38px', height: '38px', borderRadius: '50%', flexShrink: 0,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: '15px', fontWeight: 800,
+          background: t.role === '팀장' ? '#1E8E5A' : '#E7F2EC',
+          color: t.role === '팀장' ? '#fff' : '#1E8E5A',
+        },
+        roleStyle: {
+          marginTop: '3px', fontSize: '10.5px', fontWeight: 800, letterSpacing: '.1em',
+          color: t.role === '팀장' ? '#1E8E5A' : '#8A9A90',
+        },
+      })),
+      aboutRows: [
+        { k: '왜 필요한가요?', v: '식용유 1L가 하수구로 흘러가면 물 약 20만L를 오염시킵니다. 흡수 패드는 이를 고체화해 일반 종량제로 안전하게 배출하게 돕습니다.' },
+        { k: '어떻게 참여하나요?', v: '패드 사용 후 인쇄된 영문 코드를 QR로 접속한 이 페이지에 입력하면 그 자리에서 경품 당첨 여부가 공개됩니다.' },
+        { k: '경품은요?', v: '코드마다 당첨 경품이 정해져 있어요. 상품권·쿠폰·굿즈 등 다양한 경품을 즉석에서 받아가세요. 실천이 곧 혜택이 됩니다.' },
+      ],
+      faqs: [
+        { q: '코드는 어디에 적혀 있나요?', a: '흡수 패드 개별 포장 안쪽에 영문+숫자 조합 코드가 인쇄되어 있습니다.' },
+        { q: '코드가 인식되지 않아요.', a: '대소문자와 하이픈(-)을 포함해 정확히 입력했는지 확인해 주세요. 이미 사용된 코드는 재사용할 수 없습니다.' },
+        { q: '당첨 경품은 어떻게 받나요?', a: '당첨 즉시 마이페이지 경품함에 저장됩니다. 모바일 경품은 바로, 실물 굿즈는 영업일 기준 3~5일 내 발송됩니다.' },
+        { q: '한 코드로 여러 번 응모할 수 있나요?', a: '아니요. 코드는 1회만 사용할 수 있으며 당첨 결과는 코드마다 고정되어 있습니다.' },
+      ],
+      footerLinks: [
+        { label: 'About us', go: () => this.setState({ view: 'about', menuOpen: false }) },
+        { label: '분리배출 tip', go: () => this.setState({ view: 'tip', menuOpen: false }) },
+        { label: '마이페이지', go: () => this.setState({ view: 'mypage', menuOpen: false }) },
+        { label: '이용약관·문의', go: () => this.showToast('준비 중이에요') },
+      ],
+      menuItems: [
+        { label: 'About us', desc: '프로젝트 소개·설명글', go: () => this.setState({ view: 'about', menuOpen: false }) },
+        { label: '마이페이지', desc: '내 경품함·당첨 내역', go: () => this.setState({ view: 'mypage', menuOpen: false }) },
+        { label: '분리배출 tip', desc: '올바른 분리수거 팁', go: () => this.setState({ view: 'tip', menuOpen: false }) },
+      ],
+
+      openMenu: () => this.setState({ menuOpen: true }),
+      closeAll: () => this.setState({ menuOpen: false, sheetId: null }),
+      goHome: () => this.setState({ view: 'home' }),
+      onCodeInput: (e) => this.setState({ code: e.target.value }),
+
+      submitCode: () => {
+        const c = (s.code || '').trim().toUpperCase();
+        if (!c) { this.showToast('코드를 입력해 주세요'); return; }
+        if (s.usedCodes.includes(c)) { this.showToast('이미 사용된 코드예요'); return; }
+        this.setState({ phase: 'revealing', menuOpen: false, sheetId: null });
+        clearTimeout(this._r);
+        this._r = setTimeout(() => {
+          this.setState({ phase: 'result', result: this.outcomeFor(c) });
+        }, 1800);
+      },
+
+      closeReveal: () => {
+        const c = (s.code || '').trim().toUpperCase();
+        const r = s.result;
+        const win = r && !r.miss;
+        this.setState({
+          phase: 'idle',
+          result: null,
+          code: '',
+          usedCodes: c ? [...s.usedCodes, c] : s.usedCodes,
+          wins: win ? [{ id: r.id, title: r.title, cat: r.cat, hue: r.hue, date: '2026.07.14', code: c, used: false }, ...s.wins] : s.wins,
+        });
+        if (win) this.showToast('경품함에 저장되었어요');
+      },
+
+      overlayStyle, drawerStyle, sheetStyle, revealWrapStyle, toastStyle,
+    };
+  }
+}
+</script>
+</body>
+</html>

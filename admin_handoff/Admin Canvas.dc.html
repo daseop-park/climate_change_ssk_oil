@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  body { margin:0; background:#E4EBE5; font-family:'Noto Sans KR','Pretendard',system-ui,sans-serif; -webkit-font-smoothing:antialiased; }
+  a { color:#1E8E5A; text-decoration:none; }
+  a:hover { color:#0E2A1C; text-decoration:underline; }
+</style>
+</helmet>
+
+<section style="width:max-content;padding:56px 48px 80px;display:flex;flex-direction:column;gap:26px;">
+
+  <div style="display:flex;flex-direction:column;gap:8px;max-width:820px;">
+    <div style="font-size:11px;font-weight:800;letter-spacing:.18em;color:#1E8E5A;">TURN 1 · ADMIN CONSOLE</div>
+    <h1 style="margin:0;font-size:27px;font-weight:900;letter-spacing:-.03em;color:#17211C;">싹싹기름 관리자 페이지 제안</h1>
+    <p style="margin:0;font-size:14px;line-height:1.7;color:#55665C;text-wrap:pretty;">운영자가 실제로 하는 일은 넷입니다. 코드 발급, 경품 재고·확률 관리, 당첨 내역 확인, 경품 사용 처리. 데스크톱 1440px 기준으로 좌측 고정 내비 + 본문 구조를 잡았고, 유리 질감은 쓰지 않았습니다. 관리 화면은 밀도와 가독성이 우선이라 불투명 표면과 명확한 테두리로 갑니다.</p>
+  </div>
+
+  <div id="1a" style="width:1440px;background:#F5F8F5;border:1px solid #D8E2DA;border-radius:18px;overflow:hidden;box-shadow:0 20px 60px rgba(23,33,28,.14);">
+    <div style="display:flex;align-items:center;gap:10px;padding:14px 20px;border-bottom:1px solid #E6ECE7;background:#fff;">
+      <span style="font-size:10.5px;font-weight:900;letter-spacing:.1em;color:#fff;background:#0E2A1C;padding:5px 10px;border-radius:20px;">1a</span>
+      <span style="font-size:13.5px;font-weight:800;color:#17211C;letter-spacing:-.01em;">대시보드</span>
+    </div>
+
+    <div style="display:flex;min-height:820px;">
+
+      <aside style="width:224px;flex-shrink:0;background:#0E2A1C;display:flex;flex-direction:column;padding:22px 14px;gap:26px;">
+        <div style="display:flex;align-items:center;gap:10px;padding:0 8px;">
+          <div style="width:32px;height:32px;border-radius:9px;background:#1E8E5A;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:900;color:#fff;">싹</div>
+          <div style="display:flex;flex-direction:column;gap:2px;">
+            <span style="font-size:13px;font-weight:800;color:#fff;letter-spacing:-.01em;">싹싹기름</span>
+            <span style="font-size:9.5px;font-weight:800;letter-spacing:.14em;color:#5FD39A;">ADMIN</span>
+          </div>
+        </div>
+
+        <nav style="display:flex;flex-direction:column;gap:3px;">
+          <div style="font-size:9.5px;font-weight:800;letter-spacing:.14em;color:rgba(255,255,255,.34);padding:0 10px 8px;">OPERATION</div>
+          <div style="display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:10px;background:#1E8E5A;color:#fff;font-size:13px;font-weight:700;">대시보드</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:11px 12px;border-radius:10px;color:rgba(255,255,255,.72);font-size:13px;font-weight:600;">
+            <span>코드 관리</span>
+            <span style="font-size:10px;font-weight:800;color:#5FD39A;">12,000</span>
+          </div>
+          <div style="display:flex;align-items:center;padding:11px 12px;border-radius:10px;color:rgba(255,255,255,.72);font-size:13px;font-weight:600;">경품 관리</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:11px 12px;border-radius:10px;color:rgba(255,255,255,.72);font-size:13px;font-weight:600;">
+            <span>당첨 내역</span>
+            <span style="font-size:10px;font-weight:800;color:#5FD39A;">712</span>
+          </div>
+
+          <div style="font-size:9.5px;font-weight:800;letter-spacing:.14em;color:rgba(255,255,255,.34);padding:20px 10px 8px;">SYSTEM</div>
+          <div style="display:flex;align-items:center;padding:11px 12px;border-radius:10px;color:rgba(255,255,255,.72);font-size:13px;font-weight:600;">감사 로그</div>
+          <div style="display:flex;align-items:center;padding:11px 12px;border-radius:10px;color:rgba(255,255,255,.72);font-size:13px;font-weight:600;">관리자 계정</div>
+        </nav>
+
+        <div style="margin-top:auto;display:flex;align-items:center;gap:10px;padding:12px;border-radius:12px;background:rgba(255,255,255,.07);">
+          <div style="width:30px;height:30px;border-radius:50%;background:#5FD39A;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:#0E2A1C;">김</div>
+          <div style="display:flex;flex-direction:column;gap:1px;min-width:0;">
+            <span style="font-size:12px;font-weight:700;color:#fff;">김운영</span>
+            <span style="font-size:10px;font-weight:600;color:rgba(255,255,255,.5);">최고관리자</span>
+          </div>
+        </div>
+      </aside>
+
+      <div style="flex:1;min-width:0;display:flex;flex-direction:column;background:#F5F8F5;">
+
+        <header style="display:flex;align-items:center;justify-content:space-between;padding:20px 28px;background:#fff;border-bottom:1px solid #E6ECE7;">
+          <div style="display:flex;flex-direction:column;gap:4px;">
+            <h2 style="margin:0;font-size:19px;font-weight:800;letter-spacing:-.025em;color:#17211C;">대시보드</h2>
+            <span style="font-size:12px;font-weight:500;color:#8A9A90;">2026년 8월 8일 09:24 기준 · 5분마다 자동 갱신</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:9px;">
+            <div style="display:flex;align-items:center;gap:7px;height:38px;padding:0 14px;border:1px solid #E1E8E2;border-radius:10px;background:#fff;font-size:12.5px;font-weight:700;color:#3C4B43;">최근 30일</div>
+            <div style="display:flex;align-items:center;gap:7px;height:38px;padding:0 16px;border-radius:10px;background:#1E8E5A;font-size:12.5px;font-weight:800;color:#fff;">CSV 내보내기</div>
+          </div>
+        </header>
+
+        <div style="flex:1;padding:24px 28px 32px;display:flex;flex-direction:column;gap:20px;">
+
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;">
+            <div style="background:#fff;border:1px solid #E6ECE7;border-radius:14px;padding:18px 20px;display:flex;flex-direction:column;gap:10px;">
+              <span style="font-size:11px;font-weight:800;letter-spacing:.08em;color:#8A9A90;">코드 사용률</span>
+              <div style="display:flex;align-items:baseline;gap:7px;">
+                <span style="font-size:28px;font-weight:900;letter-spacing:-.03em;color:#17211C;">38.2%</span>
+                <span style="font-size:11.5px;font-weight:800;color:#1E8E5A;">+4.1%p</span>
+              </div>
+              <div style="height:6px;border-radius:6px;background:#EEF3EF;overflow:hidden;">
+                <div style="width:38.2%;height:100%;background:#1E8E5A;"></div>
+              </div>
+              <span style="font-size:11px;font-weight:600;color:#8A9A90;">4,584 / 12,000장</span>
+            </div>
+
+            <div style="background:#fff;border:1px solid #E6ECE7;border-radius:14px;padding:18px 20px;display:flex;flex-direction:column;gap:10px;">
+              <span style="font-size:11px;font-weight:800;letter-spacing:.08em;color:#8A9A90;">당첨 건수</span>
+              <div style="display:flex;align-items:baseline;gap:7px;">
+                <span style="font-size:28px;font-weight:900;letter-spacing:-.03em;color:#17211C;">712</span>
+                <span style="font-size:11.5px;font-weight:800;color:#1E8E5A;">+63</span>
+              </div>
+              <div style="height:6px;border-radius:6px;background:#EEF3EF;overflow:hidden;">
+                <div style="width:15.5%;height:100%;background:#5FD39A;"></div>
+              </div>
+              <span style="font-size:11px;font-weight:600;color:#8A9A90;">코드 1장당 경품 1개 · 전원 당첨</span>
+            </div>
+
+            <div style="background:#fff;border:1px solid #E6ECE7;border-radius:14px;padding:18px 20px;display:flex;flex-direction:column;gap:10px;">
+              <span style="font-size:11px;font-weight:800;letter-spacing:.08em;color:#8A9A90;">경품 소진</span>
+              <div style="display:flex;align-items:baseline;gap:7px;">
+                <span style="font-size:28px;font-weight:900;letter-spacing:-.03em;color:#17211C;">712</span>
+                <span style="font-size:11.5px;font-weight:800;color:#8A9A90;">/ 1,500</span>
+              </div>
+              <div style="height:6px;border-radius:6px;background:#EEF3EF;overflow:hidden;">
+                <div style="width:47.4%;height:100%;background:#14663F;"></div>
+              </div>
+              <span style="font-size:11px;font-weight:600;color:#C0492E;">1등 잔여 3개 — 소진 임박</span>
+            </div>
+
+          </div>
+
+          <div style="display:grid;grid-template-columns:1.55fr 1fr;gap:14px;">
+
+            <div style="background:#fff;border:1px solid #E6ECE7;border-radius:14px;padding:20px 22px 22px;display:flex;flex-direction:column;gap:18px;">
+              <div style="display:flex;align-items:baseline;justify-content:space-between;">
+                <h3 style="margin:0;font-size:14.5px;font-weight:800;letter-spacing:-.02em;color:#17211C;">일별 코드 사용</h3>
+                <div style="display:flex;align-items:center;gap:14px;">
+                  <div style="display:flex;align-items:center;gap:6px;"><span style="width:9px;height:9px;border-radius:3px;background:#1E8E5A;"></span><span style="font-size:11px;font-weight:700;color:#55665C;">사용</span></div>
+                  <div style="display:flex;align-items:center;gap:6px;"><span style="width:9px;height:9px;border-radius:3px;background:#C7DED1;"></span><span style="font-size:11px;font-weight:700;color:#55665C;">당첨</span></div>
+                </div>
+              </div>
+
+              <div style="display:flex;align-items:flex-end;gap:9px;height:186px;padding-bottom:22px;border-bottom:1px solid #E6ECE7;position:relative;">
+                <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;gap:3px;height:100%;"><div style="height:52%;background:#1E8E5A;border-radius:5px 5px 0 0;"></div><div style="height:9%;background:#C7DED1;"></div></div>
+                <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;gap:3px;height:100%;"><div style="height:61%;background:#1E8E5A;border-radius:5px 5px 0 0;"></div><div style="height:11%;background:#C7DED1;"></div></div>
+                <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;gap:3px;height:100%;"><div style="height:44%;background:#1E8E5A;border-radius:5px 5px 0 0;"></div><div style="height:7%;background:#C7DED1;"></div></div>
+                <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;gap:3px;height:100%;"><div style="height:73%;background:#1E8E5A;border-radius:5px 5px 0 0;"></div><div style="height:12%;background:#C7DED1;"></div></div>
+                <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;gap:3px;height:100%;"><div style="height:88%;background:#1E8E5A;border-radius:5px 5px 0 0;"></div><div style="height:15%;background:#C7DED1;"></div></div>
+                <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;gap:3px;height:100%;"><div style="height:96%;background:#0E2A1C;border-radius:5px 5px 0 0;"></div><div style="height:16%;background:#C7DED1;"></div></div>
+                <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;gap:3px;height:100%;"><div style="height:69%;background:#1E8E5A;border-radius:5px 5px 0 0;"></div><div style="height:10%;background:#C7DED1;"></div></div>
+                <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;gap:3px;height:100%;"><div style="height:58%;background:#1E8E5A;border-radius:5px 5px 0 0;"></div><div style="height:9%;background:#C7DED1;"></div></div>
+                <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;gap:3px;height:100%;"><div style="height:64%;background:#1E8E5A;border-radius:5px 5px 0 0;"></div><div style="height:11%;background:#C7DED1;"></div></div>
+                <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;gap:3px;height:100%;"><div style="height:79%;background:#1E8E5A;border-radius:5px 5px 0 0;"></div><div style="height:13%;background:#C7DED1;"></div></div>
+                <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;gap:3px;height:100%;"><div style="height:47%;background:#1E8E5A;border-radius:5px 5px 0 0;"></div><div style="height:8%;background:#C7DED1;"></div></div>
+                <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;gap:3px;height:100%;"><div style="height:36%;background:#1E8E5A;border-radius:5px 5px 0 0;"></div><div style="height:6%;background:#C7DED1;"></div></div>
+                <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;gap:3px;height:100%;"><div style="height:55%;background:#1E8E5A;border-radius:5px 5px 0 0;"></div><div style="height:9%;background:#C7DED1;"></div></div>
+                <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;gap:3px;height:100%;"><div style="height:42%;background:#B9CCC0;border-radius:5px 5px 0 0;"></div><div style="height:7%;background:#DCE7E0;"></div></div>
+              </div>
+
+              <div style="display:flex;justify-content:space-between;font-size:11px;font-weight:600;color:#8A9A90;">
+                <span>7/26</span><span>7/30</span><span>8/3</span><span>8/8 (진행 중)</span>
+              </div>
+            </div>
+
+            <div style="background:#fff;border:1px solid #E6ECE7;border-radius:14px;padding:20px 22px 22px;display:flex;flex-direction:column;gap:14px;">
+              <div style="display:flex;align-items:baseline;justify-content:space-between;">
+                <h3 style="margin:0;font-size:14.5px;font-weight:800;letter-spacing:-.02em;color:#17211C;">경품 잔여</h3>
+                <span style="font-size:11.5px;font-weight:700;color:#1E8E5A;">전체 보기</span>
+              </div>
+
+              <div style="display:flex;flex-direction:column;gap:13px;">
+                <div style="display:flex;flex-direction:column;gap:7px;">
+                  <div style="display:flex;justify-content:space-between;align-items:baseline;">
+                    <span style="font-size:12.5px;font-weight:700;color:#17211C;">스타벅스 아메리카노</span>
+                    <span style="font-size:11.5px;font-weight:800;color:#55665C;font-family:ui-monospace,monospace;">412 / 800</span>
+                  </div>
+                  <div style="height:7px;border-radius:7px;background:#EEF3EF;overflow:hidden;"><div style="width:51.5%;height:100%;background:#1E8E5A;"></div></div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:7px;">
+                  <div style="display:flex;justify-content:space-between;align-items:baseline;">
+                    <span style="font-size:12.5px;font-weight:700;color:#17211C;">배달앱 3천원 쿠폰</span>
+                    <span style="font-size:11.5px;font-weight:800;color:#55665C;font-family:ui-monospace,monospace;">198 / 500</span>
+                  </div>
+                  <div style="height:7px;border-radius:7px;background:#EEF3EF;overflow:hidden;"><div style="width:39.6%;height:100%;background:#1E8E5A;"></div></div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:7px;">
+                  <div style="display:flex;justify-content:space-between;align-items:baseline;">
+                    <span style="font-size:12.5px;font-weight:700;color:#17211C;">편의점 5천원 상품권</span>
+                    <span style="font-size:11.5px;font-weight:800;color:#55665C;font-family:ui-monospace,monospace;">79 / 150</span>
+                  </div>
+                  <div style="height:7px;border-radius:7px;background:#EEF3EF;overflow:hidden;"><div style="width:52.6%;height:100%;background:#1E8E5A;"></div></div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:7px;">
+                  <div style="display:flex;justify-content:space-between;align-items:baseline;">
+                    <span style="font-size:12.5px;font-weight:700;color:#17211C;">문화상품권 1만원</span>
+                    <span style="font-size:11.5px;font-weight:800;color:#C0492E;font-family:ui-monospace,monospace;">3 / 50</span>
+                  </div>
+                  <div style="height:7px;border-radius:7px;background:#EEF3EF;overflow:hidden;"><div style="width:6%;height:100%;background:#C0492E;"></div></div>
+                </div>
+              </div>
+
+              <div style="margin-top:auto;display:flex;gap:10px;padding:13px 14px;border-radius:11px;background:#FBF0ED;border:1px solid #F0D9D2;">
+                <span style="font-size:11px;font-weight:900;color:#C0492E;flex-shrink:0;">!</span>
+                <p style="margin:0;font-size:11.5px;line-height:1.55;color:#8A5343;text-wrap:pretty;">문화상품권 잔여 3개. 소진 시 해당 등급은 자동으로 추첨 대상에서 제외되며 하위 등급 확률이 재계산됩니다.</p>
+              </div>
+            </div>
+          </div>
+
+          <div style="background:#fff;border:1px solid #E6ECE7;border-radius:14px;overflow:hidden;">
+            <div style="display:flex;align-items:baseline;justify-content:space-between;padding:18px 22px 14px;">
+              <h3 style="margin:0;font-size:14.5px;font-weight:800;letter-spacing:-.02em;color:#17211C;">최근 당첨</h3>
+              <span style="font-size:11.5px;font-weight:700;color:#1E8E5A;">당첨 내역 전체</span>
+            </div>
+            <table style="width:100%;border-collapse:collapse;">
+              <thead>
+                <tr style="background:#F5F8F5;">
+                  <th style="text-align:left;padding:10px 22px;font-size:11px;font-weight:800;letter-spacing:.06em;color:#8A9A90;border-top:1px solid #E6ECE7;border-bottom:1px solid #E6ECE7;">시각</th>
+                  <th style="text-align:left;padding:10px 12px;font-size:11px;font-weight:800;letter-spacing:.06em;color:#8A9A90;border-top:1px solid #E6ECE7;border-bottom:1px solid #E6ECE7;">코드</th>
+                  <th style="text-align:left;padding:10px 12px;font-size:11px;font-weight:800;letter-spacing:.06em;color:#8A9A90;border-top:1px solid #E6ECE7;border-bottom:1px solid #E6ECE7;">배치</th>
+                  <th style="text-align:left;padding:10px 12px;font-size:11px;font-weight:800;letter-spacing:.06em;color:#8A9A90;border-top:1px solid #E6ECE7;border-bottom:1px solid #E6ECE7;">경품</th>
+                  <th style="text-align:left;padding:10px 12px;font-size:11px;font-weight:800;letter-spacing:.06em;color:#8A9A90;border-top:1px solid #E6ECE7;border-bottom:1px solid #E6ECE7;">성함</th>
+                  <th style="text-align:left;padding:10px 12px;font-size:11px;font-weight:800;letter-spacing:.06em;color:#8A9A90;border-top:1px solid #E6ECE7;border-bottom:1px solid #E6ECE7;">연락처</th>
+                  <th style="text-align:left;padding:10px 22px;font-size:11px;font-weight:800;letter-spacing:.06em;color:#8A9A90;border-top:1px solid #E6ECE7;border-bottom:1px solid #E6ECE7;">상태</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr style="border-bottom:1px solid #F0F3F0;">
+                  <td style="padding:13px 22px;font-size:12.5px;color:#55665C;font-family:ui-monospace,monospace;">08-08 09:12</td>
+                  <td style="padding:13px 12px;font-size:12.5px;font-weight:700;color:#17211C;font-family:ui-monospace,monospace;">OCEAN-7X2K</td>
+                  <td style="padding:13px 12px;font-size:12.5px;color:#55665C;">B-2026-03</td>
+                  <td style="padding:13px 12px;font-size:12.5px;font-weight:700;color:#17211C;">스타벅스 아메리카노</td>
+                  <td style="padding:13px 12px;font-size:12.5px;font-weight:700;color:#17211C;">김O은</td>
+                  <td style="padding:13px 12px;font-size:12.5px;color:#55665C;font-family:ui-monospace,monospace;">010-****-4821</td>
+                  <td style="padding:13px 22px;"><span style="font-size:10.5px;font-weight:800;color:#1E8E5A;background:#E7F2EC;padding:4px 9px;border-radius:20px;">미사용</span></td>
+                </tr>
+                <tr style="border-bottom:1px solid #F0F3F0;">
+                  <td style="padding:13px 22px;font-size:12.5px;color:#55665C;font-family:ui-monospace,monospace;">08-08 08:47</td>
+                  <td style="padding:13px 12px;font-size:12.5px;font-weight:700;color:#17211C;font-family:ui-monospace,monospace;">WAVE-K3M9</td>
+                  <td style="padding:13px 12px;font-size:12.5px;color:#55665C;">B-2026-03</td>
+                  <td style="padding:13px 12px;font-size:12.5px;font-weight:700;color:#17211C;">문화상품권 1만원</td>
+                  <td style="padding:13px 12px;font-size:12.5px;font-weight:700;color:#17211C;">박O훈</td>
+                  <td style="padding:13px 12px;font-size:12.5px;color:#55665C;font-family:ui-monospace,monospace;">010-****-0193</td>
+                  <td style="padding:13px 22px;"><span style="font-size:10.5px;font-weight:800;color:#8A9A90;background:#F0F3F0;padding:4px 9px;border-radius:20px;">사용완료</span></td>
+                </tr>
+                <tr style="border-bottom:1px solid #F0F3F0;">
+                  <td style="padding:13px 22px;font-size:12.5px;color:#55665C;font-family:ui-monospace,monospace;">08-08 08:31</td>
+                  <td style="padding:13px 12px;font-size:12.5px;font-weight:700;color:#17211C;font-family:ui-monospace,monospace;">LEAF-9P4C</td>
+                  <td style="padding:13px 12px;font-size:12.5px;color:#55665C;">B-2026-02</td>
+                  <td style="padding:13px 12px;font-size:12.5px;font-weight:700;color:#17211C;">배달앱 3천원 쿠폰</td>
+                  <td style="padding:13px 12px;font-size:12.5px;font-weight:700;color:#17211C;">이O아</td>
+                  <td style="padding:13px 12px;font-size:12.5px;color:#55665C;font-family:ui-monospace,monospace;">010-****-7756</td>
+                  <td style="padding:13px 22px;"><span style="font-size:10.5px;font-weight:800;color:#1E8E5A;background:#E7F2EC;padding:4px 9px;border-radius:20px;">미사용</span></td>
+                </tr>
+                <tr>
+                  <td style="padding:13px 22px;font-size:12.5px;color:#55665C;font-family:ui-monospace,monospace;">08-08 07:58</td>
+                  <td style="padding:13px 12px;font-size:12.5px;font-weight:700;color:#17211C;font-family:ui-monospace,monospace;">PURE-2H8T</td>
+                  <td style="padding:13px 12px;font-size:12.5px;color:#55665C;">B-2026-03</td>
+                  <td style="padding:13px 12px;font-size:12.5px;font-weight:700;color:#17211C;">편의점 5천원 상품권</td>
+                  <td style="padding:13px 12px;font-size:12.5px;font-weight:700;color:#17211C;">정O서</td>
+                  <td style="padding:13px 12px;font-size:12.5px;color:#55665C;font-family:ui-monospace,monospace;">010-****-3310</td>
+                  <td style="padding:13px 22px;"><span style="font-size:10.5px;font-weight:800;color:#1E8E5A;background:#E7F2EC;padding:4px 9px;border-radius:20px;">미사용</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-wrap:wrap;gap:22px;align-items:flex-start;">
+
+    <div id="1b" style="width:709px;background:#F5F8F5;border:1px solid #D8E2DA;border-radius:18px;overflow:hidden;">
+      <div style="display:flex;align-items:center;gap:10px;padding:14px 20px;border-bottom:1px solid #E6ECE7;background:#fff;">
+        <span style="font-size:10.5px;font-weight:900;letter-spacing:.1em;color:#fff;background:#0E2A1C;padding:5px 10px;border-radius:20px;">1b</span>
+        <span style="font-size:13.5px;font-weight:800;color:#17211C;letter-spacing:-.01em;">코드 배치 발급</span>
+      </div>
+
+      <div style="padding:24px 26px 28px;display:flex;flex-direction:column;gap:18px;background:#F5F8F5;">
+        <div style="background:#fff;border:1px solid #E6ECE7;border-radius:14px;padding:22px 24px;display:flex;flex-direction:column;gap:18px;">
+          <div style="display:flex;flex-direction:column;gap:5px;">
+            <h3 style="margin:0;font-size:15px;font-weight:800;letter-spacing:-.02em;color:#17211C;">새 배치 발급</h3>
+            <p style="margin:0;font-size:12px;line-height:1.6;color:#8A9A90;">발급된 코드는 CSV로 내려받아 패드 인쇄 업체에 전달합니다. 발급 후 코드 문자열은 다시 조회할 수 없습니다.</p>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+            <div style="display:flex;flex-direction:column;gap:7px;">
+              <label style="font-size:11.5px;font-weight:800;color:#3C4B43;">배치 이름</label>
+              <div style="height:42px;border:1px solid #E1E8E2;border-radius:10px;background:#fff;display:flex;align-items:center;padding:0 13px;font-size:13px;font-weight:600;color:#17211C;">B-2026-04</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:7px;">
+              <label style="font-size:11.5px;font-weight:800;color:#3C4B43;">발급 수량</label>
+              <div style="height:42px;border:1px solid #E1E8E2;border-radius:10px;background:#fff;display:flex;align-items:center;padding:0 13px;font-size:13px;font-weight:600;color:#17211C;font-family:ui-monospace,monospace;">5,000</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:7px;">
+              <label style="font-size:11.5px;font-weight:800;color:#3C4B43;">코드 접두어</label>
+              <div style="height:42px;border:1px solid #E1E8E2;border-radius:10px;background:#fff;display:flex;align-items:center;padding:0 13px;font-size:13px;font-weight:600;color:#17211C;font-family:ui-monospace,monospace;">OCEAN, WAVE, LEAF, PURE</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:7px;">
+              <label style="font-size:11.5px;font-weight:800;color:#3C4B43;">유효 기간</label>
+              <div style="height:42px;border:1px solid #E1E8E2;border-radius:10px;background:#fff;display:flex;align-items:center;padding:0 13px;font-size:13px;font-weight:600;color:#17211C;">2026-09-01 — 2026-12-31</div>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:11px;padding:13px 15px;border-radius:11px;background:#F5F8F5;border:1px solid #E6ECE7;">
+            <span style="font-size:11.5px;font-weight:900;color:#1E8E5A;flex-shrink:0;">i</span>
+            <p style="margin:0;font-size:11.5px;line-height:1.6;color:#55665C;text-wrap:pretty;">코드는 서버에서 암호학적 난수로 생성되며 중복 검사를 거칩니다. 형식 <strong style="font-family:ui-monospace,monospace;font-weight:700;">PREFIX-XXXX</strong> — 접두어 4종 × 36<sup>4</sup> 조합.</p>
+          </div>
+
+          <div style="display:flex;gap:10px;">
+            <div style="flex:1;height:46px;border-radius:11px;background:#1E8E5A;display:flex;align-items:center;justify-content:center;font-size:13.5px;font-weight:800;color:#fff;">발급하고 CSV 내려받기</div>
+            <div style="height:46px;padding:0 20px;border-radius:11px;border:1.5px solid #E1E8E2;background:#fff;display:flex;align-items:center;justify-content:center;font-size:13.5px;font-weight:700;color:#3C4B43;">취소</div>
+          </div>
+        </div>
+
+        <div style="background:#fff;border:1px solid #E6ECE7;border-radius:14px;overflow:hidden;">
+          <div style="padding:16px 22px 12px;font-size:14.5px;font-weight:800;letter-spacing:-.02em;color:#17211C;">발급 이력</div>
+          <table style="width:100%;border-collapse:collapse;">
+            <thead>
+              <tr style="background:#F5F8F5;">
+                <th style="text-align:left;padding:9px 22px;font-size:11px;font-weight:800;letter-spacing:.06em;color:#8A9A90;border-top:1px solid #E6ECE7;border-bottom:1px solid #E6ECE7;">배치</th>
+                <th style="text-align:right;padding:9px 12px;font-size:11px;font-weight:800;letter-spacing:.06em;color:#8A9A90;border-top:1px solid #E6ECE7;border-bottom:1px solid #E6ECE7;">수량</th>
+                <th style="text-align:right;padding:9px 12px;font-size:11px;font-weight:800;letter-spacing:.06em;color:#8A9A90;border-top:1px solid #E6ECE7;border-bottom:1px solid #E6ECE7;">사용</th>
+                <th style="text-align:left;padding:9px 12px;font-size:11px;font-weight:800;letter-spacing:.06em;color:#8A9A90;border-top:1px solid #E6ECE7;border-bottom:1px solid #E6ECE7;">발급일</th>
+                <th style="text-align:left;padding:9px 22px;font-size:11px;font-weight:800;letter-spacing:.06em;color:#8A9A90;border-top:1px solid #E6ECE7;border-bottom:1px solid #E6ECE7;">상태</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="border-bottom:1px solid #F0F3F0;">
+                <td style="padding:12px 22px;font-size:12.5px;font-weight:700;color:#17211C;">B-2026-03</td>
+                <td style="padding:12px 12px;text-align:right;font-size:12.5px;color:#55665C;font-family:ui-monospace,monospace;">5,000</td>
+                <td style="padding:12px 12px;text-align:right;font-size:12.5px;color:#55665C;font-family:ui-monospace,monospace;">2,184</td>
+                <td style="padding:12px 12px;font-size:12.5px;color:#55665C;">2026-07-14</td>
+                <td style="padding:12px 22px;"><span style="font-size:10.5px;font-weight:800;color:#1E8E5A;background:#E7F2EC;padding:4px 9px;border-radius:20px;">활성</span></td>
+              </tr>
+              <tr style="border-bottom:1px solid #F0F3F0;">
+                <td style="padding:12px 22px;font-size:12.5px;font-weight:700;color:#17211C;">B-2026-02</td>
+                <td style="padding:12px 12px;text-align:right;font-size:12.5px;color:#55665C;font-family:ui-monospace,monospace;">4,000</td>
+                <td style="padding:12px 12px;text-align:right;font-size:12.5px;color:#55665C;font-family:ui-monospace,monospace;">1,802</td>
+                <td style="padding:12px 12px;font-size:12.5px;color:#55665C;">2026-06-02</td>
+                <td style="padding:12px 22px;"><span style="font-size:10.5px;font-weight:800;color:#1E8E5A;background:#E7F2EC;padding:4px 9px;border-radius:20px;">활성</span></td>
+              </tr>
+              <tr>
+                <td style="padding:12px 22px;font-size:12.5px;font-weight:700;color:#17211C;">B-2026-01</td>
+                <td style="padding:12px 12px;text-align:right;font-size:12.5px;color:#55665C;font-family:ui-monospace,monospace;">3,000</td>
+                <td style="padding:12px 12px;text-align:right;font-size:12.5px;color:#55665C;font-family:ui-monospace,monospace;">598</td>
+                <td style="padding:12px 12px;font-size:12.5px;color:#55665C;">2026-04-19</td>
+                <td style="padding:12px 22px;"><span style="font-size:10.5px;font-weight:800;color:#8A9A90;background:#F0F3F0;padding:4px 9px;border-radius:20px;">만료</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div id="1c" style="width:709px;background:#F5F8F5;border:1px solid #D8E2DA;border-radius:18px;overflow:hidden;">
+      <div style="display:flex;align-items:center;gap:10px;padding:14px 20px;border-bottom:1px solid #E6ECE7;background:#fff;">
+        <span style="font-size:10.5px;font-weight:900;letter-spacing:.1em;color:#fff;background:#0E2A1C;padding:5px 10px;border-radius:20px;">1c</span>
+        <span style="font-size:13.5px;font-weight:800;color:#17211C;letter-spacing:-.01em;">경품 · 확률 관리</span>
+      </div>
+
+      <div style="padding:24px 26px 28px;display:flex;flex-direction:column;gap:18px;background:#F5F8F5;">
+        <div style="background:#fff;border:1px solid #E6ECE7;border-radius:14px;overflow:hidden;">
+          <div style="display:flex;align-items:baseline;justify-content:space-between;padding:18px 22px 14px;">
+            <h3 style="margin:0;font-size:15px;font-weight:800;letter-spacing:-.02em;color:#17211C;">경품 목록</h3>
+            <span style="font-size:12px;font-weight:800;color:#1E8E5A;">+ 경품 추가</span>
+          </div>
+          <table style="width:100%;border-collapse:collapse;">
+            <thead>
+              <tr style="background:#F5F8F5;">
+                <th style="text-align:left;padding:9px 22px;font-size:11px;font-weight:800;letter-spacing:.06em;color:#8A9A90;border-top:1px solid #E6ECE7;border-bottom:1px solid #E6ECE7;">경품</th>
+                <th style="text-align:right;padding:9px 10px;font-size:11px;font-weight:800;letter-spacing:.06em;color:#8A9A90;border-top:1px solid #E6ECE7;border-bottom:1px solid #E6ECE7;">가중치</th>
+                <th style="text-align:right;padding:9px 10px;font-size:11px;font-weight:800;letter-spacing:.06em;color:#8A9A90;border-top:1px solid #E6ECE7;border-bottom:1px solid #E6ECE7;">확률</th>
+                <th style="text-align:right;padding:9px 10px;font-size:11px;font-weight:800;letter-spacing:.06em;color:#8A9A90;border-top:1px solid #E6ECE7;border-bottom:1px solid #E6ECE7;">잔여</th>
+                <th style="text-align:right;padding:9px 22px;font-size:11px;font-weight:800;letter-spacing:.06em;color:#8A9A90;border-top:1px solid #E6ECE7;border-bottom:1px solid #E6ECE7;">노출</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="border-bottom:1px solid #F0F3F0;">
+                <td style="padding:13px 22px;"><div style="display:flex;align-items:center;gap:11px;"><div style="width:34px;height:34px;border-radius:9px;background:repeating-linear-gradient(135deg,#EAF1EC 0 8px,#DFE9E2 8px 16px);flex-shrink:0;"></div><div style="display:flex;flex-direction:column;gap:2px;"><span style="font-size:12.5px;font-weight:700;color:#17211C;">문화상품권 1만원</span><span style="font-size:10.5px;font-weight:700;color:#8A9A90;">1등 · 상품권</span></div></div></td>
+                <td style="padding:13px 10px;text-align:right;font-size:12.5px;color:#55665C;font-family:ui-monospace,monospace;">5</td>
+                <td style="padding:13px 10px;text-align:right;font-size:12.5px;font-weight:700;color:#17211C;font-family:ui-monospace,monospace;">3.1%</td>
+                <td style="padding:13px 10px;text-align:right;font-size:12.5px;font-weight:800;color:#C0492E;font-family:ui-monospace,monospace;">3</td>
+                <td style="padding:13px 22px;text-align:right;"><div style="display:inline-flex;width:38px;height:22px;border-radius:20px;background:#1E8E5A;padding:2px;box-sizing:border-box;justify-content:flex-end;"><span style="width:18px;height:18px;border-radius:50%;background:#fff;"></span></div></td>
+              </tr>
+              <tr style="border-bottom:1px solid #F0F3F0;">
+                <td style="padding:13px 22px;"><div style="display:flex;align-items:center;gap:11px;"><div style="width:34px;height:34px;border-radius:9px;background:repeating-linear-gradient(135deg,#EAF1EC 0 8px,#DFE9E2 8px 16px);flex-shrink:0;"></div><div style="display:flex;flex-direction:column;gap:2px;"><span style="font-size:12.5px;font-weight:700;color:#17211C;">편의점 5천원 상품권</span><span style="font-size:10.5px;font-weight:700;color:#8A9A90;">2등 · 상품권</span></div></div></td>
+                <td style="padding:13px 10px;text-align:right;font-size:12.5px;color:#55665C;font-family:ui-monospace,monospace;">15</td>
+                <td style="padding:13px 10px;text-align:right;font-size:12.5px;font-weight:700;color:#17211C;font-family:ui-monospace,monospace;">9.4%</td>
+                <td style="padding:13px 10px;text-align:right;font-size:12.5px;font-weight:800;color:#17211C;font-family:ui-monospace,monospace;">79</td>
+                <td style="padding:13px 22px;text-align:right;"><div style="display:inline-flex;width:38px;height:22px;border-radius:20px;background:#1E8E5A;padding:2px;box-sizing:border-box;justify-content:flex-end;"><span style="width:18px;height:18px;border-radius:50%;background:#fff;"></span></div></td>
+              </tr>
+              <tr style="border-bottom:1px solid #F0F3F0;">
+                <td style="padding:13px 22px;"><div style="display:flex;align-items:center;gap:11px;"><div style="width:34px;height:34px;border-radius:9px;background:repeating-linear-gradient(135deg,#EAF1EC 0 8px,#DFE9E2 8px 16px);flex-shrink:0;"></div><div style="display:flex;flex-direction:column;gap:2px;"><span style="font-size:12.5px;font-weight:700;color:#17211C;">배달앱 3천원 쿠폰</span><span style="font-size:10.5px;font-weight:700;color:#8A9A90;">3등 · 배달</span></div></div></td>
+                <td style="padding:13px 10px;text-align:right;font-size:12.5px;color:#55665C;font-family:ui-monospace,monospace;">50</td>
+                <td style="padding:13px 10px;text-align:right;font-size:12.5px;font-weight:700;color:#17211C;font-family:ui-monospace,monospace;">31.3%</td>
+                <td style="padding:13px 10px;text-align:right;font-size:12.5px;font-weight:800;color:#17211C;font-family:ui-monospace,monospace;">198</td>
+                <td style="padding:13px 22px;text-align:right;"><div style="display:inline-flex;width:38px;height:22px;border-radius:20px;background:#1E8E5A;padding:2px;box-sizing:border-box;justify-content:flex-end;"><span style="width:18px;height:18px;border-radius:50%;background:#fff;"></span></div></td>
+              </tr>
+              <tr style="border-bottom:1px solid #F0F3F0;">
+                <td style="padding:13px 22px;"><div style="display:flex;align-items:center;gap:11px;"><div style="width:34px;height:34px;border-radius:9px;background:repeating-linear-gradient(135deg,#EAF1EC 0 8px,#DFE9E2 8px 16px);flex-shrink:0;"></div><div style="display:flex;flex-direction:column;gap:2px;"><span style="font-size:12.5px;font-weight:700;color:#17211C;">스타벅스 아메리카노</span><span style="font-size:10.5px;font-weight:700;color:#8A9A90;">4등 · 카페</span></div></div></td>
+                <td style="padding:13px 10px;text-align:right;font-size:12.5px;color:#55665C;font-family:ui-monospace,monospace;">90</td>
+                <td style="padding:13px 10px;text-align:right;font-size:12.5px;font-weight:700;color:#17211C;font-family:ui-monospace,monospace;">56.2%</td>
+                <td style="padding:13px 10px;text-align:right;font-size:12.5px;font-weight:800;color:#17211C;font-family:ui-monospace,monospace;">412</td>
+                <td style="padding:13px 22px;text-align:right;"><div style="display:inline-flex;width:38px;height:22px;border-radius:20px;background:#1E8E5A;padding:2px;box-sizing:border-box;justify-content:flex-end;"><span style="width:18px;height:18px;border-radius:50%;background:#fff;"></span></div></td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 22px;background:#F5F8F5;border-top:1px solid #E6ECE7;">
+            <span style="font-size:12px;font-weight:700;color:#55665C;">가중치 합계 <strong style="font-family:ui-monospace,monospace;color:#17211C;">160</strong> · 전원 당첨 (미당첨 없음)</span>
+            <div style="height:36px;padding:0 18px;border-radius:9px;background:#1E8E5A;display:flex;align-items:center;font-size:12.5px;font-weight:800;color:#fff;">변경사항 저장</div>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:11px;padding:15px 17px;border-radius:12px;background:#0E2A1C;">
+          <span style="font-size:11.5px;font-weight:900;color:#5FD39A;flex-shrink:0;">!</span>
+          <p style="margin:0;font-size:11.5px;line-height:1.6;color:rgba(255,255,255,.82);text-wrap:pretty;">확률 변경은 즉시 반영되며 감사 로그에 <strong style="color:#5FD39A;font-weight:700;">누가 · 언제 · 어떤 값에서 어떤 값으로</strong> 기록됩니다. 공모전 심사 대비 근거 자료가 되므로 로그는 삭제할 수 없게 설계하세요.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div style="width:1440px;box-sizing:border-box;background:#fff;border:1px solid #D8E2DA;border-radius:18px;padding:28px 32px 34px;display:flex;flex-direction:column;gap:22px;">
+    <div style="display:flex;flex-direction:column;gap:6px;">
+      <div style="font-size:10.5px;font-weight:900;letter-spacing:.14em;color:#1E8E5A;">HANDOFF NOTES</div>
+      <h2 style="margin:0;font-size:19px;font-weight:800;letter-spacing:-.025em;color:#17211C;">구현 메모</h2>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:18px;">
+
+      <div style="display:flex;flex-direction:column;gap:11px;padding:20px 22px;border:1px solid #E6ECE7;border-radius:14px;background:#F5F8F5;">
+        <span style="font-size:11px;font-weight:900;letter-spacing:.1em;color:#1E8E5A;">ROUTES</span>
+        <div style="display:flex;flex-direction:column;gap:7px;font-size:12px;line-height:1.6;color:#3C4B43;font-family:ui-monospace,monospace;">
+          <span>/admin</span>
+          <span>/admin/codes</span>
+          <span>/admin/prizes</span>
+          <span>/admin/wins</span>
+          <span>/admin/audit</span>
+        </div>
+        <p style="margin:0;font-size:11.5px;line-height:1.6;color:#55665C;text-wrap:pretty;">전부 <strong>middleware.ts</strong>에서 JWT 검증. 쿠키는 httpOnly + Secure + SameSite=Strict. 관리자 화면은 <code style="font-family:ui-monospace,monospace;">robots noindex</code>.</p>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:11px;padding:20px 22px;border:1px solid #E6ECE7;border-radius:14px;background:#F5F8F5;">
+        <span style="font-size:11px;font-weight:900;letter-spacing:.1em;color:#1E8E5A;">개인정보</span>
+        <p style="margin:0;font-size:11.5px;line-height:1.65;color:#55665C;text-wrap:pretty;">성함도 전화번호와 동일하게 <code style="font-family:ui-monospace,monospace;">nameEnc</code>(AES-256-GCM) + <code style="font-family:ui-monospace,monospace;">nameHash</code>(HMAC)로 저장하고, 목록에는 <strong>가운데 글자를 가린 형태</strong>(김O은)로만 표시합니다. 성함은 경품 수령 시 본인 대조용이며, 번호와 함께 <strong>복합 조회</strong>로 씁니다.</p>
+        <p style="margin:0;font-size:11.5px;line-height:1.65;color:#55665C;text-wrap:pretty;">테이블에는 <strong>항상 마스킹된 번호</strong>만 렌더합니다. 평문 복호화는 별도 버튼 → 사유 입력 → 감사 로그 기록 후에만 허용하세요. 목록 API 응답에 평문을 절대 포함하지 마세요.</p>
+        <p style="margin:0;font-size:11.5px;line-height:1.65;color:#55665C;text-wrap:pretty;">검색은 평문이 아니라 <strong>HMAC 해시</strong>로: 입력값을 정규화 → HMAC → <code style="font-family:ui-monospace,monospace;">phoneHash</code> 인덱스 조회.</p>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:11px;padding:20px 22px;border:1px solid #E6ECE7;border-radius:14px;background:#F5F8F5;">
+        <span style="font-size:11px;font-weight:900;letter-spacing:.1em;color:#1E8E5A;">확률 · 재고</span>
+        <p style="margin:0;font-size:11.5px;line-height:1.65;color:#55665C;text-wrap:pretty;">확률은 별도 컬럼이 아니라 <strong>가중치 ÷ 합계</strong>로 항상 파생 계산합니다. 두 값을 각각 저장하면 반드시 어긋납니다.</p>
+        <p style="margin:0;font-size:11.5px;line-height:1.65;color:#55665C;text-wrap:pretty;">재고 0이 되면 추첨 대상에서 제외되고 나머지 가중치로 자동 재정규화. <strong>미당첨이 없으므로 전 경품 소진 = 이벤트 종료</strong>입니다. 최하위 등급 재고를 총 코드 수 이상으로 확보하거나, 소진 시 응답을 따로 설계하세요.</p>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:11px;padding:20px 22px;border:1px solid #E6ECE7;border-radius:14px;background:#F5F8F5;">
+        <span style="font-size:11px;font-weight:900;letter-spacing:.1em;color:#1E8E5A;">코드 발급</span>
+        <p style="margin:0;font-size:11.5px;line-height:1.65;color:#55665C;text-wrap:pretty;">5,000건 생성은 요청 타임아웃을 넘길 수 있습니다. <strong>Route Handler에서 스트리밍 CSV 응답</strong> 또는 백그라운드 잡 + 완료 알림 중 하나를 택하세요.</p>
+        <p style="margin:0;font-size:11.5px;line-height:1.65;color:#55665C;text-wrap:pretty;">삽입은 <code style="font-family:ui-monospace,monospace;">createMany({ skipDuplicates: true })</code> 후 실제 삽입 수를 검증해 부족분만 재생성.</p>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:11px;padding:20px 22px;border:1px solid #E6ECE7;border-radius:14px;background:#F5F8F5;">
+        <span style="font-size:11px;font-weight:900;letter-spacing:.1em;color:#1E8E5A;">데이터 페칭</span>
+        <p style="margin:0;font-size:11.5px;line-height:1.65;color:#55665C;text-wrap:pretty;">KPI·차트는 서버 컴포넌트에서 직접 Prisma 조회 (<code style="font-family:ui-monospace,monospace;">revalidate: 300</code>). 테이블 필터·페이지네이션만 TanStack Query 클라이언트 훅으로 분리하세요.</p>
+        <p style="margin:0;font-size:11.5px;line-height:1.65;color:#55665C;text-wrap:pretty;">폼은 React Hook Form + Zod, 스키마는 서버 라우트와 <strong>같은 파일에서 공유</strong>.</p>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:11px;padding:20px 22px;border:1px solid #E6ECE7;border-radius:14px;background:#F5F8F5;">
+        <span style="font-size:11px;font-weight:900;letter-spacing:.1em;color:#1E8E5A;">디자인 규칙</span>
+        <p style="margin:0;font-size:11.5px;line-height:1.65;color:#55665C;text-wrap:pretty;">모바일 앱의 유리 질감은 <strong>쓰지 않습니다.</strong> 팔레트만 공유하고 표면은 불투명 흰색 + <code style="font-family:ui-monospace,monospace;">#E6ECE7</code> 테두리.</p>
+        <p style="margin:0;font-size:11.5px;line-height:1.65;color:#55665C;text-wrap:pretty;">숫자·코드·시각은 전부 <code style="font-family:ui-monospace,monospace;">ui-monospace</code>, 우측 정렬. 경고색은 <code style="font-family:ui-monospace,monospace;">#C0492E</code> 하나만 추가했습니다.</p>
+      </div>
+
+    </div>
+  </div>
+
+</section>
+
+</x-dc>
+</body>
+</html>
