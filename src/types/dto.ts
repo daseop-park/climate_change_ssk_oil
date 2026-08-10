@@ -96,9 +96,12 @@ export type ReceiveRewardsResponse = {
 /**
  * 누구나 볼 수 있는 경품 정보.
  *
- * ⚠️ 재고 수치(issued/unused/…)는 **절대 포함하지 마세요.**
- *    남은 개수를 공개하면 "1등이 아직 남았는지"를 외부에서 조회할 수 있습니다.
- *    재고는 관리자 전용 `DashboardResponse.stock` 에만 실립니다.
+ * ⚠️ 재고 수치(issued/unused/…)도 **당첨 확률도** 절대 포함하지 마세요.
+ *    남은 개수를 공개하면 "1등이 아직 남았는지"를 외부에서 조회할 수 있고,
+ *    발급 비율을 공개하는 것은 배치 구성비를 공개하는 것과 같습니다.
+ *    둘 다 관리자 전용입니다 — `DashboardResponse.stock` · `PrizeStatusDto.oddsLabel`.
+ *
+ *    화면에서 확률이 있던 자리는 등급(`rank`)이 대신합니다.
  */
 export type PublicPrizeDto = {
   id: string;
@@ -108,8 +111,6 @@ export type PublicPrizeDto = {
   category: string;
   rank: string;
   hue: number;
-  /** 발급 비율에서 계산한 당첨 확률 문구 (예: "15%"). 발급 전이면 null */
-  oddsLabel: string | null;
 };
 
 /* ── 관리자 ──────────────────────────────────────────────── */
@@ -187,6 +188,31 @@ export type RecentWinDto = {
   status: RewardStatus;
   /** 당첨 시각 = 코드를 등록한 시각 */
   wonAt: string;
+};
+
+/**
+ * 경품 현황 한 줄 — **관리자 전용**.
+ *
+ * 핸드오프의 `가중치` 입력과 `노출` 토글은 없습니다. 사전 배정 모델이라 확률이 이미
+ * 발급된 코드에 확정되어 있어 가중치 편집이 아무 효과도 내지 못하고, 노출 제어는
+ * 백엔드의 `deletedAt` 이 대신합니다 (`docs/phase5-admin-estimate.md` §2-1).
+ */
+export type PrizeStatusDto = {
+  productId: string;
+  name: string;
+  category: string;
+  rank: string;
+  image: string | null;
+  hue: number;
+  /** 발급된 코드 수 */
+  issued: number;
+  /** 아직 아무도 등록하지 않은 수 */
+  unused: number;
+  /**
+   * 발급 비율에서 계산한 당첨 확률 문구 (예: `15%`). 발급 전이면 null.
+   * ⚠️ **공개 응답에 넣지 마세요** — 배치 구성비를 공개하는 것과 같습니다.
+   */
+  oddsLabel: string | null;
 };
 
 export type StockRowDto = {

@@ -1,43 +1,27 @@
 /**
  * 공개 경품 목록.
  *
- * 화면에 뿌릴 당첨 확률을 **발급 비율에서 계산**합니다.
- * 프론트에 확률을 하드코딩해 두면 발급 계획을 바꾸는 순간 표기가 틀어집니다
- * (실제로 한 번 틀어져 있었습니다 — 합계가 86% 였습니다).
+ * ⚠️ **이 응답에는 재고도 확률도 넣지 않습니다.**
  *
- * ⚠️ 이 응답에는 재고 수치를 넣지 않습니다.
- *    남은 개수를 공개하면 "1등이 아직 남았는지"를 외부에서 조회할 수 있고,
- *    그걸 보고 코드를 긁는 동기가 생깁니다. 재고는 관리자 대시보드에만 실립니다.
+ * 재고를 공개하면 "1등이 아직 남았는지"를 외부에서 조회할 수 있고, 그걸 보고 코드를
+ * 긁는 동기가 생깁니다. **확률도 같은 이유로 뺐습니다** — 발급 비율을 내보내는 것은
+ * 사실상 배치 구성비를 공개하는 것이라, 남은 수는 아니어도 "1등은 100장 중 1장" 은
+ * 알려주는 셈이었습니다. 재고 비공개 결정과 결이 어긋나 있었습니다.
+ * (`docs/implementation-plan.md` — Phase 4 후속, 2026-08-09 결정)
+ *
+ * 확률 계산 자체는 폐기하지 않고 **관리자 쪽으로 옮겼습니다** (`admin.service.formatOdds`).
+ * 화면에는 확률 대신 등급(`rank`)이 들어갑니다.
+ *
+ * 부수 효과로 이 함수는 `reward_codes` 를 **아예 건드리지 않습니다** — 쿼리가 2개에서
+ * 1개로 줄었고, 공개 API 가 코드 테이블에 접근할 이유가 없어졌습니다.
  */
 import { db } from "../lib/db";
 import { productRepository } from "../repositories/product.repository";
-import { rewardRepository } from "../repositories/reward.repository";
 import type { PublicPrizeDto } from "../types/dto";
-
-/** 소수점 없이 보여줍니다. 1% 미만이면 "1% 미만" 으로 뭉갭니다. */
-function formatOdds(issued: number, total: number): string | null {
-  if (total <= 0 || issued <= 0) return null;
-
-  const percent = (issued / total) * 100;
-  if (percent < 1) return "1% 미만";
-  return `${Math.round(percent)}%`;
-}
 
 export const prizeService = {
   async listPublic(): Promise<PublicPrizeDto[]> {
-    const [products, grouped] = await Promise.all([
-      productRepository.listActive(db),
-      rewardRepository.groupByProductStatus(db),
-    ]);
-
-    // 상품별 총 발급 수 — 상태와 무관하게 발급된 코드 전부를 셉니다.
-    // 이미 사용된 코드를 빼면 이벤트가 진행될수록 표기 확률이 요동칩니다.
-    const issuedBy = new Map<string, number>();
-    for (const g of grouped) {
-      issuedBy.set(g.productId, (issuedBy.get(g.productId) ?? 0) + g._count._all);
-    }
-
-    const totalIssued = [...issuedBy.values()].reduce((a, b) => a + b, 0);
+    const products = await productRepository.listActive(db);
 
     return products.map((p) => ({
       id: p.id,
@@ -47,8 +31,6 @@ export const prizeService = {
       category: p.category,
       rank: p.rank,
       hue: p.hue,
-      // 마케팅상 다른 문구가 필요하면 상품에 적어둔 값이 우선합니다.
-      oddsLabel: p.oddsLabel ?? formatOdds(issuedBy.get(p.id) ?? 0, totalIssued),
     }));
   },
 };

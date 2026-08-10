@@ -118,14 +118,14 @@ async function main() {
 
   const prizeList = prizes.body.data as Array<Record<string, unknown>>;
   check("경품 6종", prizeList?.length === 6, `${prizeList?.length}종`);
-  check(
-    "확률 문구 포함",
-    prizeList?.every((p) => typeof p.oddsLabel === "string"),
-    String(prizeList?.[0]?.oddsLabel),
-  );
+  check("등급 포함", prizeList?.every((p) => typeof p.rank === "string"), String(prizeList?.[0]?.rank));
 
   // 재고가 새면 "1등이 남았는지"를 외부에서 알 수 있습니다. 가장 중요한 확인입니다.
-  const leakedKeys = ["issued", "unused", "used", "received", "stock"];
+  //
+  // `oddsLabel` 도 같은 목록에 넣었습니다 — 발급 비율을 내보내는 것은 배치 구성비를
+  // 공개하는 것과 같습니다. 예전에는 여기서 "확률 문구가 **있는지**" 를 확인했는데,
+  // 그 성질 자체가 뒤집혔습니다 (Phase 4 후속, 2026-08-09 결정).
+  const leakedKeys = ["issued", "unused", "used", "received", "stock", "oddsLabel"];
   const leaked = prizeList?.flatMap((p) => leakedKeys.filter((k) => k in p)) ?? [];
   check("재고 수치 미노출", leaked.length === 0, leaked.join(", "));
 

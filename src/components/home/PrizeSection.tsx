@@ -66,17 +66,17 @@ export default function PrizeSection() {
                   sizes="(max-width: 480px) 45vw, 200px"
                 />
                 <div className="px-3 pt-3 pb-[14px]">
+                  {/*
+                    등급을 카테고리 칩에 **붙여서** 넣습니다. 칩을 하나 더 두면
+                    카드가 좁아 답답해지고, 확률이 있던 자리를 비우면 카드 높이가
+                    들쭉날쭉해집니다. 되돌리려면 이 한 줄만 나누면 됩니다.
+                  */}
                   <span className="text-green-600 text-[9.5px] font-extrabold tracking-[.08em]">
-                    {r.category}
+                    {r.category} · {r.rank}
                   </span>
                   <div className="mt-[7px] min-h-9 text-[13px] leading-[1.4] font-bold tracking-[-.01em]">
                     {r.name}
                   </div>
-                  {r.oddsLabel && (
-                    <div className="text-muted-3 mt-1 text-[10.5px] font-extrabold tracking-[.06em]">
-                      당첨 확률 {r.oddsLabel}
-                    </div>
-                  )}
                 </div>
               </button>
             </div>

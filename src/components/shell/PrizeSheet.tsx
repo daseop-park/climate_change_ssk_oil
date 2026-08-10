@@ -45,17 +45,13 @@ export default function PrizeSheet() {
               labelClassName="text-[11px]"
               sizes="(max-width: 480px) 92vw, 420px"
             />
+            {/* 그리드와 같은 규칙 — 카테고리 · 등급. 확률은 관리자 화면에만 남습니다. */}
             <span className="bg-chip-bg text-green-600 rounded-[7px] px-[9px] py-1 text-[11px] font-bold">
-              {shown.category}
+              {shown.category} · {shown.rank}
             </span>
             <h2 className="mt-[11px] mb-0 text-[20px] font-extrabold tracking-[-.02em]">
               {shown.name}
             </h2>
-            {shown.oddsLabel && (
-              <div className="text-green-600 mt-[6px] text-[14px] font-bold">
-                당첨 확률 {shown.oddsLabel}
-              </div>
-            )}
             {shown.description && (
               <p className="text-muted-2 mt-[14px] mb-0 text-[13px] leading-[1.65]">
                 {shown.description}

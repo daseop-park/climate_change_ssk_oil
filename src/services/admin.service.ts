@@ -26,6 +26,7 @@ import type {
   DashboardResponse,
   IssueCodesResponse,
   IssuedCodeDto,
+  PrizeStatusDto,
   StockRowDto,
   UpdateProductRequest,
 } from "../types/dto";
@@ -39,6 +40,24 @@ const DAILY_CHART_DAYS = 14;
 /** 비율 %. 분모가 0이면 0 — `0/0 = NaN` 이 그대로 화면에 나가면 진행바 폭이 깨집니다. */
 function percent(part: number, whole: number): number {
   return whole === 0 ? 0 : (part / whole) * 100;
+}
+
+/**
+ * 발급 비율에서 당첨 확률 문구를 만듭니다. 소수점 없이, 1% 미만이면 뭉갭니다.
+ *
+ * **`prize.service` 에서 옮겨온 함수입니다.** 폐기한 것이 아니라 노출 범위를 좁힌 것입니다 —
+ * 발급 비율을 공개하는 것은 배치 구성비를 공개하는 것과 같아서, 사용자 화면에서는 빼고
+ * 관리자 경품 현황에만 남겼습니다 (`docs/implementation-plan.md` — Phase 4 후속).
+ *
+ * 확률을 컬럼으로 저장하지 않는 이유는 그대로입니다. 하드코딩하면 배치 분배가 달라지는
+ * 순간 표기와 실제가 어긋납니다 — 실제로 합계가 86% 로 어긋난 적이 있습니다.
+ */
+function formatOdds(issued: number, total: number): string | null {
+  if (total <= 0 || issued <= 0) return null;
+
+  const ratio = (issued / total) * 100;
+  if (ratio < 1) return "1% 미만";
+  return `${Math.round(ratio)}%`;
 }
 
 /**
@@ -182,6 +201,56 @@ export const adminService = {
         received,
       };
     });
+  },
+
+  /**
+   * 경품 현황 — 재고 + **파생 확률**. 전부 읽기 전용입니다.
+   *
+   * 확률을 편집하는 화면이 아닙니다. 사전 배정 모델에서는 확률이 이미 발급된 코드
+   * 분포에 확정되어 박혀 있어, 가중치 같은 것을 고쳐도 바뀌는 것이 없습니다.
+   * 다음 배치의 분배를 바꾸려면 `issueCodes({ plan })` 로 발급할 때 정합니다.
+   *
+   * ⚠️ 분모(`totalIssued`)는 **활성 상품의 발급 수 합계**입니다. 집계 원본
+   *    (`groupByProductStatus`)은 삭제된 상품의 코드까지 세므로 그대로 쓰면 확률 합계가
+   *    100% 미만으로 떨어집니다. 애초에 발급분이 있는 상품은 삭제되지 않도록
+   *    `productRepository.softDelete()` 가 막지만, 분모는 목록과 같은 모집단으로
+   *    맞춰 두는 편이 안전합니다 (`docs/phase5-admin-estimate.md` §7-1).
+   */
+  async listPrizeStatus(): Promise<PrizeStatusDto[]> {
+    const [products, grouped] = await Promise.all([
+      productRepository.listActive(db),
+      rewardRepository.groupByProductStatus(db),
+    ]);
+
+    const at = (productId: string, status: string) =>
+      grouped.find((g) => g.productId === productId && g.status === status)?._count._all ?? 0;
+
+    const rows = products.map((p) => {
+      const unused = at(p.id, REWARD_STATUS.UNUSED);
+      const used = at(p.id, REWARD_STATUS.USED);
+      const received = at(p.id, REWARD_STATUS.RECEIVED);
+
+      return {
+        productId: p.id,
+        name: p.name,
+        category: p.category,
+        rank: p.rank,
+        image: p.image,
+        hue: p.hue,
+        issued: unused + used + received,
+        unused,
+        // 확률은 아래에서 합계를 안 뒤에 채웁니다.
+        oddsLabel: p.oddsLabel,
+      };
+    });
+
+    const totalIssued = rows.reduce((sum, r) => sum + r.issued, 0);
+
+    return rows.map((r) => ({
+      ...r,
+      // 마케팅상 다른 문구가 필요하면 상품에 적어둔 값이 우선합니다.
+      oddsLabel: r.oddsLabel ?? formatOdds(r.issued, totalIssued),
+    }));
   },
 
   /* ── 상품 관리 ─────────────────────────────────────────── */

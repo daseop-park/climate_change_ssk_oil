@@ -25,26 +25,8 @@ export function isRewardStatus(v: string): v is RewardStatus {
   return v in REWARD_STATUS;
 }
 
-/** 경품 목록·상세에 쓰는 화면용 DTO (Prisma 모델과 분리) */
-export type ProductDto = {
-  id: string;
-  name: string;
-  description: string | null;
-  image: string | null;
-  category: string;
-  rank: string;
-  hue: number;
-  /** 발급 비율에서 계산한 당첨 확률 문구 (예: "15%") */
-  oddsLabel: string;
-};
-
-/** 관리자 재고 현황 — 저장된 카운터가 아니라 reward_codes 집계 결과 */
-export type StockRow = {
-  productId: string;
-  name: string;
-  rank: string;
-  issued: number;
-  unused: number;
-  used: number;
-  received: number;
-};
+// `ProductDto` 와 `StockRow` 가 여기 있었습니다. 어디서도 import 되지 않으면서
+// `types/dto.ts` 의 `PublicPrizeDto`·`StockRowDto` 와 거의 같은 모양이라,
+// 경품 타입을 손볼 때 검색 결과에 먼저 걸리기 좋은 함정이었습니다.
+// (`codeSchema.ts` 와 같은 종류의 잔재입니다.) 2026-08-10 삭제.
+// 살아 있는 쪽은 `src/types/dto.ts` 입니다.
