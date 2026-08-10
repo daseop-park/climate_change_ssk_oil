@@ -15,7 +15,20 @@ import { generatePhoneHash } from "../src/lib/crypto";
 import { adminService } from "../src/services/admin.service";
 
 const BASE = process.env.TEST_BASE_URL ?? "http://localhost:3111";
-const ADMIN_PASSWORD = process.env.TEST_ADMIN_PASSWORD ?? "dev-only-change-me-4821";
+
+/**
+ * 관리자 비밀번호는 **반드시 환경변수로** 받습니다. 기본값을 두지 않습니다.
+ *
+ * 원래 여기에 개발용 기본값이 하드코딩돼 있었고, 그 값이 실제 `.env` 의
+ * `ADMIN_PASSWORD_HASH` 와 맞아 있었습니다. 이 파일은 git 추적 대상이라
+ * (`.env` 와 달리 `.gitignore` 에 걸리지 않습니다) **운영 비밀번호가 리포지토리에
+ * 평문으로 커밋돼 있는 상태**였습니다. 사이트 게이트 토큰과 JWT 시크릿을 아무리 잘
+ * 숨겨도 관리자 콘솔은 이 한 줄로 열립니다.
+ *
+ * 폴백을 없애면 "값을 안 넣으면 테스트가 안 도는" 불편이 생기는데, 그 불편이
+ * 폴백이 조용히 실제 비밀번호가 되어 버리는 것보다 낫습니다. (2026-08-10)
+ */
+const ADMIN_PASSWORD = process.env.TEST_ADMIN_PASSWORD ?? "";
 
 const STAMP = Date.now();
 const BATCH = `http-${STAMP}`;
@@ -77,6 +90,19 @@ function expectFail(label: string, res: Res, status: number, errorCode: string) 
 }
 
 async function main() {
+  // 관리자 구간(10건 남짓)에 들어가서야 실패하면 앞선 테스트가 만든 배치·사용자가
+  // 정리되지 않은 채 남습니다. 시작하기 전에 막습니다.
+  if (!ADMIN_PASSWORD) {
+    console.error(
+      "\nTEST_ADMIN_PASSWORD 가 설정되지 않았습니다." +
+        "\n관리자 라우트 검증에 필요합니다. `.env` 의 ADMIN_PASSWORD_HASH 와 짝이 되는" +
+        "\n비밀번호 원문을 넣어 주세요 — 이 파일에는 기본값을 두지 않습니다.\n" +
+        '\n  TEST_ADMIN_PASSWORD="<비밀번호>" npm run test:api\n' +
+        "\n또는 `.env` 에 TEST_ADMIN_PASSWORD 를 추가하세요 (`.env` 는 git 추적 대상이 아닙니다).\n",
+    );
+    process.exit(1);
+  }
+
   console.log(`\n3단계 HTTP 스모크 테스트 · ${BASE} · 배치 ${BATCH}\n`);
 
   // 준비 — 서비스로 직접 발급합니다 (관리자 라우트는 뒤에서 따로 검증).
