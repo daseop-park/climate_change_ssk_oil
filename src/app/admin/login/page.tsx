@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { redirect } from "next/navigation";
 import AdminLoginForm from "@/components/admin/AdminLoginForm";
 import { isAdminAuthenticated } from "@/lib/admin-guard";
@@ -28,9 +29,13 @@ export default async function AdminLoginPage(props: PageProps<"/admin/login">) {
     <div className="flex min-h-[100dvh] items-center justify-center px-6">
       <main className="w-full max-w-[360px]">
         <div className="mb-[22px] flex items-center gap-[10px]">
-          <div className="bg-green-600 flex h-8 w-8 items-center justify-center rounded-[9px] text-[15px] font-black text-white">
-            싹
-          </div>
+          <Image
+            src="/assets/logo-ssak.png"
+            alt="싹싹기름 로고"
+            width={32}
+            height={32}
+            className="h-8 w-8 rounded-[9px] object-contain"
+          />
           <div className="flex flex-col gap-[2px]">
             <span className="text-ink text-[13px] font-extrabold tracking-[-.01em]">싹싹기름</span>
             <span className="text-green-600 text-[9.5px] font-extrabold tracking-[.14em]">

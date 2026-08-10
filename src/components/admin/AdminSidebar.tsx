@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ADMIN_NAV } from "@/lib/admin-nav";
@@ -19,9 +20,18 @@ export default function AdminSidebar({ counts }: { counts: AdminNavCounts }) {
   return (
     <aside className="bg-green-900 flex w-[224px] flex-shrink-0 flex-col gap-[26px] px-[14px] py-[22px]">
       <div className="flex items-center gap-[10px] px-2">
-        <div className="bg-green-600 flex h-8 w-8 items-center justify-center rounded-[9px] text-[15px] font-black text-white">
-          싹
-        </div>
+        {/*
+          핸드오프는 `#1E8E5A` 사각형 안에 "싹" 글자를 넣은 자리표시였습니다.
+          실제 로고로 교체합니다 — 마크가 짙은 초록이라 어두운 사이드바 위에서는
+          밝은 타일이 필요하고, 공개 화면 헤더·푸터도 같은 방식입니다.
+        */}
+        <Image
+          src="/assets/logo-ssak.png"
+          alt="싹싹기름 로고"
+          width={32}
+          height={32}
+          className="h-8 w-8 rounded-[9px] bg-white object-contain"
+        />
         <div className="flex flex-col gap-[2px]">
           <span className="text-[13px] font-extrabold tracking-[-.01em] text-white">싹싹기름</span>
           <span className="text-mint-400 text-[9.5px] font-extrabold tracking-[.14em]">ADMIN</span>

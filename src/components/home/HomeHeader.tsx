@@ -17,12 +17,13 @@ export default function HomeHeader({ solid }: { solid: boolean }) {
         transition: "background .25s ease, border-color .25s ease",
       }}
     >
+      {/* 로고는 정사각형입니다. `w-auto` 로 두면 34×34 가 되지만 의도를 못 박아 둡니다. */}
       <Image
-        src="/assets/logo-r14.png"
+        src="/assets/logo-ssak.png"
         alt="싹싹기름 로고"
-        width={31}
+        width={34}
         height={34}
-        className="h-[34px] w-auto rounded-[8px] object-contain"
+        className="h-[34px] w-[34px] rounded-[8px] object-contain"
       />
       <span
         className="text-[15px] font-bold tracking-[-.02em]"

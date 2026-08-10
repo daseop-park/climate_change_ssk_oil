@@ -14,11 +14,11 @@ export default function HomeFooter() {
     <footer className="bg-[rgba(14,42,28,.7)] px-5 pt-8 pb-[34px] text-white">
       <div className="flex items-center gap-[9px]">
         <Image
-          src="/assets/logo-r14.png"
+          src="/assets/logo-ssak.png"
           alt="싹싹기름 로고"
-          width={26}
+          width={28}
           height={28}
-          className="h-7 w-auto rounded-[7px] object-contain"
+          className="h-7 w-7 rounded-[7px] object-contain"
         />
         <span className="text-[14px] font-extrabold tracking-[-.02em]">
           team_싹싹기름
