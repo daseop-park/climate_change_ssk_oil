@@ -1,43 +1,76 @@
-import AdminPage, { AdminPanel } from "@/components/admin/AdminPage";
+import AdminKpiCard from "@/components/admin/AdminKpiCard";
+import AdminPage from "@/components/admin/AdminPage";
+import AdminRecentWinsTable from "@/components/admin/AdminRecentWinsTable";
+import AdminStockGauges from "@/components/admin/AdminStockGauges";
+import AdminUsageChart from "@/components/admin/AdminUsageChart";
 import { formatDateTime } from "@/lib/format-date";
 import { adminService } from "@/services/admin.service";
 
 /**
  * 대시보드 `/admin`.
  *
- * 5.1 에서는 셸이 제대로 서는지 확인할 수 있을 만큼만 채웁니다.
- * KPI 카드·일별 사용 추이 차트·경품 잔여 게이지·최근 당첨 테이블은 **5.2** 입니다.
+ * 서버 컴포넌트에서 `adminService` 를 직접 부릅니다. proxy 와 콘솔 레이아웃이 이미
+ * 인증을 통과시킨 뒤라 `fetch` 로 우리 API 를 한 바퀴 돌 이유가 없습니다.
+ * 다만 **아래로 내려가는 것은 전부 DTO** 입니다 — Prisma 생성 타입이 컴포넌트 props 에
+ * 실리면 클라이언트 번들이 깨집니다 (Phase 2 에서 겪은 문제).
+ *
+ * 그리드는 전부 분수(`1fr`·`1.55fr`)입니다. 1440px 을 하드코딩하지 않아 1280px 에서
+ * 그대로 접힙니다 (`docs/phase5-admin-estimate.md` §8).
  */
 export default async function AdminDashboardPage() {
-  const counts = await adminService.getNavCounts();
-  const usedRate = counts.issued === 0 ? 0 : (counts.wins / counts.issued) * 100;
+  const d = await adminService.getDashboard();
 
   return (
     <AdminPage
       title="대시보드"
-      // 핸드오프의 "5분마다 자동 갱신" 은 기각했습니다. `revalidate` 없이 매 요청 렌더하므로
-      // 새로고침이 곧 최신입니다 (`admin/layout.tsx` 의 `dynamic = "force-dynamic"`).
+      // 핸드오프의 "5분마다 자동 갱신" 은 기각했습니다. 현장에서 지급 처리를 하는 중에
+      // 재고가 5분 늦게 보이면 같은 경품을 두 번 꺼냅니다. 매 요청 렌더라 새로고침이 곧 최신입니다.
       subtitle={`${formatDateTime(new Date().toISOString())} 기준 · 새로고침하면 최신`}
     >
-      <AdminPanel className="p-6">
-        <h2 className="text-ink m-0 text-[14.5px] font-extrabold tracking-[-.02em]">코드 사용률</h2>
-        <div className="mt-[10px] flex items-baseline gap-[7px]">
-          <span className="text-ink text-[28px] font-black tracking-[-.03em]">
-            {usedRate.toFixed(1)}%
-          </span>
-          <span className="text-muted-3 text-[11.5px] font-extrabold">
-            {counts.wins.toLocaleString("ko-KR")} / {counts.issued.toLocaleString("ko-KR")}장
-          </span>
-        </div>
-        <div className="bg-track mt-[10px] h-[6px] overflow-hidden rounded-[6px]">
-          <div className="bg-green-600 h-full" style={{ width: `${usedRate}%` }} />
-        </div>
-      </AdminPanel>
+      <div className="grid grid-cols-3 gap-[14px]">
+        <AdminKpiCard
+          label="코드 사용률"
+          value={`${d.usedRate.toFixed(1)}%`}
+          delta={d.todayRegistered > 0 ? `오늘 +${d.todayRegistered}` : undefined}
+          ratio={d.usedRate}
+          caption={`${d.registered.toLocaleString("ko-KR")} / ${d.issued.toLocaleString("ko-KR")}장`}
+        />
 
-      <AdminPanel className="text-muted-3 p-6 text-[12px] leading-[1.7]">
-        KPI 카드 3장 · 일별 코드 사용 스택 막대(14일) · 경품 잔여 게이지 · 최근 당첨 테이블은
-        <strong className="text-ink font-bold"> 5.2</strong> 에서 채웁니다.
-      </AdminPanel>
+        <AdminKpiCard
+          label="당첨 건수"
+          value={d.registered.toLocaleString("ko-KR")}
+          delta={d.todayRegistered > 0 ? `오늘 +${d.todayRegistered}` : undefined}
+          ratio={d.usedRate}
+          barClass="bg-mint-400"
+          caption="코드 1장당 경품 1개 · 전원 당첨"
+        />
+
+        {/*
+          핸드오프의 세 번째 카드는 "경품 소진"(지급/재고)이었는데, 우리 모델에서 소진을
+          재는 값은 곧 코드 사용률이라 1번 카드와 같은 숫자가 됩니다. 대신 현장에서
+          실제로 필요한 것 — **아직 안 나간 경품이 몇 개인가** — 를 셋째 칸에 뒀습니다.
+        */}
+        <AdminKpiCard
+          label="경품 지급"
+          value={d.totalReceived.toLocaleString("ko-KR")}
+          delta={d.todayReceived > 0 ? `오늘 +${d.todayReceived}` : undefined}
+          ratio={d.receivedRate}
+          barClass="bg-green-800"
+          caption={
+            d.registered - d.totalReceived > 0
+              ? `수령 대기 ${(d.registered - d.totalReceived).toLocaleString("ko-KR")}건`
+              : "수령 대기 없음"
+          }
+          captionTone={d.registered - d.totalReceived > 0 ? "danger" : "muted"}
+        />
+      </div>
+
+      <div className="grid grid-cols-[1.55fr_1fr] gap-[14px]">
+        <AdminUsageChart daily={d.daily} />
+        <AdminStockGauges stock={d.stock} />
+      </div>
+
+      <AdminRecentWinsTable wins={d.recentWins} />
     </AdminPage>
   );
 }

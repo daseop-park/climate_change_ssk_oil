@@ -7,6 +7,7 @@
 import { db } from "../lib/db";
 import { assertCryptoEnv, encryptPhone, generatePhoneHash, normalizePhone } from "../lib/crypto";
 import { AppError, ERROR_CODES } from "../lib/errors";
+import { maskName, maskPhone } from "../lib/mask";
 import { userRepository } from "../repositories/user.repository";
 import { rewardRepository } from "../repositories/reward.repository";
 import type { DbClient } from "../repositories/types";
@@ -112,27 +113,38 @@ export const userService = {
     return user;
   },
 
-  /** 관리자 사용자 조회 — 전화번호를 복호화해 내려줍니다. */
+  /**
+   * 관리자 사용자 목록.
+   *
+   * ⚠️ **평문은 나가지 않습니다.** 복호화한 번호는 이 함수 안에서 마스킹까지 마치고,
+   *    `AdminUserDto` 에는 `phoneMasked` 자리밖에 없습니다.
+   *    5.2 이전에는 `phone: decryptPhone(...)` 으로 평문이 그대로 나갔습니다 (§6).
+   */
   async listForAdmin(opts: { skip?: number; take?: number } = {}): Promise<AdminUserDto[]> {
     const users = await userRepository.findManyWithCounts(db, opts);
     return users.map((u) => ({
       id: u.id,
-      name: u.name,
-      phone: decryptPhone(u.phoneEncrypted),
+      nameMasked: maskName(u.name),
+      phoneMasked: maskPhone(decryptPhone(u.phoneEncrypted)),
       createdAt: u.createdAt.toISOString(),
       registeredCount: u._count.rewardCodes,
       receivedCount: u.rewardCodes.length,
     }));
   },
 
-  /** 관리자 단건 조회 — 전화번호 입력으로 사용자를 찾습니다. */
+  /**
+   * 관리자 단건 조회 — 전화번호 입력으로 사용자를 찾습니다.
+   *
+   * 입력한 번호는 이미 알고 있는 값이지만, 그렇다고 응답에 평문으로 되돌려 주면
+   * 이 응답이 다른 곳에 저장·로깅될 때 평문이 함께 퍼집니다. 목록과 같은 규칙을 씁니다.
+   */
   async findForAdminByPhone(phone: string): Promise<AdminUserDto> {
     const user = await userService.findByPhoneOrThrow(db, phone);
     const rewards = await rewardRepository.findByUserId(db, user.id);
     return {
       id: user.id,
-      name: user.name,
-      phone: decryptPhone(user.phoneEncrypted),
+      nameMasked: maskName(user.name),
+      phoneMasked: maskPhone(decryptPhone(user.phoneEncrypted)),
       createdAt: user.createdAt.toISOString(),
       registeredCount: rewards.length,
       receivedCount: rewards.filter((r) => r.status === REWARD_STATUS.RECEIVED).length,

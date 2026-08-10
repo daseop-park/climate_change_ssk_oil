@@ -182,15 +182,51 @@ export const rewardRepository = {
     });
   },
 
-  recentReceived(client: DbClient, limit: number) {
+  /**
+   * 최근 **당첨** — 등록된 코드를 최신순으로.
+   *
+   * 정렬 기준은 `receivedAt`(지급) 이 아니라 **`usedAt`(등록)** 입니다.
+   * 현장에서 "방금 누가 뭘 뽑았나" 를 보는 표라, 지급은 그 뒤에 일어나는 별도의 일입니다.
+   * 지급된 것만 모으면 아직 아무도 경품을 받아 가지 않은 행사 초반에 표가 통째로 빕니다.
+   * (5.2 이전의 `recentReceived` 가 그 모양이었고, 이걸로 대체했습니다.)
+   *
+   * 전화번호는 암호문 그대로 꺼냅니다 — 복호화·마스킹은 Service 가 합니다.
+   */
+  recentWins(client: DbClient, limit: number) {
     return client.rewardCode.findMany({
-      where: { status: REWARD_STATUS.RECEIVED },
-      orderBy: { receivedAt: "desc" },
+      where: { status: { in: [REWARD_STATUS.USED, REWARD_STATUS.RECEIVED] } },
+      orderBy: { usedAt: "desc" },
       take: limit,
-      include: {
+      select: {
+        id: true,
+        rewardCode: true,
+        batch: true,
+        status: true,
+        usedAt: true,
+        receivedAt: true,
         product: { select: { name: true } },
-        user: { select: { name: true } },
+        user: { select: { name: true, phoneEncrypted: true } },
       },
+    });
+  },
+
+  /**
+   * 일별 추이 집계용 원자료 — `since` 이후에 등록되거나 지급된 코드의 시각들.
+   *
+   * 일자별 묶기를 SQL 이 아니라 **JS 에서** 합니다. Postgres 의
+   * `AT TIME ZONE 'Asia/Seoul'` 로 `groupBy` 하려면 `$queryRaw` 를 써야 하는데,
+   * 이 레포지토리는 Prisma API 만 쓴 덕분에 SQLite → PostgreSQL 전환 때
+   * **한 줄도 고치지 않았습니다.** 그 성질을 14일치 몇백 행 때문에 버릴 이유가 없습니다.
+   *
+   * ⚠️ 총 발급량이 수만 건대로 커지면 이 판단을 뒤집으세요 — 14일 창이라 상한은
+   *    "최근 14일 안에 움직인 코드 수" 이지 전체 발급량이 아니지만, 그래도 한계는 있습니다.
+   */
+  findUsageSince(client: DbClient, since: Date) {
+    return client.rewardCode.findMany({
+      where: {
+        OR: [{ usedAt: { gte: since } }, { receivedAt: { gte: since } }],
+      },
+      select: { usedAt: true, receivedAt: true },
     });
   },
 };

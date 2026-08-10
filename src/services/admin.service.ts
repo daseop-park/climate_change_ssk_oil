@@ -9,16 +9,19 @@
 import { db } from "../lib/db";
 import { DEFAULT_PLAN, PRODUCTS, planTotal } from "../lib/catalog";
 import { randomCode, shuffle } from "../lib/code-generator";
-import { kstDayRange } from "../lib/date";
+import { decryptPhone } from "../lib/crypto";
+import { kstDateKey, kstDayRange, kstRecentDayKeys, kstRecentDaysFrom } from "../lib/date";
 import { AppError, ERROR_CODES } from "../lib/errors";
+import { maskName, maskPhone } from "../lib/mask";
 import { signAdminToken, verifyPassword } from "../lib/admin-auth";
 import { productRepository } from "../repositories/product.repository";
 import { rewardRepository } from "../repositories/reward.repository";
-import { REWARD_STATUS } from "../types/reward";
+import { REWARD_STATUS, type RewardStatus } from "../types/reward";
 import type {
   AdminLoginResponse,
   AdminNavCounts,
   CreateProductRequest,
+  DailyUsageDto,
   DashboardResponse,
   IssueCodesResponse,
   IssuedCodeDto,
@@ -28,7 +31,52 @@ import type {
 
 /** 코드 생성 재시도 한계. 이 횟수 안에 중복 없는 집합을 못 만들면 코드 공간이 포화된 것입니다. */
 const CODE_RETRY_ROUNDS = 10;
-const RECENT_RECEIPT_LIMIT = 10;
+const RECENT_WIN_LIMIT = 10;
+/** 일별 추이 차트의 막대 수. 핸드오프 디자인이 14개 기준입니다. */
+const DAILY_CHART_DAYS = 14;
+
+/** 비율 %. 분모가 0이면 0 — `0/0 = NaN` 이 그대로 화면에 나가면 진행바 폭이 깨집니다. */
+function percent(part: number, whole: number): number {
+  return whole === 0 ? 0 : (part / whole) * 100;
+}
+
+/**
+ * 일별 추이 시리즈를 만듭니다.
+ *
+ * 빈 날짜를 0 으로 채우는 것이 핵심입니다. 집계 결과만 그리면 아무도 등록하지 않은 날이
+ * 막대에서 통째로 빠져, 14일 차트가 실제보다 촘촘해 보이고 날짜 축이 어긋납니다.
+ *
+ * 일자 판정은 `kstDateKey` — 대시보드 KPI 의 "오늘"(`kstDayRange`)과 같은 기준입니다.
+ * 서버가 UTC 로 도는 환경(Railway 기본값)에서 이 둘이 어긋나면 KPI 숫자와 차트 마지막
+ * 막대가 달라지는데, 나란히 놓여 있어서 바로 눈에 띕니다.
+ */
+function buildDailySeries(
+  rows: { usedAt: Date | null; receivedAt: Date | null }[],
+  days: number,
+): DailyUsageDto[] {
+  const series = new Map<string, DailyUsageDto>(
+    kstRecentDayKeys(days).map((date) => [date, { date, registered: 0, received: 0 }]),
+  );
+
+  for (const row of rows) {
+    // 한 행이 두 막대에 기여할 수 있습니다 — 등록한 날과 지급받은 날이 다를 수 있어서
+    // else 로 묶지 않고 각각 셉니다.
+    //
+    // `bucket` 이 없을 수 있습니다. 조회 조건이 `usedAt >= since OR receivedAt >= since` 라,
+    // 예전에 등록된 코드를 오늘 지급하면 **usedAt 은 창 밖**인 채로 행이 딸려 옵니다.
+    // 그 등록분까지 세면 14일 합계가 실제보다 커집니다.
+    if (row.usedAt) {
+      const bucket = series.get(kstDateKey(row.usedAt));
+      if (bucket) bucket.registered += 1;
+    }
+    if (row.receivedAt) {
+      const bucket = series.get(kstDateKey(row.receivedAt));
+      if (bucket) bucket.received += 1;
+    }
+  }
+
+  return [...series.values()];
+}
 
 export const adminService = {
   /* ── 인증 ──────────────────────────────────────────────── */
@@ -50,29 +98,46 @@ export const adminService = {
   async getDashboard(): Promise<DashboardResponse> {
     // "오늘"은 서버 로컬 시간이 아니라 한국 시간 기준입니다. (lib/date.ts 참고)
     const { from, to } = kstDayRange();
+    const since = kstRecentDaysFrom(DAILY_CHART_DAYS);
 
-    const [todayRegistered, todayReceived, totalReceived, remaining, stock, recent] =
+    const [todayRegistered, todayReceived, totalReceived, remaining, issued, stock, recent, usage] =
       await Promise.all([
         rewardRepository.countUsedBetween(db, from, to),
         rewardRepository.countReceivedBetween(db, from, to),
         rewardRepository.countByStatus(db, REWARD_STATUS.RECEIVED),
         rewardRepository.countByStatus(db, REWARD_STATUS.UNUSED),
+        rewardRepository.countAll(db),
         adminService.getStock(),
-        rewardRepository.recentReceived(db, RECENT_RECEIPT_LIMIT),
+        rewardRepository.recentWins(db, RECENT_WIN_LIMIT),
+        rewardRepository.findUsageSince(db, since),
       ]);
 
+    // 꽝이 없으므로 "등록된 코드 수 = 당첨 건수" 입니다. 따로 세지 않고 빼서 구합니다 —
+    // 쿼리를 하나 더 날리면 두 숫자가 서로 다른 시점을 보게 될 수 있습니다.
+    const registered = issued - remaining;
+
     return {
-      todayRegistered,
-      todayReceived,
+      issued,
+      registered,
       totalReceived,
       remaining,
+      todayRegistered,
+      todayReceived,
+      usedRate: percent(registered, issued),
+      receivedRate: percent(totalReceived, registered),
+      daily: buildDailySeries(usage, DAILY_CHART_DAYS),
       stock,
-      recentReceived: recent.map((r) => ({
+      recentWins: recent.map((r) => ({
         rewardId: r.id,
         rewardCode: r.rewardCode,
+        batch: r.batch,
         productName: r.product.name,
-        userName: r.user?.name ?? "(알 수 없음)",
-        receivedAt: (r.receivedAt ?? r.createdAt).toISOString(),
+        // ⚠️ 마스킹은 **여기서** 끝냅니다. 화면으로 평문을 넘기면 네트워크 탭에 남습니다.
+        userNameMasked: r.user ? maskName(r.user.name) : "-",
+        phoneMasked: r.user ? maskPhone(decryptPhone(r.user.phoneEncrypted)) : "-",
+        status: r.status as RewardStatus,
+        // 등록된 코드만 골라 왔으므로 usedAt 은 항상 있습니다. 타입상 nullable 이라 방어만 둡니다.
+        wonAt: (r.usedAt ?? r.receivedAt ?? new Date()).toISOString(),
       })),
     };
   },

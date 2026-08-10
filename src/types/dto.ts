@@ -137,13 +137,56 @@ export type AdminNavCounts = {
 };
 
 export type DashboardResponse = {
-  todayRegistered: number;
-  todayReceived: number;
+  /** 발급 총량. 사용률·지급률의 분모입니다 */
+  issued: number;
+  /** 당첨 건수 = 등록된 코드 (USED + RECEIVED). 꽝이 없으므로 등록 = 당첨 */
+  registered: number;
+  /** 실물 지급이 끝난 건수 */
   totalReceived: number;
   /** 아직 아무도 등록하지 않은 코드 수 */
   remaining: number;
+  todayRegistered: number;
+  todayReceived: number;
+  /** 코드 사용률 % — `registered / issued`. 발급이 0이면 0 */
+  usedRate: number;
+  /** 지급률 % — `totalReceived / registered`. 당첨이 0이면 0 */
+  receivedRate: number;
+  /** 최근 14일 일별 추이. 빈 날짜도 0 으로 채워져 있습니다 */
+  daily: DailyUsageDto[];
   stock: StockRowDto[];
-  recentReceived: RecentReceiptDto[];
+  recentWins: RecentWinDto[];
+};
+
+/** 일별 코드 사용 차트의 막대 하나 */
+export type DailyUsageDto = {
+  /** KST 일자 `2026-08-10` */
+  date: string;
+  /** 그날 등록된 코드 수 (= 당첨 발생) */
+  registered: number;
+  /** 그날 실물 지급된 건수 */
+  received: number;
+};
+
+/**
+ * 최근 당첨 한 줄.
+ *
+ * ⚠️ **평문 성함·전화번호가 들어갈 자리는 없습니다.** 필드 이름에 `Masked` 를 박아 둔 것은
+ *    실수로 평문을 넣으면 이름부터 어긋나 보이게 하려는 것입니다.
+ *    본인 확인은 이 값을 보고 맞추는 것이 아니라, 운영자가 입력한 값을 서버가 해시로
+ *    대조하는 방식입니다 (`docs/phase5-admin-estimate.md` §6 B안).
+ */
+export type RecentWinDto = {
+  rewardId: string;
+  rewardCode: string;
+  batch: string;
+  productName: string;
+  /** `김O서` */
+  userNameMasked: string;
+  /** `010-****-4821` */
+  phoneMasked: string;
+  status: RewardStatus;
+  /** 당첨 시각 = 코드를 등록한 시각 */
+  wonAt: string;
 };
 
 export type StockRowDto = {
@@ -154,14 +197,6 @@ export type StockRowDto = {
   unused: number;
   used: number;
   received: number;
-};
-
-export type RecentReceiptDto = {
-  rewardId: string;
-  rewardCode: string;
-  productName: string;
-  userName: string;
-  receivedAt: string;
 };
 
 export type IssueCodesRequest = {
@@ -197,11 +232,23 @@ export type CreateProductRequest = {
 
 export type UpdateProductRequest = Partial<CreateProductRequest>;
 
-/** 관리자 사용자 조회 — 전화번호는 복호화해서 내려갑니다. */
+/**
+ * 관리자 사용자 조회.
+ *
+ * ⚠️ 필드 이름이 `phone` 이 아니라 **`phoneMasked`** 인 것은 의도적입니다.
+ *    평문을 실수로 넣으면 이름부터 어긋나 보이고, 예전 코드가 `phone` 을 읽으려 하면
+ *    **컴파일이 막습니다.** 5.2 이전에는 여기로 평문 전화번호가 그대로 나갔습니다.
+ *
+ * 본인 확인은 이 값을 눈으로 대조하는 것이 아니라, 운영자가 입력한 이름·번호를
+ * 서버가 해시로 맞춰 보는 방식입니다 (`docs/phase5-admin-estimate.md` §6 B안).
+ * 그래서 평문이 응답에 실릴 이유가 없습니다 — 복호화는 대조에만 씁니다.
+ */
 export type AdminUserDto = {
   id: string;
-  name: string;
-  phone: string;
+  /** `김O서` */
+  nameMasked: string;
+  /** `010-****-4821` */
+  phoneMasked: string;
   createdAt: string;
   registeredCount: number;
   receivedCount: number;

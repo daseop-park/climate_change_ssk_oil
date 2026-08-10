@@ -284,8 +284,41 @@ async function main() {
 
   const dash = await call("GET", "/api/admin/dashboard", undefined, { admin: true });
   check("대시보드 200", dash.status === 200 && dash.body.success);
-  const dashData = dash.body.data as { stock?: unknown[]; todayRegistered?: number };
+  const dashData = dash.body.data as {
+    stock?: unknown[];
+    todayRegistered?: number;
+    issued?: number;
+    registered?: number;
+    usedRate?: number;
+    daily?: { date: string; registered: number; received: number }[];
+    recentWins?: { userNameMasked: string; phoneMasked: string }[];
+  };
   check("재고는 관리자에게만 노출", Array.isArray(dashData?.stock), `${dashData?.stock?.length}종`);
+
+  // 5.2 — 확장 필드
+  check(
+    "일별 추이 14일 · 빈 날짜 채움",
+    dashData?.daily?.length === 14,
+    `${dashData?.daily?.length}일`,
+  );
+  check(
+    "일자 키가 KST 오름차순",
+    !!dashData?.daily?.every((d, i, a) => i === 0 || a[i - 1].date < d.date),
+  );
+  check(
+    "사용률이 발급 대비 등록",
+    dashData?.issued !== undefined &&
+      dashData?.registered !== undefined &&
+      Math.abs(
+        (dashData.usedRate ?? 0) -
+          (dashData.issued === 0 ? 0 : (dashData.registered / dashData.issued) * 100),
+      ) < 0.001,
+  );
+  check(
+    "최근 당첨에 평문 없음",
+    !JSON.stringify(dashData?.recentWins ?? []).includes(PHONE) &&
+      !JSON.stringify(dashData?.recentWins ?? []).includes(NAME),
+  );
 
   const created = await call(
     "POST",
@@ -345,8 +378,23 @@ async function main() {
 
   const users = await call("GET", `/api/admin/user?phone=${PHONE}`, undefined, { admin: true });
   check("사용자 조회 200", users.status === 200);
-  const userList = users.body.data as Array<{ phone: string }>;
-  check("전화번호 복호화됨", userList?.[0]?.phone === PHONE, userList?.[0]?.phone);
+
+  // 5.2 부터 관리자 응답에는 **평문이 실리지 않습니다.** 예전에는 여기서
+  // `phone === PHONE`(복호화 왕복)을 확인했는데, 그 성질 자체가 사라졌습니다.
+  // 이제 검사할 것은 반대 — "평문이 새지 않는가" 입니다.
+  const userList = users.body.data as Array<{ nameMasked: string; phoneMasked: string }>;
+  const first = userList?.[0];
+  check(
+    "전화번호 마스킹됨",
+    first?.phoneMasked === `${PHONE.slice(0, 3)}-****-${PHONE.slice(-4)}`,
+    first?.phoneMasked,
+  );
+  // NAME = "박테스트" (4글자) → 첫·끝만 남기고 가운데 둘을 가립니다.
+  check("성함 마스킹됨", first?.nameMasked === "박OO트", first?.nameMasked);
+  check(
+    "응답에 평문 없음",
+    !JSON.stringify(users.body).includes(PHONE) && !JSON.stringify(users.body).includes(NAME),
+  );
 
   /* ── 로그아웃 ─────────────────────────────────────────── */
   console.log("\n[로그아웃]");

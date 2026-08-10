@@ -140,8 +140,8 @@
 | 단계 | 내용 | 예상 | 상태 |
 |---|---|---|---|
 | 5.1 | 관리자 셸 + 로그인 + 1280px | 3.75h | ✅ **완료 (2026-08-10)** |
-| 5.2 | 대시보드 | 4.25h | ← 다음 |
-| 5.3 | 발급 이력 | 0.75h | 대기 |
+| 5.2 | 대시보드 | 4.25h | ✅ **완료 (2026-08-10)** |
+| 5.3 | 발급 이력 | 0.75h | ← 다음 |
 | 5.4 | 경품 현황 | 1.25h | 대기 |
 | 5.5 | 당첨 내역 · 실물 지급 + 통합 검증 | 3.75h | 대기 |
 | | **합계** | **13.75h** | |
@@ -222,7 +222,7 @@
 > `ADMIN_PASSWORD_HASH` 는 되돌릴 수 없고, 검증을 위해 비밀번호를 바꾸면 현장 설정이 틀어집니다.
 > **폼 제출 경로(브라우저에서 실제로 비밀번호를 치는 흐름)는 아직 사람 손으로 확인하지 않았습니다.**
 
-### 5.2 — 대시보드 (4.25h)
+### 5.2 — 대시보드 (4.25h) ✅ 완료
 
 | 작업 | 예상 |
 |---|---|
@@ -233,6 +233,76 @@
 | 스택 막대 차트 — CSS flex, 높이 186px, radius `5px 5px 0 0`, gap 9px | 0.75h |
 | 경품 잔여 게이지 4개 | 0.25h |
 | 최근 당첨 테이블 (7컬럼, monospace, 상태 뱃지) | 0.75h |
+
+#### 만든 것
+
+| 파일 | 내용 |
+|---|---|
+| `src/lib/mask.ts` | `maskName()` · `maskPhone()` — **서버 전용** |
+| `src/lib/date.ts` | `kstDateKey()` · `kstRecentDayKeys()` · `kstRecentDaysFrom()` |
+| `reward.repository.ts` | `recentWins()` · `findUsageSince()` (`recentReceived()` 는 삭제) |
+| `admin.service.ts` | `getDashboard()` 재작성 + `percent()` · `buildDailySeries()` |
+| `user.service.ts` | `listForAdmin()` · `findForAdminByPhone()` 마스킹 적용 |
+| `types/dto.ts` | `DashboardResponse` 확장 · `DailyUsageDto` · `RecentWinDto` · `AdminUserDto` 필드명 변경 |
+| `components/admin/` | `AdminKpiCard` · `AdminUsageChart` · `AdminStockGauges` · `AdminRecentWinsTable` |
+
+전부 **서버 컴포넌트**입니다. 상호작용이 없고 값이 DTO 로 내려오므로 `"use client"` 를 붙일 이유가 없습니다.
+
+#### 착수 후 바뀐 판단
+
+**1) 차트의 두 시리즈를 바꿨습니다 — `사용`+`당첨` → `등록`+`지급`.**
+핸드오프는 `사용`과 `당첨`을 쌓는데, 우리 모델에서 **그 둘은 같은 숫자**입니다. 꽝이 없어서
+코드를 쓰면 곧 당첨이라, 쌓아 봐야 한쪽이 다른 쪽의 복제가 됩니다. 실제로 다른 두 값인
+`usedAt`(등록)과 `receivedAt`(지급)으로 바꿨습니다 — 현장 질문("오늘 몇 개 등록됐고 몇 개
+나갔나")에 그대로 대응합니다.
+
+**2) `recentReceived` → `recentWins` 로 교체했습니다.** 견적서는 기존 `recentReceived` 를
+그대로 쓰되 배치 컬럼과 마스킹만 얹는 것으로 잡았는데, 그 쿼리는 `status='RECEIVED'` 만
+보고 `receivedAt` 으로 정렬합니다. **아직 아무도 경품을 받아 가지 않은 행사 초반에는 표가
+통째로 빕니다.** "최근 당첨" 은 등록 시점이 기준이어야 해서 `USED`+`RECEIVED` 를
+`usedAt desc` 로 봅니다. 옛 메서드와 `RecentReceiptDto` 는 **삭제**했습니다 —
+`codeSchema.ts` 처럼 죽은 채 검색에 걸리는 파일을 하나 더 만들 이유가 없습니다.
+
+**3) 셋째 KPI 를 "경품 소진" → "경품 지급" 으로 바꿨습니다.** 핸드오프의 소진율은
+지급/재고인데, 우리 모델에서 소진을 재는 값은 곧 코드 사용률이라 **1번 카드와 같은
+숫자**가 됩니다. 대신 현장에서 실제로 필요한 것 — 아직 안 나간 경품 수 — 를 넣었습니다.
+캡션이 `수령 대기 N건` 입니다.
+
+**4) 일자 묶기를 SQL 이 아니라 JS 에서 합니다.** Postgres `AT TIME ZONE` 으로 `groupBy`
+하려면 `$queryRaw` 가 필요한데, 이 레포지토리는 Prisma API 만 쓴 덕분에 SQLite →
+PostgreSQL 전환 때 **한 줄도 안 고쳤습니다.** 14일치 몇백 행 때문에 그 성질을 버리지
+않았습니다. 발급량이 수만 건대가 되면 뒤집으세요 (`findUsageSince` 주석에 적어 뒀습니다).
+
+**5) `AdminUserDto.phone` → `nameMasked`·`phoneMasked`.** §6 대로 필드명을 바꿔
+평문을 넣으면 컴파일이 막게 했습니다. `decryptPhone` 은 이제 **마스킹 직전에만** 불립니다.
+
+#### 잡은 버그
+
+`buildDailySeries` 첫 구현이 `series.get(key)?.registered++` 였는데 TS 가 막았습니다.
+고치면서 보니 **실제 집계 오류**를 가리고 있었습니다 — 조회 조건이
+`usedAt >= since OR receivedAt >= since` 라, **예전에 등록된 코드를 오늘 지급하면
+`usedAt` 이 창 밖인 채로 행이 딸려 옵니다.** 그대로 세면 14일 등록 합계가 실제보다
+커집니다. 지금은 버킷이 없으면 건너뜁니다.
+
+#### 검증 (2026-08-10)
+
+`tsc` · `eslint` · `next build` 통과. **`test:api` 53건**(47 → +6) · `db:smoke` 38건 통과.
+
+| 항목 | 결과 |
+|---|---|
+| `maskName` / `maskPhone` / KST 일자 단위 검증 | **20건 통과** (§6 표 전부 + 자정 경계) |
+| KST 자정 경계 | UTC 15:00 → 다음날 · 14:59:59 → 전날 |
+| 일별 추이 | 14일 · 빈 날짜 0 채움 · 키 오름차순 |
+| 사용률 | `registered / issued` 와 오차 0.001 미만 |
+| KPI 3장 | 코드 사용률 1.0% · 당첨 1 · 경품 지급 0 (수령 대기 1건) |
+| 차트 | 막대 14개 · 범례 등록/지급 · 오늘 막대만 `bg-step-arrow` |
+| 잔여 게이지 | 6종 |
+| 최근 당첨 테이블 | 7컬럼 · `GQW-374` · `2026-demo-01` · `임O민` · `010-****-5678` · 수령 대기 |
+| **평문 누출 — 실제 DB 값 대조** | 이름·번호(평문)·번호(하이픈) **0건** (RSC 페이로드 포함) |
+
+> 누출 검사는 추측한 문자열이 아니라 **DB 에서 복호화한 실제 값**으로 렌더된 HTML 을 훑었습니다.
+> 서버 렌더 결과에는 SSR HTML 과 RSC 플라이트 페이로드가 함께 들어 있어서, 눈에 보이는
+> 화면만 확인하면 페이로드 쪽 누출을 놓칩니다.
 
 ### 5.3 — 발급 이력 (0.75h)
 
