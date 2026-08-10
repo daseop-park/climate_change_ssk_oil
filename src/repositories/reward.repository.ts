@@ -160,6 +160,16 @@ export const rewardRepository = {
     return client.rewardCode.count({ where: { status } });
   },
 
+  /** 발급된 코드 전체 수 (상태 무관). 사이드바 '발급 이력' 뱃지의 분모입니다. */
+  countAll(client: DbClient) {
+    return client.rewardCode.count();
+  },
+
+  /** 여러 상태를 한 번에 셉니다. (예: USED + RECEIVED = 당첨 건수) */
+  countByStatuses(client: DbClient, statuses: RewardStatus[]) {
+    return client.rewardCode.count({ where: { status: { in: statuses } } });
+  },
+
   /** [from, to) 구간에 등록된 건수 */
   countUsedBetween(client: DbClient, from: Date, to: Date) {
     return client.rewardCode.count({ where: { usedAt: { gte: from, lt: to } } });

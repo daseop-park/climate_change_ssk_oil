@@ -17,6 +17,7 @@ import { rewardRepository } from "../repositories/reward.repository";
 import { REWARD_STATUS } from "../types/reward";
 import type {
   AdminLoginResponse,
+  AdminNavCounts,
   CreateProductRequest,
   DashboardResponse,
   IssueCodesResponse,
@@ -74,6 +75,20 @@ export const adminService = {
         receivedAt: (r.receivedAt ?? r.createdAt).toISOString(),
       })),
     };
+  },
+
+  /**
+   * 사이드바 카운트 뱃지.
+   *
+   * 콘솔 레이아웃이 페이지를 옮길 때마다 부릅니다. 대시보드 전체를 부르면
+   * 재고 집계와 최근 당첨 조회까지 딸려오므로, 필요한 두 개만 셉니다.
+   */
+  async getNavCounts(): Promise<AdminNavCounts> {
+    const [issued, wins] = await Promise.all([
+      rewardRepository.countAll(db),
+      rewardRepository.countByStatuses(db, [REWARD_STATUS.USED, REWARD_STATUS.RECEIVED]),
+    ]);
+    return { issued, wins };
   },
 
   /** 상품별 재고. 저장된 카운터가 아니라 reward_codes 를 세어서 만듭니다. */

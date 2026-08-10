@@ -1,7 +1,17 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
-import AppShell from "@/components/shell/AppShell";
 import Providers from "./providers";
+
+/**
+ * 루트 레이아웃 — `<html>`·폰트·전역 프로바이더만 담습니다.
+ *
+ * 화면 셸은 여기 두지 않습니다. 사용자 화면은 모바일 폭 고정(`max-w-[440px]`),
+ * 관리자 콘솔은 데스크톱 1280px 이상이라 같은 셸에 들어갈 수 없습니다.
+ * 그래서 `(app)/layout.tsx` 가 `AppShell` 을, `admin/` 이 콘솔 셸을 각각 갖습니다.
+ *
+ * ⚠️ `Providers`(TanStack Query)는 **반드시 루트에 남아 있어야 합니다.**
+ *    `(app)` 으로 함께 내리면 관리자 지급 화면(5.5)의 mutation 이 프로바이더 밖에 놓입니다.
+ */
 
 export const metadata: Metadata = {
   title: "team_싹싹기름",
@@ -30,9 +40,7 @@ export default function RootLayout({
         />
       </head>
       <body>
-        <Providers>
-          <AppShell>{children}</AppShell>
-        </Providers>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

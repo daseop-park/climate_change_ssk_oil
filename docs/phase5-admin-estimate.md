@@ -30,6 +30,8 @@
 
 `src/app/admin/` 이 없습니다. 로그인 페이지를 포함해 관리자 화면은 한 장도 없습니다.
 
+> ✅ **2026-08-10 해소.** 5.1 에서 셸·로그인·자리표시 4화면을 만들었습니다. 아래 §4 참고.
+
 ### API — 조회 전용 기준 약 80%
 
 | 화면 요구 | 현재 | 갭 |
@@ -51,6 +53,9 @@
 **페이지 라우트 `/admin` 은 여전히 관리자 인증 대상이 아닙니다.** proxy 는 `/api/admin` 으로 시작하는 경로에만 토큰을 요구합니다. 5.1 에서 화면을 만드는 순간, (게이트가 꺼져 있으면) 인증 없이 열리는 관리자 페이지가 생깁니다.
 
 남은 작업은 **matcher 확장이 아니라 관리자 경로의 실패 응답 분기**입니다 — 페이지는 로그인으로 리다이렉트, API 는 401 JSON. 분기 설계는 §5.
+
+> ✅ **2026-08-10 해소.** `isAdminPath()` 가 `/admin` 페이지와 `/api/admin` 을 함께 판정하고,
+> 실패 응답을 리다이렉트 / 401 JSON 으로 가릅니다. `(console)/layout.tsx` 2차 가드도 함께 들어갔습니다.
 
 ### 디자인 토큰 — 3개만 추가
 
@@ -132,16 +137,16 @@
 
 ## 4. 5단계 견적
 
-| 단계 | 내용 | 예상 |
-|---|---|---|
-| 5.1 | 관리자 셸 + 로그인 + 1280px | 3.75h |
-| 5.2 | 대시보드 | 4.25h |
-| 5.3 | 발급 이력 | 0.75h |
-| 5.4 | 경품 현황 | 1.25h |
-| 5.5 | 당첨 내역 · 실물 지급 + 통합 검증 | 3.75h |
-| | **합계** | **13.75h** |
+| 단계 | 내용 | 예상 | 상태 |
+|---|---|---|---|
+| 5.1 | 관리자 셸 + 로그인 + 1280px | 3.75h | ✅ **완료 (2026-08-10)** |
+| 5.2 | 대시보드 | 4.25h | ← 다음 |
+| 5.3 | 발급 이력 | 0.75h | 대기 |
+| 5.4 | 경품 현황 | 1.25h | 대기 |
+| 5.5 | 당첨 내역 · 실물 지급 + 통합 검증 | 3.75h | 대기 |
+| | **합계** | **13.75h** | |
 
-### 5.1 — 관리자 셸 + 로그인 + 1280px (3.75h)
+### 5.1 — 관리자 셸 + 로그인 + 1280px (3.75h) ✅ 완료
 
 | 작업 | 예상 |
 |---|---|
@@ -152,6 +157,70 @@
 | **`proxy.ts` 관리자 분기** — 페이지는 리다이렉트 / API 는 401, 예외 목록에 `/admin/login` 추가, `?next=` (§5). **matcher 와 `isApiPath()` 는 이미 있으니 건드리지 마세요** | 0.25h |
 | `(admin)/layout.tsx` 2차 가드 + `noindex` | 0.25h |
 | **1280px** — 셸 `min-width` + 가로 스크롤, 테이블 경품명 `truncate` (§8) | 0.5h |
+
+#### 만든 것
+
+| 파일 | 내용 |
+|---|---|
+| `src/app/layout.tsx` | `<html>`·폰트·`Providers` 만 남김 (`AppShell` 제거) |
+| `src/app/(app)/layout.tsx` | `AppShell`. 홈·마이페이지·About·팁·문의가 이 아래로 이동 |
+| `src/app/admin/layout.tsx` | `robots: noindex` + `dynamic = "force-dynamic"` + `bg-surface` |
+| `src/app/admin/login/page.tsx` | 로그인 (서버에서 `?next=` 검증) |
+| `src/app/admin/(console)/layout.tsx` | 2차 가드 + 사이드바 + `min-w-[1120px]` 가로 스크롤 |
+| `src/app/admin/(console)/{page,codes,prizes,wins}` | 대시보드 + 5.2~5.5 자리표시 |
+| `src/components/admin/` | `AdminSidebar` · `AdminLogoutButton` · `AdminPage`(+`AdminPanel`) · `AdminLoginForm` |
+| `src/lib/admin-nav.ts` | 메뉴 정의 · `isAdminPath()` · `sanitizeAdminNext()` — **proxy 와 사이드바가 공유** |
+| `src/lib/admin-guard.ts` | `isAdminAuthenticated()` — `cookies()` 기반 2차 가드 |
+| `src/proxy.ts` | 관리자 실패 응답 분기 (페이지 리다이렉트 / API 401) |
+| `src/services/admin.service.ts` | `getNavCounts()` — 사이드바 뱃지 (`count` 2방) |
+
+#### 착수 후 바뀐 판단
+
+**1) Route Group 은 `(app)` 하나만 만들었습니다.** 관리자 화면이 전부 `/admin` 아래라
+`(admin)/admin/…` 은 한 겹이 헛돕니다 — `(admin)/layout.tsx` 와 `admin/layout.tsx` 가
+하는 일이 정확히 같습니다. 견적이 말한 분리의 핵심(루트에서 `AppShell` 을 걷어내기)은
+`(app)/layout.tsx` 로 이미 끝났습니다. 대신 `admin/` **안에** `(console)` 그룹을 뒀습니다 —
+로그인 화면을 인증 가드 밖에 두는 데 실제로 필요합니다.
+
+**2) `?next=` 에 쿼리를 싣지 않습니다.** §5 가 경고한 RSC 문제의 실제 형태는
+"302 를 따라간다" 가 아니라 **`_rsc=…` 내부 파라미터가 `next` 에 섞여 들어오는 것**이었습니다.
+`pathname` 만 실으면 RSC 헤더를 따로 볼 필요 없이 사라집니다. 콘솔은 필터를 URL 에
+담지 않으므로 잃는 것이 없습니다. (소프트 내비게이션이 전체 리로드로 떨어지는 것은 남습니다.
+목적지가 로그인 화면이라 어차피 전체 리로드가 맞습니다.)
+
+**3) 사이드바 카운트는 `DashboardResponse` 를 쓰지 않습니다.** 대시보드를 통째로 부르면
+재고 집계와 최근 당첨 조회까지 딸려오는데, 뱃지에 필요한 건 두 숫자뿐입니다.
+`getNavCounts()` 로 분리해 `count` 2방으로 끝냅니다. — 콘솔 레이아웃은 **페이지를 옮길 때마다**
+도는 코드라 여기가 무거우면 화면 전환 전체가 느려집니다.
+
+**4) `eslint.config.mjs` 에 핸드오프 폴더 2개를 ignore 에 넣었습니다.** `support.js` 가
+고칠 수 없는 에러 4건을 매번 뱉어 정작 우리 코드의 경고를 묻고 있었습니다.
+저자가 "이식 대상 아님" 이라고 명시했고 `src/` 밖이라 번들에도 안 들어갑니다.
+
+#### 검증 (2026-08-10)
+
+`npx tsc --noEmit` · `eslint` · `next build` 통과. `npm run test:api` **47건**,
+`npm run db:smoke` **38건** 전부 통과 (`receive` 이관은 5.5 이므로 아직 안 깨집니다).
+
+| 항목 | 결과 |
+|---|---|
+| 쿠키 없이 `/admin` | 307 → `/admin/login` |
+| 쿠키 없이 `/admin/wins` | 307 → `/admin/login?next=%2Fadmin%2Fwins` |
+| 쿠키 없이 `/api/admin/dashboard` | 401 JSON (`errorCode: UNAUTHORIZED`) |
+| `/admin/login` (예외 경로) | 200 — 무한 리다이렉트 없음 |
+| 유효 쿠키로 `/admin` | 200 · 사이드바 4메뉴 · 뱃지 `100`/`1` · 계정 카드 · 로그아웃 |
+| 로그인 상태로 `/admin/login` | 307 → `next` |
+| open redirect | `https://evil.example` · `//evil.example` · `/etc/passwd` → 전부 `/admin` |
+| `next=/admin/wins` | `/admin/wins` (정상 통과) |
+| `noindex` | `<meta name="robots" content="noindex, nofollow, nocache">` |
+| 1280px | `min-w-[1120px]` + 사이드바 `w-[224px]` 적용 |
+| 공개 화면 5종 | 전부 200 · `AppShell` 유지 (`(app)` 이동 무해) |
+| 로그인 화면 | `AppShell` 없음 (모바일 셸에 안 갇힘) |
+| 빌드 렌더 모드 | 관리자 전 라우트 `ƒ` (동적) |
+
+> 검증에는 비밀번호 대신 `signAdminToken()` 으로 만든 쿠키를 썼습니다. `.env` 의
+> `ADMIN_PASSWORD_HASH` 는 되돌릴 수 없고, 검증을 위해 비밀번호를 바꾸면 현장 설정이 틀어집니다.
+> **폼 제출 경로(브라우저에서 실제로 비밀번호를 치는 흐름)는 아직 사람 손으로 확인하지 않았습니다.**
 
 ### 5.2 — 대시보드 (4.25h)
 

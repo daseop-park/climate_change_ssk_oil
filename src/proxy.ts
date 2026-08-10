@@ -14,6 +14,7 @@
  */
 import { NextResponse, type NextRequest } from "next/server";
 import { verifyAdminToken } from "@/lib/admin-auth";
+import { ADMIN_LOGIN_PATH, NEXT_PARAM, isAdminPath } from "@/lib/admin-nav";
 import { readAdminToken } from "@/lib/admin-session";
 import { ERROR_CODES } from "@/lib/errors";
 import {
@@ -29,8 +30,12 @@ import type { ApiFailure } from "@/types/dto";
 /**
  * 토큰 없이 통과시켜야 하는 관리자 경로.
  * 로그인은 토큰을 **발급받으러** 오는 곳이라 여기서 막으면 영원히 로그인할 수 없습니다.
+ *
+ * ⚠️ 화면과 API 를 **한 배열로** 관리합니다. 둘을 따로 두면 한쪽만 빠뜨렸을 때
+ *    로그인 화면이 자기 자신으로 무한히 리다이렉트되고, 브라우저에는 그냥
+ *    빈 화면만 보여서 원인을 찾기 어렵습니다.
  */
-const PUBLIC_ADMIN_PATHS = new Set(["/api/admin/login"]);
+const PUBLIC_ADMIN_PATHS = new Set(["/api/admin/login", ADMIN_LOGIN_PATH]);
 
 function isApiPath(pathname: string): boolean {
   return pathname.startsWith("/api/");
@@ -109,12 +114,32 @@ function siteGate(req: NextRequest): NextResponse | null {
   }
 }
 
+/**
+ * 인증 실패 시 로그인 화면으로 보냅니다.
+ *
+ * `next` 에 **pathname 만** 싣고 쿼리는 버립니다. Next 라우터가 보내는 RSC 페이로드
+ * 요청에는 `_rsc=…` 같은 내부 파라미터가 붙어 있어서, 통째로 실으면 로그인 후
+ * 그 파라미터가 그대로 살아 돌아옵니다. 콘솔은 필터를 URL 에 담지 않으므로 잃는 것이 없습니다.
+ *
+ * 받는 쪽(`admin/login/page.tsx`)에서 `sanitizeAdminNext()` 로 한 번 더 거릅니다 —
+ * 여기서 만든 값만 오는 것이 아니라 주소창에 직접 칠 수도 있기 때문입니다.
+ */
+function redirectToLogin(req: NextRequest) {
+  const url = req.nextUrl.clone();
+  url.pathname = ADMIN_LOGIN_PATH;
+  url.search = "";
+  if (req.nextUrl.pathname !== "/admin") {
+    url.searchParams.set(NEXT_PARAM, req.nextUrl.pathname);
+  }
+  return NextResponse.redirect(url);
+}
+
 export function proxy(req: NextRequest) {
   const blocked = siteGate(req);
   if (blocked) return blocked;
 
   const { pathname } = req.nextUrl;
-  if (!pathname.startsWith("/api/admin") || PUBLIC_ADMIN_PATHS.has(pathname)) {
+  if (!isAdminPath(pathname) || PUBLIC_ADMIN_PATHS.has(pathname)) {
     return NextResponse.next();
   }
 
@@ -123,7 +148,14 @@ export function proxy(req: NextRequest) {
     return NextResponse.next();
   } catch {
     // 만료·위조·부재를 구분하지 않습니다. 구분해 주면 공격자에게 힌트가 됩니다.
-    return unauthorizedJson("관리자 인증이 필요합니다.");
+    //
+    // 다만 **응답 형식은 소비자에 맞춥니다.** `fetch` 는 `api-client` 가 아는 `ApiFailure` 를,
+    // 브라우저 내비게이션은 로그인 화면을 받아야 합니다. 토큰 TTL 이 8시간이라 현장 운영
+    // 도중 반드시 한 번은 만료되는데, 페이지에까지 401 JSON 을 돌려주면 화면이 깨진 채로
+    // 멈춥니다. 리다이렉트면 스스로 복구됩니다.
+    return isApiPath(pathname)
+      ? unauthorizedJson("관리자 인증이 필요합니다.")
+      : redirectToLogin(req);
   }
 }
 

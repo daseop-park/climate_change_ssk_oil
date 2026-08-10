@@ -123,6 +123,19 @@ export type AdminLoginResponse = {
   expiresAt: string;
 };
 
+/**
+ * 사이드바 메뉴 옆 카운트 뱃지.
+ *
+ * 콘솔 레이아웃이 매 페이지에서 읽으므로 두 번의 `count` 로만 만듭니다.
+ * 대시보드 KPI 와 달리 파생 계산이 없어 `DashboardResponse` 와 분리했습니다.
+ */
+export type AdminNavCounts = {
+  /** 발급된 코드 전체 수 */
+  issued: number;
+  /** 당첨 건수 = 등록된 코드 (USED + RECEIVED) */
+  wins: number;
+};
+
 export type DashboardResponse = {
   todayRegistered: number;
   todayReceived: number;

@@ -10,6 +10,8 @@
   --color-green-600: #1e8e5a;
   --color-mint-400: #5fd39a;
   --color-mint-300: #8fe6b8;
+  /* 관리자 콘솔에서만 쓰는 셋 (admin_handoff Design Tokens) */
+  --color-mint-200: #c7ded1; /* 차트 보조 계열 */
   --color-ink: #17211c;
   --color-ink-70: #3c4b43;
   --color-ink-60: #3c4a43;
@@ -21,6 +23,8 @@
   --color-line-3: #e1e8e2;
   --color-chip-bg: #e7f2ec;
   --color-surface: #f5f8f5;
+  --color-track: #eef3ef; /* 진행바 트랙 */
+  --color-danger: #c0492e; /* KPI 델타 경고 */
   --color-surface-slide: #f2f6f3;
   --color-slide-arc: #e3efe7;
   --color-page-bg: #e4ebe5;
