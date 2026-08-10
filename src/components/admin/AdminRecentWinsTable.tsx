@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { TableEmpty, Td, Th, Tr } from "@/components/admin/AdminTable";
 import { formatDateTime } from "@/lib/format-date";
 import { REWARD_STATUS, type RewardStatus } from "@/types/reward";
 import type { RecentWinDto } from "@/types/dto";
@@ -31,8 +32,6 @@ const STATUS_CLASS: Record<RewardStatus, string> = {
   RECEIVED: "text-muted-3 bg-line-2",
 };
 
-const TH = "text-muted-3 border-line border-t border-b text-[11px] font-extrabold tracking-[.06em]";
-
 export default function AdminRecentWinsTable({ wins }: { wins: RecentWinDto[] }) {
   return (
     <div className="border-line overflow-hidden rounded-[14px] border bg-white">
@@ -44,52 +43,42 @@ export default function AdminRecentWinsTable({ wins }: { wins: RecentWinDto[] })
       </div>
 
       {wins.length === 0 ? (
-        <p className="text-muted-3 border-line m-0 border-t px-[22px] py-8 text-center text-[12px] font-semibold">
-          아직 등록된 코드가 없습니다.
-        </p>
+        <TableEmpty>아직 등록된 코드가 없습니다.</TableEmpty>
       ) : (
         <table className="w-full border-collapse">
           <thead>
-            <tr className="bg-surface">
-              <th className={`${TH} px-[22px] py-[10px] text-left`}>시각</th>
-              <th className={`${TH} px-3 py-[10px] text-left`}>코드</th>
-              <th className={`${TH} px-3 py-[10px] text-left`}>배치</th>
-              <th className={`${TH} px-3 py-[10px] text-left`}>경품</th>
-              <th className={`${TH} px-3 py-[10px] text-left`}>성함</th>
-              <th className={`${TH} px-3 py-[10px] text-left`}>연락처</th>
-              <th className={`${TH} px-[22px] py-[10px] text-left`}>상태</th>
+            <tr>
+              <Th edge="start">시각</Th>
+              <Th>코드</Th>
+              <Th>배치</Th>
+              <Th>경품</Th>
+              <Th>성함</Th>
+              <Th>연락처</Th>
+              <Th edge="end">상태</Th>
             </tr>
           </thead>
           <tbody>
             {wins.map((w) => {
               const status = w.status as RewardStatus;
               return (
-                <tr key={w.rewardId} className="border-line-2 border-b last:border-b-0">
-                  <td className="text-muted px-[22px] py-[13px] font-mono text-[12.5px]">
+                <Tr key={w.rewardId}>
+                  <Td edge="start" className="text-muted font-mono">
                     {formatDateTime(w.wonAt)}
-                  </td>
-                  <td className="text-ink px-3 py-[13px] font-mono text-[12.5px] font-bold">
-                    {w.rewardCode}
-                  </td>
-                  <td className="text-muted px-3 py-[13px] text-[12.5px]">{w.batch}</td>
+                  </Td>
+                  <Td className="text-ink font-mono font-bold">{w.rewardCode}</Td>
+                  <Td className="text-muted">{w.batch}</Td>
                   {/* 가변 폭은 이 칸뿐입니다 — 1280px 에서 여기가 줄어들며 표가 들어갑니다. */}
-                  <td className="text-ink max-w-0 truncate px-3 py-[13px] text-[12.5px] font-bold">
-                    {w.productName}
-                  </td>
-                  <td className="text-ink px-3 py-[13px] text-[12.5px] font-bold">
-                    {w.userNameMasked}
-                  </td>
-                  <td className="text-muted px-3 py-[13px] font-mono text-[12.5px]">
-                    {w.phoneMasked}
-                  </td>
-                  <td className="px-[22px] py-[13px]">
+                  <Td className="text-ink max-w-0 truncate font-bold">{w.productName}</Td>
+                  <Td className="text-ink font-bold">{w.userNameMasked}</Td>
+                  <Td className="text-muted font-mono">{w.phoneMasked}</Td>
+                  <Td edge="end">
                     <span
                       className={`rounded-[20px] px-[9px] py-1 text-[10.5px] font-extrabold ${STATUS_CLASS[status] ?? STATUS_CLASS[REWARD_STATUS.UNUSED]}`}
                     >
                       {STATUS_LABEL[status] ?? status}
                     </span>
-                  </td>
-                </tr>
+                  </Td>
+                </Tr>
               );
             })}
           </tbody>

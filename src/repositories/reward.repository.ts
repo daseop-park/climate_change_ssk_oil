@@ -142,8 +142,22 @@ export const rewardRepository = {
     });
   },
 
+  /**
+   * 배치별 · 상태별 집계.
+   *
+   * `batch` 하나로 묶지 않고 **상태까지 함께** 묶습니다. 그래야 "발급 수량"과
+   * "사용 수"를 쿼리 한 번으로 같이 얻습니다 — 따로 세면 두 숫자가 서로 다른
+   * 시점을 보게 되어 합계가 어긋날 수 있습니다.
+   *
+   * `_min.createdAt` 이 곧 발급 시각입니다. 배치는 한 트랜잭션에서 통째로
+   * 만들어지므로 배치 안의 `createdAt` 은 모두 같은 순간입니다.
+   */
   listBatches(client: DbClient) {
-    return client.rewardCode.groupBy({ by: ["batch"], _count: { _all: true } });
+    return client.rewardCode.groupBy({
+      by: ["batch", "status"],
+      _count: { _all: true },
+      _min: { createdAt: true },
+    });
   },
 
   /* ── 집계 ──────────────────────────────────────────────── */

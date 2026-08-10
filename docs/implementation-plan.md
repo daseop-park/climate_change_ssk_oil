@@ -243,7 +243,7 @@ Loading·Skeleton·Empty State·Error Boundary, 모달 포커스 트랩, `aria-e
 | Phase 2 | DB 스키마 + Repository/Service | 1단계 + 2단계 일부 | ✅ 완료 |
 | Phase 3 | Route Handler + Zod + 관리자 인증 | 2단계 나머지 + 3단계 + 5단계 | ✅ 완료 |
 | Phase 4 | 사용자 프론트엔드 실데이터 연동 | 4단계 + 7단계 일부 | ✅ 완료 |
-| **Phase 5** | **관리자 화면** | **6단계** | **진행 중 — 5.1·5.2 완료, 5.3 다음** |
+| **Phase 5** | **관리자 화면** | **6단계** | **진행 중 — 5.1~5.3 완료, 5.4 다음** |
 | Phase 6 | 통합 테스트·폴리싱 | 7단계 | 대기 |
 
 ## 완료 기록

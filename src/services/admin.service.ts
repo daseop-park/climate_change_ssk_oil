@@ -20,6 +20,7 @@ import { REWARD_STATUS, type RewardStatus } from "../types/reward";
 import type {
   AdminLoginResponse,
   AdminNavCounts,
+  CodeBatchDto,
   CreateProductRequest,
   DailyUsageDto,
   DashboardResponse,
@@ -325,8 +326,38 @@ export const adminService = {
     return { batch, total, dryRun: false, rows };
   },
 
-  /** 발급된 배치 목록과 각 수량 */
-  listBatches() {
-    return rewardRepository.listBatches(db);
+  /**
+   * 발급 이력 — 배치별 수량·사용 수·발급일.
+   *
+   * 레포지토리는 (배치 × 상태) 로 잘게 묶어 오고, 배치 단위로 합치는 것은 여기서 합니다.
+   * 최신 배치가 위로 오도록 발급일 내림차순으로 정렬합니다 — 현장에서 방금 뿌린 배치를
+   * 확인하는 것이 가장 흔한 용도입니다.
+   */
+  async listBatches(): Promise<CodeBatchDto[]> {
+    const grouped = await rewardRepository.listBatches(db);
+    const rows = new Map<string, CodeBatchDto>();
+
+    for (const g of grouped) {
+      const row = rows.get(g.batch) ?? {
+        batch: g.batch,
+        quantity: 0,
+        used: 0,
+        unused: 0,
+        issuedAt: "",
+      };
+
+      const count = g._count._all;
+      row.quantity += count;
+      if (g.status === REWARD_STATUS.UNUSED) row.unused += count;
+      else row.used += count;
+
+      // 그룹마다 _min 이 따로 나오므로 배치 전체의 최솟값을 직접 고릅니다.
+      const created = g._min.createdAt?.toISOString();
+      if (created && (row.issuedAt === "" || created < row.issuedAt)) row.issuedAt = created;
+
+      rows.set(g.batch, row);
+    }
+
+    return [...rows.values()].sort((a, b) => b.issuedAt.localeCompare(a.issuedAt));
   },
 };

@@ -44,7 +44,7 @@ async function main() {
   );
 
   const batches = await adminService.listBatches();
-  console.log("\n배치: " + (batches.map((b) => `${b.batch}(${b._count._all})`).join(", ") || "없음"));
+  console.log("\n배치: " + (batches.map((b) => `${b.batch}(${b.quantity})`).join(", ") || "없음"));
 
   await db.$disconnect();
 }

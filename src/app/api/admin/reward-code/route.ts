@@ -15,8 +15,9 @@ import { adminService } from "@/services/admin.service";
 
 export function GET() {
   return handle(async () => {
-    const batches = await adminService.listBatches();
-    const data = batches.map((b) => ({ batch: b.batch, count: b._count._all }));
+    // 5.3 부터 서비스가 이미 `CodeBatchDto[]` 로 만들어 줍니다.
+    // (예전에는 여기서 `_count._all` 을 풀어 `{ batch, count }` 로 바꿨습니다.)
+    const data = await adminService.listBatches();
     return ok(data, "발급 배치 목록입니다.");
   });
 }

@@ -219,6 +219,25 @@ export type IssuedCodeDto = {
   productId: string;
 };
 
+/**
+ * 발급 이력 한 줄.
+ *
+ * 핸드오프의 `유효 기간` · `코드 접두어` 컬럼은 없습니다 — 대응 컬럼이 없고
+ * `CodeBatch` 모델로 승격하지도 않았습니다. 상태는 저장된 값이 아니라
+ * **`unused === 0` 에서 파생**합니다 (`docs/phase5-admin-estimate.md` §3).
+ */
+export type CodeBatchDto = {
+  batch: string;
+  /** 발급 수량 */
+  quantity: number;
+  /** 등록된 코드 수 (USED + RECEIVED) */
+  used: number;
+  /** 아직 아무도 등록하지 않은 코드 수 */
+  unused: number;
+  /** 발급 시각. 배치는 한 트랜잭션에 만들어지므로 `min(createdAt)` 이 곧 발급 시각입니다 */
+  issuedAt: string;
+};
+
 export type CreateProductRequest = {
   name: string;
   description?: string | null;
