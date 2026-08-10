@@ -143,7 +143,7 @@ async function main() {
   const first = box.pending[0];
   const second = box.pending[1];
 
-  const receipt = await rewardService.receive({ phone: PHONE_A, rewardIds: [first.id] });
+  const receipt = await rewardService.receive({ name: "김테스트", phone: PHONE_A, rewardIds: [first.id] });
   check("정상 수령 처리", receipt.receivedCount === 1);
 
   const afterFirst = await rewardRepository.findByIdWithProduct(db, first.id);
@@ -151,12 +151,12 @@ async function main() {
   check("receivedAt 기록됨", afterFirst?.receivedAt != null);
 
   await expectError("이중 지급 거절", "ALREADY_RECEIVED", () =>
-    rewardService.receive({ phone: PHONE_A, rewardIds: [first.id] }),
+    rewardService.receive({ name: "김테스트", phone: PHONE_A, rewardIds: [first.id] }),
   );
 
   // A안 — 하나라도 처리 불가면 전부 롤백
   await expectError("일부 불가 시 전체 실패", "ALREADY_RECEIVED", () =>
-    rewardService.receive({ phone: PHONE_A, rewardIds: [second.id, first.id] }),
+    rewardService.receive({ name: "김테스트", phone: PHONE_A, rewardIds: [second.id, first.id] }),
   );
   const secondAfter = await rewardRepository.findByIdWithProduct(db, second.id);
   check(
@@ -169,14 +169,30 @@ async function main() {
   await rewardService.register({ name: "이테스트", phone: PHONE_B, code: c4 });
   const boxB = await rewardService.lookup({ name: "이테스트", phone: PHONE_B });
   await expectError("타인 리워드 지급 거절", "ALREADY_RECEIVED", () =>
-    rewardService.receive({ phone: PHONE_A, rewardIds: [boxB.pending[0].id] }),
+    rewardService.receive({ name: "김테스트", phone: PHONE_A, rewardIds: [boxB.pending[0].id] }),
   );
   const bAfter = await rewardRepository.findByIdWithProduct(db, boxB.pending[0].id);
   check("타인 리워드는 USED 유지", bAfter?.status === REWARD_STATUS.USED);
 
   await expectError("빈 선택 거절", "VALIDATION_ERROR", () =>
-    rewardService.receive({ phone: PHONE_A, rewardIds: [] }),
+    rewardService.receive({ name: "김테스트", phone: PHONE_A, rewardIds: [] }),
   );
+
+  // 5.5 — 이름 복합 대조. 관리자 목록에 성함이 마스킹되어 나가면서 "보고 맞추기" 가
+  // 성립하지 않게 됐고, 번호만으로 지급되면 번호를 아는 사람이 남의 경품을 소각할 수 있습니다.
+  await expectError("이름 불일치 지급 거절", "NOT_FOUND", () =>
+    rewardService.receive({ name: "엉뚱한사람", phone: PHONE_A, rewardIds: [second.id] }),
+  );
+  const afterMismatch = await rewardRepository.findByIdWithProduct(db, second.id);
+  check("이름 불일치는 상태를 바꾸지 않음", afterMismatch?.status === REWARD_STATUS.USED);
+
+  // 공백·대소문자 차이는 흡수합니다 (조회와 같은 규칙).
+  const spacedReceipt = await rewardService.receive({
+    name: " 김 테스트 ",
+    phone: PHONE_A,
+    rewardIds: [second.id],
+  });
+  check("이름 공백 차이는 흡수해 지급", spacedReceipt.receivedCount === 1);
 
   /* ── 되돌리기 (RECEIVED → USED) ──────────────────────── */
   console.log("\n[되돌리기]");

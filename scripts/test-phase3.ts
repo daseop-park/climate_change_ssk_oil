@@ -202,37 +202,6 @@ async function main() {
     "NOT_FOUND",
   );
 
-  /* ── 수령 ─────────────────────────────────────────────── */
-  console.log("\n[PATCH /api/reward/receive]");
-
-  const ids = boxData.pending.map((p) => p.id);
-  const recv = await call("PATCH", "/api/reward/receive", { phone: PHONE, rewardIds: [ids[0]] });
-  check("200 지급 처리", recv.status === 200 && recv.body.success, recv.body.message);
-
-  expectFail(
-    "이중 지급 409",
-    await call("PATCH", "/api/reward/receive", { phone: PHONE, rewardIds: [ids[0]] }),
-    409,
-    "ALREADY_RECEIVED",
-  );
-
-  expectFail(
-    "일부 불가 시 전체 실패 409",
-    await call("PATCH", "/api/reward/receive", { phone: PHONE, rewardIds: [ids[1], ids[0]] }),
-    409,
-    "ALREADY_RECEIVED",
-  );
-
-  const stillUsed = await db.rewardCode.findUnique({ where: { id: ids[1] } });
-  check("롤백되어 USED 유지", stillUsed?.status === "USED", `현재 ${stillUsed?.status}`);
-
-  expectFail(
-    "빈 선택 400",
-    await call("PATCH", "/api/reward/receive", { phone: PHONE, rewardIds: [] }),
-    400,
-    "VALIDATION_ERROR",
-  );
-
   /* ── 레이트 리밋 (조회 테스트 마지막에) ───────────────── */
   console.log("\n[레이트 리밋]");
 
@@ -278,6 +247,102 @@ async function main() {
   check("본문에 토큰 미포함", !JSON.stringify(login.body).includes("eyJ"));
 
   adminCookie = sessionCookie?.split(";")[0] ?? "";
+
+  /* ── 수령 ─────────────────────────────────────────────── */
+  //
+  // 5.5 에서 `/api/reward/receive` → `/api/admin/reward/receive` 로 옮겼습니다.
+  // 예전에는 인증 밖이라 전화번호만 알면 남의 리워드를 소각할 수 있었습니다.
+  // 이제 proxy 가 막고, 서비스가 **이름까지 대조**합니다 (§6 B안).
+  console.log("\n[PATCH /api/admin/reward/receive]");
+
+  const RECEIVE = "/api/admin/reward/receive";
+  const ids = boxData.pending.map((p) => p.id);
+
+  expectFail(
+    "미인증 지급 401",
+    await call("PATCH", RECEIVE, { name: NAME, phone: PHONE, rewardIds: [ids[0]] }),
+    401,
+    "UNAUTHORIZED",
+  );
+
+  const recvAdmin = { admin: true } as const;
+
+  expectFail(
+    "이름 불일치 404",
+    await call("PATCH", RECEIVE, { name: "엉뚱한사람", phone: PHONE, rewardIds: [ids[0]] }, recvAdmin),
+    404,
+    "NOT_FOUND",
+  );
+
+  const stillUsedBefore = await db.rewardCode.findUnique({ where: { id: ids[0] } });
+  check("이름 불일치는 상태를 바꾸지 않음", stillUsedBefore?.status === "USED");
+
+  const recv = await call(
+    "PATCH",
+    RECEIVE,
+    { name: NAME, phone: PHONE, rewardIds: [ids[0]] },
+    recvAdmin,
+  );
+  check("200 지급 처리", recv.status === 200 && recv.body.success, recv.body.message);
+
+  expectFail(
+    "이중 지급 409",
+    await call("PATCH", RECEIVE, { name: NAME, phone: PHONE, rewardIds: [ids[0]] }, recvAdmin),
+    409,
+    "ALREADY_RECEIVED",
+  );
+
+  expectFail(
+    "일부 불가 시 전체 실패 409",
+    await call("PATCH", RECEIVE, { name: NAME, phone: PHONE, rewardIds: [ids[1], ids[0]] }, recvAdmin),
+    409,
+    "ALREADY_RECEIVED",
+  );
+
+  const stillUsed = await db.rewardCode.findUnique({ where: { id: ids[1] } });
+  check("롤백되어 USED 유지", stillUsed?.status === "USED", `현재 ${stillUsed?.status}`);
+
+  expectFail(
+    "빈 선택 400",
+    await call("PATCH", RECEIVE, { name: NAME, phone: PHONE, rewardIds: [] }, recvAdmin),
+    400,
+    "VALIDATION_ERROR",
+  );
+
+  expectFail(
+    "이름 누락 400",
+    await call("PATCH", RECEIVE, { phone: PHONE, rewardIds: [ids[1]] }, recvAdmin),
+    400,
+    "VALIDATION_ERROR",
+  );
+
+  /* ── 관리자 지급 조회 ─────────────────────────────────── */
+  console.log("\n[POST /api/admin/reward/lookup]");
+
+  const LOOKUP = "/api/admin/reward/lookup";
+
+  expectFail("미인증 조회 401", await call("POST", LOOKUP, { name: NAME, phone: PHONE }), 401, "UNAUTHORIZED");
+
+  const adminBox = await call("POST", LOOKUP, { name: NAME, phone: PHONE }, recvAdmin);
+  check("200 조회", adminBox.status === 200 && adminBox.body.success, adminBox.body.message);
+
+  const abData = adminBox.body.data as {
+    userNameMasked: string;
+    phoneMasked: string;
+    pending: unknown[];
+    received: unknown[];
+  };
+  check("성함 마스킹됨", abData?.userNameMasked === "박OO트", abData?.userNameMasked);
+  check(
+    "연락처 마스킹됨",
+    abData?.phoneMasked === `${PHONE.slice(0, 3)}-****-${PHONE.slice(-4)}`,
+    abData?.phoneMasked,
+  );
+  check(
+    "응답에 평문 없음",
+    !JSON.stringify(adminBox.body).includes(PHONE) && !JSON.stringify(adminBox.body).includes(NAME),
+  );
+  check("지급분이 received 로 이동", abData?.received?.length === 1, `${abData?.received?.length}건`);
 
   /* ── 관리자 기능 ──────────────────────────────────────── */
   console.log("\n[관리자 기능]");

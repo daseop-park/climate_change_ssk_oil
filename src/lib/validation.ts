@@ -65,7 +65,16 @@ export const lookupRewardsSchema = z.object({
   phone: phoneField,
 });
 
+/**
+ * 실물 지급 처리.
+ *
+ * **이름을 함께 받습니다.** 관리자 목록에 성함이 마스킹되어 나가면서(§6 B안)
+ * "화면을 보고 대조" 하는 방식이 성립하지 않게 됐습니다. 대신 운영자가 고객에게
+ * 이름을 물어 입력하면 서버가 대조합니다 — 확인 수단을 화면에서 입력으로 옮긴 것입니다.
+ * 이름 없이 번호만으로 지급되면 번호를 아는 사람이 남의 경품을 소각할 수 있습니다.
+ */
 export const receiveRewardsSchema = z.object({
+  name: nameField,
   phone: phoneField,
   rewardIds: z
     .array(z.string().min(1))

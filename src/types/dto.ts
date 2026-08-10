@@ -81,9 +81,33 @@ export type LookupRewardsResponse = {
 /* ── 실물 수령 처리 ──────────────────────────────────────── */
 
 export type ReceiveRewardsRequest = {
+  /**
+   * 수령자 이름. 전화번호와 **복합 대조**합니다.
+   *
+   * 목록에 성함이 마스킹되어 나가면서(§6 B안) 화면을 보고 맞추는 방식이 성립하지
+   * 않게 됐습니다. 운영자가 고객에게 물어 입력하면 서버가 대조합니다.
+   */
+  name: string;
   phone: string;
   /** 관리자가 체크한 rewardCode.id 목록 */
   rewardIds: string[];
+};
+
+/**
+ * 관리자 지급 화면의 조회 결과.
+ *
+ * 공개 `LookupRewardsResponse` 와 달리 **성함·연락처가 마스킹**되어 옵니다.
+ * 운영자가 입력한 값이 맞았는지 확인하는 용도이지, 읽어서 대조하는 용도가 아닙니다.
+ */
+export type AdminLookupResponse = {
+  /** `김O서` */
+  userNameMasked: string;
+  /** `010-****-4821` */
+  phoneMasked: string;
+  /** 아직 실물을 받지 않은 것 (status: USED) */
+  pending: RewardItemDto[];
+  /** 수령 완료 (status: RECEIVED) */
+  received: RewardItemDto[];
 };
 
 export type ReceiveRewardsResponse = {
@@ -188,6 +212,18 @@ export type RecentWinDto = {
   status: RewardStatus;
   /** 당첨 시각 = 코드를 등록한 시각 */
   wonAt: string;
+  /** 실물 지급 시각. 아직 안 나갔으면 null */
+  receivedAt: string | null;
+};
+
+/** 당첨 내역 목록 — 필터·페이지네이션 결과 */
+export type WinListResponse = {
+  items: RecentWinDto[];
+  /** 필터를 적용한 전체 건수 (페이지 수 계산용) */
+  total: number;
+  /** 1부터 */
+  page: number;
+  pageSize: number;
 };
 
 /**

@@ -27,8 +27,10 @@ import type {
   IssueCodesResponse,
   IssuedCodeDto,
   PrizeStatusDto,
+  RecentWinDto,
   StockRowDto,
   UpdateProductRequest,
+  WinListResponse,
 } from "../types/dto";
 
 /** 코드 생성 재시도 한계. 이 횟수 안에 중복 없는 집합을 못 만들면 코드 공간이 포화된 것입니다. */
@@ -36,6 +38,12 @@ const CODE_RETRY_ROUNDS = 10;
 const RECENT_WIN_LIMIT = 10;
 /** 일별 추이 차트의 막대 수. 핸드오프 디자인이 14개 기준입니다. */
 const DAILY_CHART_DAYS = 14;
+/** 당첨 내역 한 페이지. 1280px 에서 스크롤 없이 대충 들어가는 수입니다. */
+const WIN_PAGE_SIZE = 20;
+
+function clamp(v: number, min: number, max: number): number {
+  return Math.min(max, Math.max(min, v));
+}
 
 /** 비율 %. 분모가 0이면 0 — `0/0 = NaN` 이 그대로 화면에 나가면 진행바 폭이 깨집니다. */
 function percent(part: number, whole: number): number {
@@ -58,6 +66,39 @@ function formatOdds(issued: number, total: number): string | null {
   const ratio = (issued / total) * 100;
   if (ratio < 1) return "1% 미만";
   return `${Math.round(ratio)}%`;
+}
+
+/** `recentWins`·`findWins` 가 돌려주는 행의 모양 (레포지토리 `select` 와 같습니다) */
+type WinRow = {
+  id: string;
+  rewardCode: string;
+  batch: string;
+  status: string;
+  usedAt: Date | null;
+  receivedAt: Date | null;
+  product: { name: string };
+  user: { name: string; phoneEncrypted: string } | null;
+};
+
+/**
+ * 당첨 행 → DTO. **마스킹이 여기 한 곳에만 있습니다.**
+ *
+ * 대시보드의 최근 당첨과 당첨 내역 목록이 같은 함수를 씁니다. 두 곳에 따로 적으면
+ * 한쪽만 고쳐졌을 때 **평문이 새는 화면이 하나 생기는데, 화면은 멀쩡해 보입니다.**
+ */
+function toWinDto(r: WinRow): RecentWinDto {
+  return {
+    rewardId: r.id,
+    rewardCode: r.rewardCode,
+    batch: r.batch,
+    productName: r.product.name,
+    userNameMasked: r.user ? maskName(r.user.name) : "-",
+    phoneMasked: r.user ? maskPhone(decryptPhone(r.user.phoneEncrypted)) : "-",
+    status: r.status as RewardStatus,
+    // 등록된 코드만 골라 왔으므로 usedAt 은 항상 있습니다. 타입상 nullable 이라 방어만 둡니다.
+    wonAt: (r.usedAt ?? r.receivedAt ?? new Date()).toISOString(),
+    receivedAt: r.receivedAt?.toISOString() ?? null,
+  };
 }
 
 /**
@@ -147,19 +188,36 @@ export const adminService = {
       receivedRate: percent(totalReceived, registered),
       daily: buildDailySeries(usage, DAILY_CHART_DAYS),
       stock,
-      recentWins: recent.map((r) => ({
-        rewardId: r.id,
-        rewardCode: r.rewardCode,
-        batch: r.batch,
-        productName: r.product.name,
-        // ⚠️ 마스킹은 **여기서** 끝냅니다. 화면으로 평문을 넘기면 네트워크 탭에 남습니다.
-        userNameMasked: r.user ? maskName(r.user.name) : "-",
-        phoneMasked: r.user ? maskPhone(decryptPhone(r.user.phoneEncrypted)) : "-",
-        status: r.status as RewardStatus,
-        // 등록된 코드만 골라 왔으므로 usedAt 은 항상 있습니다. 타입상 nullable 이라 방어만 둡니다.
-        wonAt: (r.usedAt ?? r.receivedAt ?? new Date()).toISOString(),
-      })),
+      // ⚠️ 마스킹은 `toWinDto` 안에서 끝납니다. 화면으로 평문을 넘기면 네트워크 탭에 남습니다.
+      recentWins: recent.map(toWinDto),
     };
+  },
+
+  /**
+   * 당첨 내역 목록 — 상태 필터 + 페이지네이션.
+   *
+   * 목록과 카운트를 **같은 트랜잭션에 묶지 않았습니다.** 그 사이에 지급이 한 건 일어나면
+   * 총계가 1 어긋나는데, 다음 렌더에서 바로 맞춰집니다. 현장 조회 화면에서 그 정도
+   * 오차를 없애자고 쓰기 경로를 잠글 이유가 없습니다.
+   */
+  async listWins(params: {
+    status?: RewardStatus;
+    page?: number;
+    pageSize?: number;
+  }): Promise<WinListResponse> {
+    const pageSize = clamp(params.pageSize ?? WIN_PAGE_SIZE, 1, 100);
+    const page = Math.max(1, Math.trunc(params.page ?? 1));
+
+    const [rows, total] = await Promise.all([
+      rewardRepository.findWins(db, {
+        status: params.status,
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+      }),
+      rewardRepository.countWins(db, params.status),
+    ]);
+
+    return { items: rows.map(toWinDto), total, page, pageSize };
   },
 
   /**

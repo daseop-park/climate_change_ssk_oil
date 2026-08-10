@@ -10,12 +10,15 @@
  * "먼저 읽어서 확인한다"는 절차가 없다는 점이 핵심입니다 — 확인은 DB 가 합니다.
  */
 import { db } from "../lib/db";
+import { decryptPhone } from "../lib/crypto";
 import { AppError, ERROR_CODES } from "../lib/errors";
+import { maskName, maskPhone } from "../lib/mask";
 import { normalizeCode } from "../lib/reward-code";
 import { rewardRepository } from "../repositories/reward.repository";
 import { derivePhoneFields, userService } from "./user.service";
 import { REWARD_STATUS, type RewardStatus } from "../types/reward";
 import type {
+  AdminLookupResponse,
   LookupRewardsRequest,
   LookupRewardsResponse,
   ReceiveRewardsRequest,
@@ -142,12 +145,37 @@ export const rewardService = {
   },
 
   /**
+   * 관리자 지급 화면의 조회.
+   *
+   * 공개 `lookup` 과 같은 조회지만 **응답이 다릅니다** — 성함·연락처가 마스킹되어 나갑니다.
+   * 운영자가 입력한 값이 맞았는지 확인하는 용도이지 읽어서 대조하는 용도가 아닙니다 (§6 B안).
+   *
+   * 레이트 리밋을 걸지 않습니다. 공개 조회는 전화번호 순회를 막아야 하지만, 이 경로는
+   * 이미 관리자 인증을 통과한 뒤이고 현장에서 연달아 조회하는 것이 정상 사용입니다.
+   */
+  async lookupForAdmin(input: LookupRewardsRequest): Promise<AdminLookupResponse> {
+    const user = await userService.findByPhoneOrThrow(db, input.phone, input.name);
+    const rewards = await rewardRepository.findByUserId(db, user.id);
+
+    return {
+      userNameMasked: maskName(user.name),
+      phoneMasked: maskPhone(decryptPhone(user.phoneEncrypted)),
+      pending: rewards.filter((r) => r.status === REWARD_STATUS.USED).map(toRewardItem),
+      received: rewards.filter((r) => r.status === REWARD_STATUS.RECEIVED).map(toRewardItem),
+    };
+  },
+
+  /**
    * 실물 지급 처리. (USED → RECEIVED)
    *
    * **전부 성공하거나 전부 실패합니다.** 요청한 개수와 실제 갱신 수가 다르면
    * 롤백하고 에러를 냅니다. 일부만 처리하고 "3개 중 2개 완료"를 돌려주면,
    * 현장에서 실물을 건네는 관리자가 무엇을 이미 줬는지 알 수 없게 됩니다.
    * 관리자는 목록을 새로고침해 실제 상태를 보고 다시 선택하게 됩니다.
+   *
+   * **이름까지 대조합니다.** 목록에 성함이 마스킹되어 나가면서 "보고 맞추기"가
+   * 성립하지 않게 됐고, 번호만으로 지급되면 번호를 아는 사람이 남의 경품을
+   * 소각할 수 있습니다. 확인 수단을 화면에서 입력으로 옮긴 것입니다 (§6 B안).
    */
   async receive(input: ReceiveRewardsRequest): Promise<ReceiveRewardsResponse> {
     const ids = [...new Set(input.rewardIds ?? [])].filter(Boolean);
@@ -155,7 +183,7 @@ export const rewardService = {
       throw new AppError(ERROR_CODES.VALIDATION_ERROR, "지급할 리워드를 선택해 주세요.");
     }
 
-    const user = await userService.findByPhoneOrThrow(db, input.phone);
+    const user = await userService.findByPhoneOrThrow(db, input.phone, input.name);
     const now = new Date();
 
     await db.$transaction(async (tx) => {

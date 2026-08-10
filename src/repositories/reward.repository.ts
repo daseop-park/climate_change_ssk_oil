@@ -34,6 +34,17 @@ export type CreateRewardCodeInput = {
   batch: string;
 };
 
+/**
+ * 당첨 내역의 모집단 — 목록과 카운트가 **반드시 같은 조건**을 써야 합니다.
+ * 두 곳에 따로 적으면 한쪽만 고쳐졌을 때 페이지 수가 실제 행 수와 어긋나는데,
+ * 마지막 페이지가 비는 형태로만 드러나 원인을 찾기 어렵습니다.
+ */
+function winsWhere(status?: RewardStatus) {
+  return status
+    ? { status }
+    : { status: { in: [REWARD_STATUS.USED, REWARD_STATUS.RECEIVED] } };
+}
+
 export const rewardRepository = {
   findByCode(client: DbClient, rewardCode: string) {
     return client.rewardCode.findUnique({ where: { rewardCode } });
@@ -222,6 +233,39 @@ export const rewardRepository = {
         user: { select: { name: true, phoneEncrypted: true } },
       },
     });
+  },
+
+  /**
+   * 당첨 내역 목록 — 필터 + 페이지네이션.
+   *
+   * `recentWins` 와 같은 모집단(등록된 코드)이지만 이쪽은 상태로 좁힐 수 있고
+   * 건너뛰기가 있습니다. `status` 를 주지 않으면 `USED`+`RECEIVED` 전부입니다.
+   */
+  findWins(
+    client: DbClient,
+    params: { status?: RewardStatus; skip: number; take: number },
+  ) {
+    return client.rewardCode.findMany({
+      where: winsWhere(params.status),
+      orderBy: { usedAt: "desc" },
+      skip: params.skip,
+      take: params.take,
+      select: {
+        id: true,
+        rewardCode: true,
+        batch: true,
+        status: true,
+        usedAt: true,
+        receivedAt: true,
+        product: { select: { name: true } },
+        user: { select: { name: true, phoneEncrypted: true } },
+      },
+    });
+  },
+
+  /** 위 목록의 전체 건수. 페이지 수 계산에 씁니다. */
+  countWins(client: DbClient, status?: RewardStatus) {
+    return client.rewardCode.count({ where: winsWhere(status) });
   },
 
   /**
