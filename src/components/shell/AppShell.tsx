@@ -21,7 +21,7 @@ function Shell({ children }: { children: React.ReactNode }) {
         <Intro />
 
         <div
-          className="ssak-panel absolute top-[68px] right-0 bottom-0 left-0 z-30 flex flex-col overflow-hidden rounded-t-3xl bg-[rgba(245,248,245,.34)] shadow-[0_-20px_50px_rgba(4,16,10,.5)] backdrop-blur-[8px]"
+          className="ssak-panel absolute top-[68px] right-0 bottom-0 left-0 z-30 flex flex-col overflow-hidden rounded-t-3xl bg-[rgba(245,248,245,.45)] shadow-[0_-20px_50px_rgba(4,16,10,.5)] backdrop-blur-[8px]"
           style={{
             transition: "transform .72s cubic-bezier(.22,1,.36,1)",
             transform: entered ? "translateY(0)" : "translateY(104%)",

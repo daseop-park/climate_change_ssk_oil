@@ -27,7 +27,8 @@ export const PRODUCTS: CatalogProduct[] = [
     id: "prd_sb_americano",
     name: "스타벅스 아메리카노 T",
     description:
-      "전국 스타벅스 매장에서 사용 가능한 모바일 교환권입니다. 발급 후 30일 이내 사용해 주세요.",
+      "전국 스타벅스 매장에서 사용 가능한 모바일 교환권입니다.",
+    image: "/assets/prize-starbucks-americano.png",
     category: "카페",
     rank: "3등",
     hue: 150,
@@ -38,6 +39,7 @@ export const PRODUCTS: CatalogProduct[] = [
     name: "편의점 모바일상품권 5,000원",
     description:
       "GS25·CU·세븐일레븐 등 전국 편의점에서 현금처럼 사용할 수 있는 모바일 금액권입니다.",
+    image: "/assets/prize-cvs-5000.png",
     category: "상품권",
     rank: "2등",
     hue: 210,
@@ -46,7 +48,7 @@ export const PRODUCTS: CatalogProduct[] = [
   {
     id: "prd_sb_giftcard",
     name: "스타벅스 기프트카드 5만원",
-    description: "이번 주 최고 경품! 스타벅스 5만원 충전 기프트카드입니다.",
+    description: "스타벅스 5만원 충전 기프트카드입니다.",
     image: "/assets/prize-starbucks-50000.png",
     category: "카페",
     rank: "1등",
@@ -54,21 +56,28 @@ export const PRODUCTS: CatalogProduct[] = [
     sortOrder: 3,
   },
   {
+    // id 는 발급된 코드가 가리키는 키라 금액이 바뀌어도 그대로 둡니다.
+    // (`prd_delivery_3000` → 현재 10,000원. id 를 바꾸면 새 상품 행이 생기고
+    //  기존 코드는 옛 상품에 매달린 채 남습니다.)
     id: "prd_delivery_3000",
-    name: "배달앱 3,000원 할인쿠폰",
+    name: "배달앱 10,000원 할인쿠폰",
     description:
       "최소 주문금액 12,000원 이상 결제 시 사용 가능한 배달 할인 쿠폰입니다.",
+    // 금액 표기가 없는 로고라 20,000원 쿠폰과 같은 파일을 씁니다.
+    image: "/assets/prize-delivery-coupon.png",
     category: "배달",
     rank: "4등",
     hue: 40,
     sortOrder: 4,
   },
   {
+    // 위와 같은 이유로 id 유지 (`prd_culture_10000` → 현재 배달앱 20,000원 쿠폰).
     id: "prd_culture_10000",
-    name: "문화상품권 10,000원",
+    name: "배달앱 20,000원 할인쿠폰",
     description:
-      "온·오프라인 가맹점에서 폭넓게 사용 가능한 문화상품권 핀번호를 발급해 드립니다.",
-    category: "상품권",
+      "배달앱에서 사용 가능한 20,000원 할인 쿠폰입니다. 최소 주문금액 등 사용 조건은 발급 시 안내됩니다.",
+    image: "/assets/prize-delivery-coupon.png",
+    category: "배달",
     rank: "2등",
     hue: 265,
     sortOrder: 5,
@@ -77,7 +86,8 @@ export const PRODUCTS: CatalogProduct[] = [
     id: "prd_ecobag",
     name: "싹싹기름 리사이클 에코백",
     description:
-      "폐페트병을 재활용한 원단으로 만든 친환경 에코백입니다. 색상은 랜덤 발송됩니다.",
+      "폐페트병을 재활용한 원단으로 만든 친환경 에코백입니다.",
+    image: "/assets/prize-ecobag.jpg",
     category: "굿즈",
     rank: "참가상",
     hue: 165,
@@ -91,10 +101,10 @@ export const PRODUCTS: CatalogProduct[] = [
  */
 export const DEFAULT_PLAN: Record<string, number> = {
   prd_sb_giftcard: 1, //  1% · 1등
-  prd_culture_10000: 5, //  5% · 2등
+  prd_culture_10000: 5, //  5% · 2등 · 배달앱 20,000원
   prd_cvs_5000: 10, // 10% · 2등
   prd_sb_americano: 15, // 15% · 3등
-  prd_delivery_3000: 29, // 29% · 4등
+  prd_delivery_3000: 29, // 29% · 4등 · 배달앱 10,000원
   prd_ecobag: 40, // 40% · 참가상
 };
 

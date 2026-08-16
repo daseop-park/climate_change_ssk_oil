@@ -26,7 +26,13 @@ export default function PrizeSheet() {
             onClick={closeAll}
             aria-label="닫기"
             tabIndex={open ? undefined : -1}
-            className="bg-line-2 absolute top-[14px] right-[14px] flex h-[34px] w-[34px] cursor-pointer items-center justify-center rounded-[11px] border-none"
+            /*
+              z-10 은 장식이 아닙니다. 아래 `ProductImage` 가 next/image 의 `fill` 때문에
+              `relative` 로 렌더되는데, DOM 순서상 이 버튼보다 뒤에 와서 같은
+              `z-index:auto` 레벨에서는 이미지가 버튼을 덮습니다. 상품 사진이 없던
+              시절에는 플레이스홀더가 위치 지정 없는 div 라 드러나지 않던 문제입니다.
+            */
+            className="bg-line-2 absolute top-[14px] right-[14px] z-10 flex h-[34px] w-[34px] cursor-pointer items-center justify-center rounded-[11px] border-none"
           >
             <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden>
               <g stroke="#17211C" strokeWidth="2" strokeLinecap="round">

@@ -16,7 +16,7 @@ export default function Intro() {
       style={{ zIndex: entered ? 5 : 60 }}
     >
       <Image
-        src="/assets/intro-bg.png"
+        src="/assets/intro-bg-earth.png"
         alt=""
         fill
         priority
