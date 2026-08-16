@@ -1,6 +1,7 @@
 # Design & Event Specifications: Climate Change SSK Oil
 
 > **갱신 이력**
+> - 2026-08-12 — 인트로/앱 배경을 `intro-bg-earth.png`로 교체(이에 맞춰 앱 패널 불투명도 `.34 → .45`). 홈 GUIDE 캐러셀을 사진 카드뉴스 5장으로 교체, About us 에 SOLUTION/HOW IT WORKS/IMPACT/MODEL 추가. 개정 스펙은 `design_handoff_ssakssak/revisions/` 로 분리.
 > - 2026-08-06 — 진실 소스를 `design_handoff_ssakssak/`로 교체. 기존의 **"배경 이미지 미사용 / 글래스모피즘 금지 / 불투명 서피스"** 조항은 새 디자인과 정면 충돌하므로 **폐기**했습니다. 8대 버튼 이벤트 중 6·7·8번은 라우트 분리 방식으로 변경.
 > - 2026-07-16 — 최초 작성 (구 Claude Design 초안 기준)
 
@@ -16,21 +17,28 @@
 
 ### 진실 소스
 - **`design_handoff_ssakssak/README.md`** — 화면별 수치 명세 (hifi, 확정값)
-- **`design_handoff_ssakssak/team_싹싹기름 v4.dc.html`** — 최종 디자인 프로토타입
+- **`design_handoff_ssakssak/team_싹싹기름 v4.dc.html`** — 디자인 프로토타입. **단 아래 개정본이 덮은 섹션은 제외**
+- **`design_handoff_ssakssak/revisions/`** — v4 이후 개정본. 해당 섹션은 v4 보다 **이쪽이 우선**한다
+  - `home-cardnews.html` — 홈 "환경을 지키는 습관" (v4 의 GUIDE 벡터 슬라이드 8장을 대체)
+  - `about-us.html` — About us 추가 섹션
 - `design_handoff_ssakssak/support.js` — 프로토타입 런타임. **이식 대상 아님**
 - `front_design/` — 구 참조 자료(로고 원본)로만 유지. 시각 기준으로 삼지 않는다.
 
 ### 배경 & 서피스 (구 조항 폐기)
 
-**배경 이미지를 사용한다.** `assets/intro-bg.png`가 인트로 스플래시이자, 진입 이후에도
+**배경 이미지를 사용한다.** `assets/intro-bg-earth.png`가 인트로 스플래시이자, 진입 이후에도
 `z-index: 60 → 5`로 내려가 **앱 패널 뒤 배경으로 상시 잔류**한다. 앱 패널이 상단 68px을 비워 두어
 배경 사진과 로고가 계속 보이는 것이 이 디자인의 정체성이다.
+(구 `intro-bg.png`(숲 항공샷)는 2026-08-12 에 교체됨.)
+
+> 새 배경은 중앙 피사체가 어두워 무배경 섹션(홈 코드 입력 폼, About 의 SOLUTION·IMPACT)의
+> 본문 대비가 낮았다. 앱 패널 불투명도를 `.34 → .45` 로 올려 해결(2026-08-12).
 
 **글래스모피즘이 핵심 디자인 언어다.** 반투명 서피스 + `backdrop-filter`로 층위를 표현한다.
 
 | 대상 | 값 |
 |---|---|
-| 앱 패널 | `rgba(245,248,245,.34)` + `blur(8px)` |
+| 앱 패널 | `rgba(245,248,245,.45)` + `blur(8px)` — v4 의 `.34` 에서 상향 |
 | 흰 섹션 | `rgba(255,255,255,.4)` |
 | 카드 | `rgba(255,255,255,.5)` |
 | 카드 테두리 | `rgba(230,236,231,.62)` |
@@ -79,13 +87,13 @@
 | 인트로 로고 | `ssakIntroLogo 2.6s cubic-bezier(.65,0,.35,1)` |
 | 인트로 CTA | `ssakIntroUp .8s ease 2.2s both` |
 | 추첨 유지 시간 | `1800ms` (응답이 빨라도 최소 유지) |
-| 팁 캐러셀 자동 전환 | `3800ms` |
+| 카드뉴스 캐러셀 자동 전환 | `4000ms` (사용자 조작 후 `6000ms` 정지) |
 | 토스트 | `2200ms` 후 자동 소멸 |
 
 > 구 명세의 모달 `cubic-bezier(0.34, 1.56, 0.64, 1)` 스프링백은 `ssakPop`으로 대체되었다.
 
 **`prefers-reduced-motion: reduce`** 시 인트로 로고 이동·컨페티·부유 애니메이션을 끄고,
-팁 캐러셀 자동 전환도 중지한다.
+카드뉴스 캐러셀 자동 전환도 중지한다.
 
 ---
 
@@ -147,7 +155,7 @@
 4. **반응형**: 모바일 세로 뷰(375~480px)를 기준으로 한다.
 5. **참조 폴더 격리**: `design_handoff_ssakssak/`, `front_design/`은 참조 전용이며 빌드 대상이 아니다.
    실제 렌더는 `src/` 컴포넌트로 재작성해 사용한다.
-6. **`'use client'` 필요 지점**: 팁 캐러셀 스케일링(ResizeObserver), 스크롤 리스너, 인트로 애니메이션,
+6. **`'use client'` 필요 지점**: 카드뉴스 캐러셀(스크롤 리스너·자동 전환 타이머), 스크롤 리스너, 인트로 애니메이션,
    셸 상태 컨텍스트. SSR에서 `window` 접근 금지.
 7. **iOS Safari**: 코드 입력창 `font-size`를 16px 미만으로 내리지 않는다 (자동 확대 방지).
 8. **터치 타깃**: 44px 이상 유지. 현재 코드 입력창·확인 버튼 46px이 하한선이다.

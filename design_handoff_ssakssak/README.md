@@ -54,7 +54,8 @@
 **Layout**: 셸 전체를 덮는 `position:absolute; inset:0; z-index:60`.
 
 **Components**
-- 배경 이미지 `assets/intro-bg.png` — `object-fit:cover; object-position:center`, 전체 채움 (모바일에서 좌우 잘림 허용).
+- 배경 이미지 `assets/intro-bg-earth.png` (지구를 든 손 · 숲 항공샷) — `object-fit:cover; object-position:center`, 전체 채움 (모바일에서 좌우 잘림 허용).
+  구 `intro-bg.png`(숲 항공샷 단독)는 더 이상 쓰지 않습니다. 새 이미지는 중앙 피사체가 어두워, 패널 뒤로 비칠 때 본문 대비가 구 이미지보다 낮습니다 (아래 **미해결 사항** 참조).
 - 비네트: `box-shadow: inset 0 0 90px 30px rgba(8,18,12,.55), inset 0 0 200px 60px rgba(8,18,12,.35)`
 - 상하 그라데이션: `linear-gradient(180deg, rgba(8,18,12,.35) 0%, rgba(8,18,12,.05) 38%, rgba(8,18,12,.62) 100%)`
 - **로고 묶음** (아미유 220px + 사랑의열매 186px, 세로 gap 16px, `filter: drop-shadow(0 6px 20px rgba(0,0,0,.35))`)
@@ -81,7 +82,7 @@
 ```
 position:absolute; left:0; right:0; top:68px; bottom:0; z-index:30;
 display:flex; flex-direction:column;
-background:rgba(245,248,245,.34);
+background:rgba(245,248,245,.45);   /* v4 는 .34 — 새 배경 대비 확보를 위해 상향 */
 backdrop-filter:blur(8px);
 border-radius:24px 24px 0 0;
 overflow:hidden;
@@ -152,27 +153,26 @@ left:50%; margin-left:-103px; top:8px
 카드 탭으로 활성 전환. 하단 인디케이터: 활성 `20×7px #1E8E5A`, 비활성 `7×7px #D3DCD6`, `border-radius:7px`, `transition:all .3s`.
 *권장 개선: 터치 스와이프 제스처 추가.*
 
-**GUIDE — 환경을 지키는 습관 (팁 캐러셀)**
-- 섹션 헤더: 키커 "GUIDE" `10.5px/800/.14em/#1B5E20`, 제목 "환경을 지키는 습관" `21px/800/-.03em`
-- 트랙: `display:flex; overflow-x:auto; scroll-snap-type:x mandatory; border-radius:20px; box-shadow:0 10px 26px rgba(23,33,28,.16)`
-- 슬라이드 8장, 각 `flex:0 0 100%; aspect-ratio:2/1; scroll-snap-align:center`
-- **중요**: 각 슬라이드 내부는 **2160×1080px 고정 캔버스**이며 `transform: scale(containerWidth / 2160)`, `transform-origin: top left`로 축소됩니다. 리사이즈 시 재계산 필요.
-  → Next.js에서는 `useEffect` + `ResizeObserver`, `'use client'` 필수. (SSR에서 `window` 접근 금지)
-- 자동 전환 3800ms (`scrollTo({behavior:'smooth'})`), 스크롤 위치로 활성 인덱스 역산
-- 하단 dot 8개: 활성 `22×3px #1E8E5A`, 비활성 `10×3px #D3DCD6`
+**CARD NEWS — 환경을 지키는 습관 (사진 카드뉴스)**
 
-**슬라이드 8장의 디자인 시스템** (2160×1080 기준 값)
-- 배경: 라이트 `#F2F6F3` / 커버 슬라이드만 `oklch(30% 0.07 152)` (딥그린)
-- 공통 우하단 장식 원: `right:-140px; bottom:-160px; 560×560; border-radius:50%; background:#E3EFE7`
-- 공통 좌상단 알약 키커: `top:64px; left:100px; background:#0E2A1C; padding:18px 44px; border-radius:999px` + 민트 점 18px `#5FD39A` + 라벨 `34px/800/.12em/#fff` ("TIP 01 · 종이팩" 형식)
-- 공통 우하단 근거 문구: `right:100px; bottom:66px; 30px/600/#8A9A90`
-- 헤드라인 `112px/900/line-height 1.24/-.01em/#17211C`, 강조 `<span>` `#1E8E5A`
-- 서브카피 `50px/500/#55665C`
-- 레이아웃 3종:
-  1. **비교형** — 2열 gap 48px. 좌: 흰 카드 `border:2px solid #E6ECE7; border-radius:32px; padding:52px 48px`, ✕ 원 64px `#EBF0EC`/글자 `#8A9A90`. 우: `#0E2A1C` 카드, ○ 원 `#1E8E5A`, 라벨 `#5FD39A`, 본문 흰색. 본문 `52px/700/line-height 1.4`
-  2. **단계형** — 원 160px 4개 + 화살표(`76px/900/#B9CCC0`). 원 색 램프: `#0E2A1C → #14663F → #1E8E5A → #5FD39A`(마지막만 글자 `#0E2A1C`)
-  3. **선언형** — 헤드라인 + 흰 카드 1개 (`56px/700/#3C4B43`)
-- 슬라이드 목록: EP.1 커버(딥그린) / CONTENTS(목차 카드 2개) / TIP 01 종이팩(비교) / TIP 02 페트병(단계) / TIP 03 택배 상자(비교) / TIP 04 폐의약품(선언) / TIP 05 난방(비교) / TIP 06 단열(선언)
+> ⚠️ **개정됨.** v4 의 "GUIDE" 캐러셀(2160×1080 벡터 슬라이드 8장)은 폐기하고 사진 배경 카드뉴스 5장으로 교체했습니다.
+> 원본 스펙: `revisions/home-cardnews.html`. v4.dc.html 의 해당 섹션은 더 이상 기준이 아닙니다.
+
+- 섹션 헤더: 키커 "CARD NEWS" `10.5px/800/.14em/#1E8E5A`, 제목 "환경을 지키는 습관" `21px/800/-.03em`, 안내 "옆으로 넘겨 보세요 · 5장" `13px/#5A6A62`
+- 트랙: `display:flex; gap:12px; padding:0 16px 8px; overflow-x:auto; scroll-snap-type:x mandatory`
+  - v4 와 달리 트랙 자체에는 `border-radius`·`box-shadow` 를 주지 않습니다. 카드마다 개별로 둥글립니다.
+- 카드 5장, 각 `flex:none; width:344px; height:208px; border-radius:20px; scroll-snap-align:center`
+  - 440px 셸에서 **다음 카드가 살짝 보이는 피크(peek) 레이아웃**입니다. 폭 344px 은 이 피크를 만들기 위한 값이므로 100% 로 바꾸지 마세요.
+  - 좌우 여백이 16px 뿐이라 첫·마지막 카드는 끝까지 밀어도 중앙에 닿지 않습니다. 인디케이터를 스크롤 위치로 역산할 때 **양 끝은 따로 고정**해야 실제 화면과 어긋나지 않습니다.
+- 카드 구성: 배경 사진(`object-fit:cover`) + 어두운 그라디언트 `linear-gradient(180deg, rgba(10,18,13,.62) 0%, rgba(10,18,13,.82) 100%)` + 중앙 정렬 텍스트 `padding:20px 24px`
+  - 라벨 `12px/700/#8FE6B8` ("CARD 01 · 표지" 형식) — 원본 스펙은 `#C9F24E`(라임)이나 사이트 팔레트에 맞춰 민트로 구현
+  - 제목 `19px/900/1.35/-.03em/#fff`, 본문 `13px/1.5/rgba(255,255,255,.84)`
+- 자동 전환 4000ms (`scrollBy({behavior:'smooth'})`), 마지막 → 첫 장 순환
+  - 사용자가 트랙을 만지면(`pointerdown`·`touchstart`·`wheel`) **6000ms 동안 자동 전환을 쉽니다.** 없으면 스와이프 도중 타이머가 화면을 낚아챕니다.
+  - `prefers-reduced-motion: reduce` 이면 자동 전환을 켜지 않습니다.
+- 하단 dot 5개: 활성 `22×3px #1E8E5A`, 비활성 `10×3px #D3DCD6`
+- 카드별 사진: 01 `photo-delivery.png` / 02 `card-settop.png` / 03 `card-eggshell.png` / 04 `card-aircon.png` / 05 `card-pad.png`
+  - 04·05 는 흰 배경 사진이라 위 그라디언트가 없으면 흰 텍스트가 읽히지 않습니다. 오버레이를 빼지 마세요.
 
 **PRIZE — 경품 목록** (grid 2열 또는 list, `rewardLayout` prop)
 - 섹션 `background:rgba(255,255,255,.4); border-top:1px solid rgba(230,236,231,.55); padding:26px 16px 32px`
@@ -194,8 +194,17 @@ border-bottom:1px solid #E6ECE7;
 ### 5. About us
 - 다크 히어로: `padding:30px 20px 26px`, `linear-gradient(172deg, rgba(8,40,24,.5) 0%, rgba(9,44,27,.78) 50%, rgba(8,36,22,.94) 100%), url(assets/photo-delivery.png) center/cover`
   키커 "ABOUT US" `#5FD39A`, 서브 "아미유 주최 기후 변화 대응 공모전 싹싹기름팀" `12.5px/600/rgba(255,255,255,.72)`, H1 `25px/800/1.32/-.035em`
-- BACKGROUND 섹션: 01/02/03 번호 카드 체인
-- 팀 섹션: 아바타 카드
+- BACKGROUND 섹션: 01/02/03 번호 카드 체인 (03 = "기름 오염으로 재활용률 저조 (16.4%)")
+- SOLUTION 섹션: 본문 + 사양 칩 3개(`14cm × 14cm` / `PLA + 케이폭` / `천연비누 코팅`), 칩 `bg #E7F2EC / 글자 #1E8E5A / border-radius:999px`
+- HOW IT WORKS 섹션: 원형 아이콘(32px, `#E7F2EC` 배경) + 한 줄 설명 3행
+- IMPACT 섹션: 2열 그리드 스탯 카드 2장 (`90%` 재활용 가능성 개선 목표 / `ESG` 기업·지자체 연계 가능)
+- MODEL 섹션: 본문 + 아이콘 카드 1장 ("지자체 협력 · 무상 보급" / "음식점 비치 → 소비자 무료 제공")
+- 팀 섹션: 아바타 카드 — **순서상 항상 마지막**
+
+> 위 4개 섹션(SOLUTION / HOW IT WORKS / IMPACT / MODEL)은 v4 이후 추가분입니다.
+> 원본 스펙: `revisions/about-us.html`.
+> 섹션 배경은 `bg-white/40` 과 무배경을 번갈아 씁니다 (BACKGROUND·HOW IT WORKS·MODEL 이 흰 배경).
+> 원본에 있던 "패드 구조 자세히 보기" 이동 행은 **대상 페이지가 없어 구현하지 않았습니다.** 패드 구조 페이지를 만들면 되살리세요.
 
 ### 6. 분리배출 tip
 - 다크 히어로 (`photo-recycle.png`), 키커 "SEPARATE COLLECTION", H1 "헷갈리는 분리배출, / 13가지만 기억하세요", 도입 문단 `12.5px/500/1.65/rgba(255,255,255,.78)`
@@ -249,7 +258,7 @@ border-bottom:1px solid #E6ECE7;
 | 오버레이 / X / 메뉴 항목 | 드로어·시트 닫기 |
 | 경품 카드 탭 | 바텀시트 열기 |
 | 커버플로우 카드 탭 | 활성 인덱스 변경 |
-| 팁 캐러셀 | 3800ms 자동 전환 + 수동 스크롤 스냅 |
+| 카드뉴스 캐러셀 | 4000ms 자동 전환 + 수동 스크롤 스냅. 사용자 조작 시 6000ms 정지, `prefers-reduced-motion` 이면 자동 전환 없음 |
 | main 스크롤 > 90px | 홈 헤더 solid 전환 |
 | "당첨 확인하기" | 빈 값 → 토스트 / 사용된 코드 → 토스트 / 그 외 → `phase:'revealing'` → 1800ms → `phase:'result'` |
 | 결과 모달 CTA | 코드를 `usedCodes`에 추가, 당첨이면 `wins` 앞에 추가, 입력창 초기화, 토스트 |
@@ -281,7 +290,7 @@ const codeSchema = z.object({
 | `phase` | `'idle' \| 'revealing' \| 'result'` | 추첨 단계 |
 | `result` | Prize \| `{miss:true}` \| null | 결과 |
 | `flowIdx` | number | 커버플로우 활성 인덱스 |
-| `promoIdx` | number | 팁 캐러셀 인덱스 |
+| `promoIdx` | number | 카드뉴스 캐러셀 인덱스 |
 | `headerSolid` | boolean | 스크롤 기반 헤더 스타일 |
 | `toast` | string \| null | 토스트 |
 
@@ -400,7 +409,7 @@ model Win {
 ### 반투명 표면 (핵심)
 | 대상 | 값 |
 |---|---|
-| 앱 패널 | `rgba(245,248,245,.34)` + `blur(8px)` |
+| 앱 패널 | `rgba(245,248,245,.45)` + `blur(8px)` — v4 의 `.34` 에서 상향 |
 | 흰 섹션 | `rgba(255,255,255,.4)` |
 | 카드 | `rgba(255,255,255,.5)` |
 | 카드 테두리 | `rgba(230,236,231,.62)` |
@@ -446,7 +455,7 @@ model Win {
 | 인트로 CTA | `.8s ease` (2.2s delay) |
 | 페이드류 | `.28 ~ .45s ease` |
 | 추첨 유지 시간 | `1800ms` |
-| 캐러셀 자동 전환 | `3800ms` |
+| 캐러셀 자동 전환 | `4000ms` (사용자 조작 후 `6000ms` 정지) |
 | 토스트 | `2200ms` |
 
 ### Keyframes
@@ -465,18 +474,30 @@ model Win {
 
 `assets/` 폴더 → Next.js `public/assets/`로 이동. CSS `url()` 배경으로 쓰이는 것은 `next/image` 대신 그대로 두세요.
 
+> **`assets/` 는 원본(마스터), `public/assets/` 는 배포본입니다.**
+> 대부분은 양쪽이 바이트 단위로 동일하지만, 아래 **"리사이즈됨"** 표시가 붙은 파일은 `public/` 쪽이 화면 표시 크기 × DPR 3 을 상한으로 축소·재압축된 사본입니다.
+> 원본이 필요하면 여기서 가져가고, `public/` 파일을 여기로 되돌려 덮어쓰지 마세요.
+
 | 파일 | 용도 | 상태 |
 |---|---|---|
-| `intro-bg.png` | 인트로 배경 (숲 항공샷) | 실제 |
+| `intro-bg-earth.png` | 인트로 + 앱 배경 (지구를 든 손) | 실제 · 리사이즈됨 (580×768 → 동일, 재압축만) |
+| `intro-bg.png` | 구 인트로 배경 (숲 항공샷) | **미사용** — 이력용으로만 보관 |
 | `logo-amiyu.png` | 아미유 로고 | 실제 |
 | `logo-fruit3.png` | 사랑의열매 로고 (여백 트리밍, **투명 배경 · 검정 아트워크**) | 실제 |
 | `logo-r14.png` | 팀 원형 로고 | 실제 |
 | `photo-greasy.png` | 커버플로우 01 | 임시 |
-| `photo-delivery.png` | 커버플로우 02, About 히어로 | 임시 |
+| `photo-delivery.png` | 커버플로우 02, About 히어로, 카드뉴스 01 | 임시 |
 | `photo-recycle.png` | 커버플로우 03, tip 히어로 | 임시 |
+| `card-settop.png` | 카드뉴스 02 · 대기전력 | 실제 · 리사이즈됨 (457×266 → 동일, 재압축만) |
+| `card-eggshell.png` | 카드뉴스 03 · 음식물류 | 실제 · 리사이즈됨 (648×559 → 동일, 재압축만) |
+| `card-aircon.png` | 카드뉴스 04 · 냉방 | 실제 · 리사이즈됨 (1536×1024 → 1032×688) |
+| `card-pad.png` | 카드뉴스 05 · 제품 소개 | 실제 · 리사이즈됨 (1402×1122 → 1032×826) |
 
 **미해결 사항**
 - 사랑의열매 로고가 검정 아트워크라 어두운 배경에서 대비가 낮습니다. **흰색(음각) 버전 확보 필요.**
+- ~~새 배경 위에서 무배경 섹션의 본문 대비가 낮음~~ → 앱 패널 불투명도를 `.34 → .45` 로 올려 완화했습니다 (2026-08-12). 배경 사진이 비치는 정도는 유지하면서 홈 코드 입력 폼과 About 의 SOLUTION·IMPACT 가독성을 확보하는 절충값입니다. 더 올리면 "배경이 상시 비친다"는 이 디자인의 정체성이 희석됩니다.
+- `card-settop.png` 는 원본이 457px 라 고해상도 화면에서 흐립니다. 더 큰 원본 확보 권장.
+- 경품 이미지 `baemin12.png` / `gs5000.png` / `staramericano.png` / `starbucks50,000.png` 는 아직 이 표에 정리되지 않았습니다 (경품 작업 진행 중).
 - 상품 이미지 전부 플레이스홀더입니다. 현재 코드:
   ```js
   imgFor(hue) {
@@ -491,10 +512,10 @@ model Win {
 
 ## 마이그레이션 체크리스트
 
-- [ ] `'use client'` — 캐러셀 스케일링, 스크롤 리스너, 인트로 애니메이션이 있는 컴포넌트
+- [ ] `'use client'` — 캐러셀 스크롤 리스너·자동 전환 타이머, 인트로 애니메이션이 있는 컴포넌트
 - [ ] `100vh` → `100dvh`
 - [ ] `backdrop-filter` `@supports` 폴백
-- [ ] 슬라이드 2160px 캔버스 스케일링을 `ResizeObserver`로 재구현
+- [x] ~~슬라이드 2160px 캔버스 스케일링을 `ResizeObserver`로 재구현~~ — 사진 카드뉴스로 교체되어 불필요
 - [ ] `view` state → App Router 라우트 분리
 - [ ] `entered` 상태를 sessionStorage에 저장 (새로고침마다 인트로 반복 방지)
 - [ ] 당첨 로직 전부 서버로 이전 (재고 차감은 트랜잭션 + 원자적 update)
@@ -511,9 +532,13 @@ model Win {
 
 | 파일 | 설명 |
 |---|---|
-| `team_싹싹기름 v4.dc.html` | **최종 디자인.** 인트로 + 반투명 홈 + 커버플로우 + 팁 캐러셀 8장 + 4개 서브페이지 |
-| `assets/` | 이미지 에셋 |
+| `team_싹싹기름 v4.dc.html` | **기본 디자인.** 인트로 + 반투명 홈 + 커버플로우 + 4개 서브페이지. 단 아래 `revisions/` 가 덮어쓴 부분은 제외 |
+| `revisions/` | **v4 이후 개정본.** 해당 섹션은 v4 가 아니라 이쪽이 기준입니다 |
+| `revisions/home-cardnews.html` | 홈 "환경을 지키는 습관" — v4 의 GUIDE 벡터 슬라이드 8장을 대체하는 사진 카드뉴스 5장 |
+| `revisions/about-us.html` | About us — SOLUTION / HOW IT WORKS / IMPACT / MODEL 섹션 추가본 |
+| `assets/` | 이미지 원본(마스터). `public/assets/` 와의 관계는 위 **Assets** 참조 |
 | `support.js` | 프로토타입 런타임. **이식 대상 아님** — 무시하세요 |
 | `분리수거_배출_tip.txt` | 분리배출 tip 페이지 원문 |
 
 HTML 파일은 브라우저에서 바로 열어 인터랙션을 확인할 수 있습니다.
+단 `revisions/` 의 두 파일은 `<html>` 래퍼가 없는 **조각(fragment)** 이며, `about-us.html` 은 Tabler 아이콘 클래스(`ti ti-*`)를 쓰므로 해당 CSS 없이 열면 아이콘 자리가 빕니다. 레이아웃·수치 확인용으로는 그대로 열어도 됩니다.
