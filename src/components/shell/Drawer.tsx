@@ -7,6 +7,7 @@ const MENU_ITEMS = [
   { label: "About us", desc: "프로젝트 소개·설명글", href: "/about" },
   { label: "마이페이지", desc: "내 경품함·당첨 내역", href: "/mypage" },
   { label: "분리배출 tip", desc: "올바른 분리수거 팁", href: "/tip" },
+  { label: "고객센터 문의", desc: "자주 묻는 질문·문의하기", href: "/support" },
 ];
 
 export default function Drawer() {

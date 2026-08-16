@@ -1,12 +1,7 @@
-"use client";
-
 import Image from "next/image";
 import Link from "next/link";
-import { useShell } from "@/components/shell/ShellContext";
 
 export default function HomeFooter() {
-  const { showToast } = useShell();
-
   const linkClass =
     "py-[5px] text-left text-[12.5px] font-semibold text-white/82 hover:text-mint-400";
 
@@ -38,13 +33,14 @@ export default function HomeFooter() {
         <Link href="/mypage" className={linkClass}>
           마이페이지
         </Link>
-        <button
-          type="button"
-          onClick={() => showToast("준비 중이에요")}
-          className={`${linkClass} cursor-pointer border-none bg-transparent`}
-        >
-          이용약관·문의
-        </button>
+        {/*
+          "이용약관·문의" 였고 누르면 "준비 중이에요" 토스트만 떴습니다.
+          이용약관 페이지는 만들 계획이 없으므로 라벨에서 빼고, 실제로 있는
+          고객센터로만 보냅니다 — 없는 문서를 링크 라벨로 약속하지 않습니다.
+        */}
+        <Link href="/support" className={linkClass}>
+          고객센터 문의
+        </Link>
       </div>
       <div className="mt-6 border-t border-white/16 pt-[18px] text-[11px] leading-[1.7] text-white/42">
         기후변화대응 공모전 출품작

@@ -421,7 +421,9 @@ Phase 5.1 검증 중에 **운영 비밀번호가 리포지토리에 평문으로
 | 죽은 쪽 | `src/lib/design/codeSchema.ts` |
 
 Phase 4 에서 `lib/design/prizes.ts`·`lib/redeem.ts` 를 걷어낼 때 함께 지웠어야 할 프로토타입
-잔재로 보입니다. **지금은 지우지 않기로 했습니다** — Phase 6 폴리싱에서 함께 정리하세요.
+잔재로 보입니다. ~~**지금은 지우지 않기로 했습니다** — Phase 6 폴리싱에서 함께 정리하세요.~~
+→ ✅ **2026-08-17 삭제 완료** (Phase 6.1). 삭제 직전 재확인에서도 살아 있는 참조는 0건이었고,
+`src/types/reward.ts:31` 의 언급은 주석입니다. 이제 `src/lib/design/` 에는 `content.ts` 만 남습니다.
 
 ---
 
@@ -831,15 +833,22 @@ README 225행에 `확률 14px/700/#1E8E5A` 스펙까지 있습니다.
 > `requireToken()` 이 던지는 예외를 `proxy.ts:107` 이 잡아 전부 차단하고,
 > **브라우저에서는 복구할 방법이 없습니다.** 대시보드에서 환경변수를 고쳐야 합니다.
 
-### 6.1 — 미연결 경로·죽은 코드 (1.25h)
+### 6.1 — 미연결 경로·죽은 코드 (1.25h) ✅ 완료 (2026-08-17)
 
-| 작업 | 대상 |
-|---|---|
-| 드로어에 "고객센터 문의 → `/support`" 추가 | `components/shell/Drawer.tsx` (`MENU_ITEMS`) |
-| 푸터 "문의"의 "준비 중이에요" 토스트를 실제 링크로 교체 | `components/home/HomeFooter.tsx` |
-| `codeSchema.ts` 삭제 | `src/lib/design/codeSchema.ts` |
-| FAQ 확률 고지 한 줄 — **숫자 없이 정책 서술로** | `lib/design/content.ts` (`FAQS`) |
-| 🆕 **`robots.ts` 추가** | `src/app/robots.ts` — 위 실측 3 |
+| 작업 | 대상 | 결과 |
+|---|---|---|
+| 드로어에 "고객센터 문의 → `/support`" 추가 | `components/shell/Drawer.tsx` (`MENU_ITEMS`) | ✅ |
+| 푸터 "문의"의 "준비 중이에요" 토스트를 실제 링크로 교체 | `components/home/HomeFooter.tsx` | ✅ |
+| `codeSchema.ts` 삭제 | `src/lib/design/codeSchema.ts` | ✅ |
+| FAQ 확률 고지 한 줄 — **숫자 없이 정책 서술로** | `lib/design/content.ts` (`FAQS`) | ✅ **이미 되어 있었음** (`content.ts:138-141`) |
+| 🆕 **`robots.ts` 추가** | `src/app/robots.ts` — 위 실측 3 | ✅ 빌드에 `○ /robots.txt` 로 확인 |
+
+착수 시점 재확인에서 FAQ 항목은 이미 문구까지 들어가 있었습니다 —
+이 절 도입부가 *"착수 시점에 이미 메워져 있다면 확인하고 지우세요"* 라고 한 그 경우입니다.
+
+**푸터 라벨을 "이용약관·문의" → "고객센터 문의" 로 줄였습니다.** 이용약관 페이지를 만들 계획이
+없는데 라벨로 약속하면 없는 문서를 링크한 셈이 됩니다. 이 변경으로 `HomeFooter` 에서
+`useShell` 의존이 사라져 `"use client"` 도 함께 걷어냈습니다.
 
 문안은 위 [확률 고지](#확률-고지--화면-밖에서-직접-2026-08-09) 절의 것을 그대로 씁니다.
 "1등 1%" 같은 파생값을 FAQ 에 박으면 86% 로 어긋났던 하드코딩 드리프트가 자리만 옮겨 재발합니다.
