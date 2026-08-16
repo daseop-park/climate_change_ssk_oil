@@ -145,8 +145,35 @@ export const FAQS = [
 export const ABOUT_CHAIN = [
   "배달을 많이 시켜먹는다",
   "버려지는 배달 용기 증가",
-  "하지만 제대로 세척이 되지 않은 용기가 많아 재활용률은 저조",
+  "기름 오염으로 재활용률 저조 (16.4%)",
 ];
+
+/** About us — 우리의 솔루션 */
+export const ABOUT_SOLUTION = {
+  desc: "PLA 외피 안에 케이폭 섬유를 채우고 겉면엔 천연비누를 코팅한 2중 구조 티백형 패드. 밀랍으로 새긴 코드가 기름을 흡수할수록 선명하게 드러납니다.",
+  tags: ["14cm × 14cm", "PLA + 케이폭", "천연비누 코팅"],
+};
+
+/** About us — 이용 방법. icon 은 about 페이지의 아이콘 표와 맞물립니다. */
+export const ABOUT_STEPS: { icon: "wipe" | "code" | "reward"; text: string }[] =
+  [
+    { icon: "wipe", text: "패드로 용기에 남은 기름 닦아내기" },
+    { icon: "code", text: "QR 스캔 후 코드 입력" },
+    { icon: "reward", text: "포인트·쿠폰 등 확률형 보상 받기" },
+  ];
+
+/** About us — 기대 효과 */
+export const ABOUT_IMPACT = [
+  { value: "90%", label: "재활용 가능성 개선 목표" },
+  { value: "ESG", label: "기업·지자체 연계 가능" },
+];
+
+/** About us — 운영 방식 */
+export const ABOUT_MODEL = {
+  desc: "개인이 직접 구매하는 제품이 아닙니다. 지자체가 환경예산으로 음식점에 무상 보급하고, 소비자는 배달 음식과 함께 자연스럽게 받는 공공서비스 모델을 지향합니다.",
+  title: "지자체 협력 · 무상 보급",
+  sub: "음식점 비치 → 소비자 무료 제공",
+};
 
 /** About us — 팀원 */
 export const ABOUT_TEAM: { name: string; role: "팀장" | "팀원" }[] = [

@@ -1,8 +1,33 @@
+import { Building2, Droplet, Gift, QrCode } from "lucide-react";
 import type { Metadata } from "next";
 import SubHeader from "@/components/shell/SubHeader";
-import { ABOUT_CHAIN, ABOUT_TEAM } from "@/lib/design/content";
+import {
+  ABOUT_CHAIN,
+  ABOUT_IMPACT,
+  ABOUT_MODEL,
+  ABOUT_SOLUTION,
+  ABOUT_STEPS,
+  ABOUT_TEAM,
+} from "@/lib/design/content";
 
 export const metadata: Metadata = { title: "About us · team_싹싹기름" };
+
+/** ABOUT_STEPS 의 icon 키 ↔ 아이콘. */
+const STEP_ICONS = { wipe: Droplet, code: QrCode, reward: Gift };
+
+/** 섹션 머리말 — 키커 + 제목을 한 벌로 묶습니다. */
+function SectionHead({ kicker, title }: { kicker: string; title: string }) {
+  return (
+    <>
+      <div className="text-green-600 text-[10.5px] font-extrabold tracking-[.14em]">
+        {kicker}
+      </div>
+      <h2 className="mt-[7px] mb-0 text-[20px] font-extrabold tracking-[-.03em]">
+        {title}
+      </h2>
+    </>
+  );
+}
 
 export default function AboutPage() {
   return (
@@ -30,12 +55,7 @@ export default function AboutPage() {
         </section>
 
         <section className="border-b border-[rgba(230,236,231,.55)] bg-white/40 px-[18px] pt-[26px] pb-7">
-          <div className="text-green-600 text-[10.5px] font-extrabold tracking-[.14em]">
-            BACKGROUND
-          </div>
-          <h2 className="mt-[7px] mb-0 text-[20px] font-extrabold tracking-[-.03em]">
-            아이디어 배경
-          </h2>
+          <SectionHead kicker="BACKGROUND" title="아이디어 배경" />
           <p className="text-ink mt-[14px] mb-5 text-[13.5px] leading-[1.6] font-bold tracking-[-.01em]">
             그야말로 배달의 민족인 대한민국 사람들
           </p>
@@ -59,14 +79,86 @@ export default function AboutPage() {
           </div>
         </section>
 
-        <section className="px-[18px] pt-[26px] pb-[34px]">
-          <div className="text-green-600 text-[10.5px] font-extrabold tracking-[.14em]">
-            TEAM
+        <section className="border-b border-[rgba(230,236,231,.55)] px-[18px] pt-[26px] pb-7">
+          <SectionHead kicker="SOLUTION" title="우리의 솔루션" />
+          <p className="text-muted mt-[14px] mb-0 text-[13px] leading-[1.65] text-pretty">
+            {ABOUT_SOLUTION.desc}
+          </p>
+          <div className="mt-[14px] flex flex-wrap gap-[6px]">
+            {ABOUT_SOLUTION.tags.map((tag) => (
+              <span
+                key={tag}
+                className="bg-chip-bg text-green-600 rounded-full px-[11px] py-[5px] text-[11.5px] font-bold tracking-[-.01em]"
+              >
+                {tag}
+              </span>
+            ))}
           </div>
-          <h2 className="mt-[7px] mb-4 text-[20px] font-extrabold tracking-[-.03em]">
-            팀원 소개
-          </h2>
-          <div className="flex flex-col gap-2">
+        </section>
+
+        <section className="border-b border-[rgba(230,236,231,.55)] bg-white/40 px-[18px] pt-[26px] pb-7">
+          <SectionHead kicker="HOW IT WORKS" title="이용 방법" />
+          <div className="mt-[14px] flex flex-col gap-[10px]">
+            {ABOUT_STEPS.map((step) => {
+              const Icon = STEP_ICONS[step.icon];
+              return (
+                <div key={step.text} className="flex items-center gap-3">
+                  <span className="bg-chip-bg flex h-8 w-8 shrink-0 items-center justify-center rounded-full">
+                    <Icon size={16} className="text-green-600" aria-hidden />
+                  </span>
+                  <span className="text-ink-60 text-[13px] leading-[1.5] font-semibold tracking-[-.01em]">
+                    {step.text}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
+        <section className="border-b border-[rgba(230,236,231,.55)] px-[18px] pt-[26px] pb-7">
+          <SectionHead kicker="IMPACT" title="기대 효과" />
+          <div className="mt-[14px] grid grid-cols-2 gap-2">
+            {ABOUT_IMPACT.map((item) => (
+              <div
+                key={item.value}
+                className="rounded-xl border border-[rgba(230,236,231,.62)] bg-white/50 px-[15px] py-[14px]"
+              >
+                <div className="text-green-600 text-[22px] font-extrabold tracking-[-.03em]">
+                  {item.value}
+                </div>
+                <div className="text-muted-3 mt-[3px] text-[11.5px] leading-[1.45] font-semibold text-pretty">
+                  {item.label}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="border-b border-[rgba(230,236,231,.55)] bg-white/40 px-[18px] pt-[26px] pb-7">
+          <SectionHead kicker="MODEL" title="운영 방식" />
+          <p className="text-muted mt-[14px] mb-0 text-[13px] leading-[1.65] text-pretty">
+            {ABOUT_MODEL.desc}
+          </p>
+          <div className="mt-[14px] flex items-center gap-3 rounded-xl border border-[rgba(230,236,231,.62)] bg-white/50 px-[15px] py-[13px]">
+            <Building2
+              size={18}
+              className="text-green-600 shrink-0"
+              aria-hidden
+            />
+            <div className="min-w-0">
+              <div className="text-ink text-[13px] font-bold tracking-[-.01em]">
+                {ABOUT_MODEL.title}
+              </div>
+              <div className="text-muted-3 mt-[3px] text-[11.5px] font-semibold">
+                {ABOUT_MODEL.sub}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="px-[18px] pt-[26px] pb-[34px]">
+          <SectionHead kicker="TEAM" title="팀원 소개" />
+          <div className="mt-4 flex flex-col gap-2">
             {ABOUT_TEAM.map((t) => {
               const lead = t.role === "팀장";
               return (
