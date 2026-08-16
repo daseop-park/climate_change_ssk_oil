@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import GuideBanner from "@/components/home/GuideBanner";
 import GuideCarousel from "@/components/home/GuideCarousel";
 import HeroCode from "@/components/home/HeroCode";
 import HomeFooter from "@/components/home/HomeFooter";
@@ -31,6 +32,7 @@ export default function Home() {
         <HeroCode />
         <HowItWorks />
         <GuideCarousel />
+        <GuideBanner />
         <PrizeSection />
         <HomeFooter />
       </main>
