@@ -43,7 +43,26 @@ export default function ProductImage({
 
   return (
     <div className={`relative overflow-hidden bg-white ${className}`}>
-      <Image src={src} alt={alt} fill sizes={sizes} className="object-contain p-2" />
+      {/*
+        `key={src}` 는 캐시 무효화가 아니라 **옛 사진이 남는 것을 막는 장치**입니다.
+
+        같은 `<img>` 노드에 `src` 만 바꾸면 브라우저는 새 이미지를 다 받을 때까지
+        **직전 비트맵을 계속 그립니다.** `PrizeSheet` 는 닫힘 애니메이션 동안 내용을
+        남기려고 계속 마운트돼 있어서(`PrizeSheet.tsx:7`), 다른 경품을 열면 잠깐
+        **앞서 본 경품 사진**이 보였습니다. 경품 화면에서 남의 상품 사진이 스치는 건
+        어색한 정도가 아니라 오해를 부릅니다.
+
+        key 가 바뀌면 노드를 새로 만들어 그릴 옛 픽셀이 아예 없습니다.
+        대신 로딩 동안 이 래퍼의 흰 배경이 보입니다 — 빈 흰 칸이 잘못된 사진보다 낫습니다.
+      */}
+      <Image
+        key={src}
+        src={src}
+        alt={alt}
+        fill
+        sizes={sizes}
+        className="object-contain p-2"
+      />
     </div>
   );
 }
