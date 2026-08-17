@@ -5,7 +5,7 @@ import { useShell } from "@/components/shell/ShellContext";
 
 /** PRIZE — 당첨 가능 경품. 목록·확률 모두 서버(`GET /api/prizes`)에서 옵니다. */
 export default function PrizeSection() {
-  const { prizes, prizesLoading, openSheet } = useShell();
+  const { prizes, prizesLoading, prizesError, retryPrizes, openSheet } = useShell();
 
   return (
     <section className="mt-[26px] border-t border-[rgba(230,236,231,.55)] bg-white/40 px-4 pt-[26px] pb-8">
@@ -25,12 +25,34 @@ export default function PrizeSection() {
 
       {prizesLoading ? (
         <PrizeGridSkeleton />
+      ) : prizesError ? (
+        /*
+          실패와 "0종" 을 나눕니다. 전에는 둘 다 "불러오지 못했어요" 였는데,
+          사용자가 할 행동이 다릅니다 — 실패는 다시 시도할 수 있고 0종은 기다릴 수밖에 없습니다.
+          새로고침을 시키지 않는 것도 요점입니다. 인트로 애니메이션을 다시 보게 되고,
+          입력하던 코드도 날아갑니다.
+        */
+        <div className="rounded-[14px] border border-[rgba(230,236,231,.62)] bg-white/50 px-5 py-[30px] text-center">
+          <div className="text-muted-2 text-[13px] leading-[1.6] font-bold">
+            경품 정보를 불러오지 못했어요.
+          </div>
+          <div className="text-muted-3 mt-[6px] text-[12.5px] leading-[1.6]">
+            연결을 확인하고 다시 시도해 주세요.
+          </div>
+          <button
+            type="button"
+            onClick={retryPrizes}
+            className="border-line-3 text-ink mt-4 inline-flex h-9 cursor-pointer items-center rounded-full border bg-white px-4 text-[13px] font-bold active:scale-95"
+          >
+            다시 시도
+          </button>
+        </div>
       ) : prizes.length === 0 ? (
         <div className="rounded-[14px] border border-[rgba(230,236,231,.62)] bg-white/50 px-5 py-[34px] text-center">
           <div className="text-muted-3 text-[13px] leading-[1.6]">
-            경품 정보를 불러오지 못했어요.
+            준비된 경품이 아직 없어요.
             <br />
-            잠시 후 다시 시도해 주세요.
+            잠시 후 다시 확인해 주세요.
           </div>
         </div>
       ) : (

@@ -867,7 +867,7 @@ README 225행에 `확률 14px/700/#1E8E5A` 스펙까지 있습니다.
 문안은 위 [확률 고지](#확률-고지--화면-밖에서-직접-2026-08-09) 절의 것을 그대로 씁니다.
 "1등 1%" 같은 파생값을 FAQ 에 박으면 86% 로 어긋났던 하드코딩 드리프트가 자리만 옮겨 재발합니다.
 
-### 6.2 — 에러·빈 상태 (2h)
+### 6.2 — 에러·빈 상태 (2h) ✅ 완료 (2026-08-17)
 
 `(app)/error.tsx` · `(app)/not-found.tsx` · `admin/(console)/error.tsx` · `global-error.tsx` 신규.
 사용자 셸(440px)과 관리자 셸(1280px)은 레이아웃이 달라 각각 필요합니다.
@@ -881,19 +881,59 @@ README 225행에 `확률 14px/700/#1E8E5A` 스펙까지 있습니다.
 > 그때 얘기이고 현재와 다릅니다.
 
 **따라서 주 작업은 `error.tsx` 가 아니라 경품 쿼리의 실패 표시입니다.**
-`ShellContext` 에 `prizesLoading` 은 있는데 `isError` 분기가 없어서, `/api/prizes` 가 실패하면
-경품 그리드가 **빈 채로 조용히** 남습니다. 배포하면 실제로 일어나는 실패라 여기가 본질입니다.
+~~`isError` 분기가 없어서 경품 그리드가 **빈 채로 조용히** 남습니다.~~
+→ 🔧 **착수해 보니 이것도 과장이었습니다.** `PrizeSection` 에 `prizes.length === 0` 분기가 있어
+*"경품 정보를 불러오지 못했어요"* 문구는 **이미 나오고 있었습니다.** 실제 결함은 둘입니다.
 
-| 작업 | 대상 |
-|---|---|
-| `usePrizes()` 에러 분기 + 재시도 UI | `ShellContext.tsx` · `PrizeSection` |
-| `error.tsx` 3종 + `not-found.tsx` | `(app)/` · `admin/(console)/` · `global-error.tsx` |
-| 🆕 **`/api/health` + 게이트 예외** | `src/app/api/health/route.ts` · `src/proxy.ts` |
+1. **실패와 "0종" 이 같은 문구를 씁니다.** 사용자가 할 행동이 다른데(다시 시도 vs 기다림)
+   구분되지 않았습니다
+2. **재시도 수단이 없습니다.** 새로고침밖에 없는데, 그러면 인트로 애니메이션을 다시 보고
+   입력하던 코드도 날아갑니다
 
-> 🔴 **헬스체크는 게이트에 걸립니다.** `proxy.ts` 의 matcher 가 정적 자원만 빼고 전 경로라
-> `/api/health` 도 게이트 ON 이면 401 입니다. 이대로 Railway 헬스체크에 물리면
-> **배포가 헬스체크 실패로 롤백됩니다.** 예외를 `PUBLIC_ADMIN_PATHS` 같은 별도 목록이 아니라
-> `siteGate()` 진입부에서 처리하세요 — 관리자 인증보다 **앞**에 있어야 합니다.
+| 작업 | 대상 | 결과 |
+|---|---|---|
+| `usePrizes()` 에러 분기 + 재시도 | `ShellContext.tsx` · `PrizeSection.tsx` | ✅ `prizesError`·`retryPrizes` 노출, 문구 분리 + "다시 시도" 버튼 |
+| `error.tsx` · `not-found.tsx` | 아래 배치 참조 | ✅ 4파일 |
+| `/api/health` + 게이트 예외 | `api/health/route.ts` · `proxy.ts` | ✅ 실측 검증 완료 |
+
+#### 파일 배치 — 계획과 두 군데 다릅니다
+
+| 계획 | 실제 | 이유 |
+|---|---|---|
+| `(app)/not-found.tsx` | **`app/not-found.tsx`** | 어느 라우트에도 안 걸린 URL 은 **Route Group 에 배정될 수 없습니다.** `(app)` 안에 두면 완전 미매칭 요청을 못 받고, `/admin/없는페이지` 까지 440px 모바일 셸로 그려집니다 |
+| `admin/(console)/error.tsx` | **`app/admin/error.tsx`** | `error.tsx` 는 **같은 세그먼트의 `layout.tsx` 를 감싸지 않습니다**(Next `error.md`). 그런데 DB 장애 시 실제로 터지는 곳이 바로 그 레이아웃입니다 |
+
+두 번째가 중요합니다. **DB 장애의 진짜 표면은 사용자 셸이 아니라 관리자 콘솔입니다** —
+`admin/(console)/layout.tsx:32` 가 사이드바 뱃지를 만들려고 `adminService.getNavCounts()` 를
+서버에서 `await` 합니다. 경계를 `(console)` 안에 두면 이 실패를 **못 잡습니다.**
+
+`global-not-found.js`(실험 플래그)는 쓰지 않았습니다 — 루트 레이아웃이 하나뿐이고 최상위
+동적 세그먼트도 없어서, 그 파일이 필요한 두 조건 중 어디에도 해당하지 않습니다.
+
+`reset` 대신 **`unstable_retry`** 를 씁니다. `reset` 은 경계만 초기화해서 원인이 서버 쪽이면
+같은 화면이 그대로 다시 납니다. `next` 를 캐럿 없이 `16.2.9` 로 고정해 두어 unstable 접두사에도
+안전합니다.
+
+#### 🔴 헬스체크는 게이트에 걸립니다 — 예외 처리 완료
+
+`proxy.ts` 의 matcher 가 정적 자원만 빼고 전 경로라 `/api/health` 도 게이트 ON 이면 401 입니다.
+이대로 헬스체크에 물리면 **배포가 헬스체크 실패로 롤백됩니다.**
+`GATE_EXEMPT_PATHS` 를 `siteGate()` 진입부에 두었습니다 — 관리자 인증보다 **앞**입니다.
+`PUBLIC_ADMIN_PATHS` 와 합치지 않은 것은 두 목록의 목적이 다르기 때문입니다.
+
+헬스체크는 프로세스 생존이 아니라 **DB 까지 닿는지**를 봅니다(`SELECT 1`). 프로세스만 보면
+DB 가 끊긴 인스턴스도 정상으로 판정돼 붙인 의미가 없습니다.
+
+#### 검증 (2026-08-17, `next start` 실측)
+
+| 조건 | 경로 | 결과 |
+|---|---|---|
+| 게이트 ON | `/api/health` | **200** `{"status":"ok"}` |
+| 게이트 ON | `/api/prizes` | **401** |
+| 게이트 ON | `/` | **403** |
+| 게이트 OFF | 없는 경로 | **404** + "페이지를 찾을 수 없어요" |
+| 게이트 OFF | `/robots.txt` | `Disallow: /` |
+| 게이트 OFF | `/api/prizes` | **200** |
 
 ### 6.3 — 접근성 (2.5h)
 

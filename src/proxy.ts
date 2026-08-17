@@ -37,6 +37,18 @@ import type { ApiFailure } from "@/types/dto";
  */
 const PUBLIC_ADMIN_PATHS = new Set(["/api/admin/login", ADMIN_LOGIN_PATH]);
 
+/**
+ * 게이트를 면제받는 경로.
+ *
+ * 헬스체크 하나뿐입니다. 면제하지 않으면 게이트를 켠 순간 플랫폼 헬스체크가 401 을 받고,
+ * **배포가 실패로 판정돼 롤백됩니다.** 관리자 인증보다 앞이라 관리자 경로 예외
+ * (`PUBLIC_ADMIN_PATHS`)와는 별개로 둡니다 — 두 목록의 목적이 다릅니다.
+ *
+ * 새 경로를 여기 넣을 때는 "게이트 밖에서 무엇이 보이는가"를 먼저 따지세요.
+ * 헬스체크가 흘리는 것은 "DB 가 붙어 있는가" 하나입니다.
+ */
+const GATE_EXEMPT_PATHS = new Set(["/api/health"]);
+
 function isApiPath(pathname: string): boolean {
   return pathname.startsWith("/api/");
 }
@@ -82,6 +94,7 @@ function blockedPage() {
  */
 function siteGate(req: NextRequest): NextResponse | null {
   if (!isGateEnabled()) return null;
+  if (GATE_EXEMPT_PATHS.has(req.nextUrl.pathname)) return null;
 
   try {
     // 1) QR 로 방금 들어온 경우 — 쿠키를 굽고 주소에서 토큰을 지웁니다.

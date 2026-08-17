@@ -47,6 +47,13 @@ type ShellValue = {
   /** 공개 경품 목록 (확률은 서버가 발급 비율에서 계산) */
   prizes: PublicPrizeDto[];
   prizesLoading: boolean;
+  /**
+   * 조회 자체가 실패했는지. **빈 목록과 구분해야 합니다** —
+   * "경품이 0종" 과 "못 불러옴" 은 사용자가 할 행동이 다릅니다(기다린다 vs 다시 시도한다).
+   */
+  prizesError: boolean;
+  /** 실패했을 때 다시 시도. 새로고침 없이 이 쿼리만 다시 부릅니다. */
+  retryPrizes: () => void;
 
   sheetPrize: PublicPrizeDto | null;
   /** 닫히는 동안에도 내용이 남도록 열림 여부는 따로 둡니다. */
@@ -125,7 +132,14 @@ export function ShellProvider({ children }: { children: React.ReactNode }) {
   const [identity, setIdentity] = useState<Identity | null>(null);
   const [myRewards, setMyRewards] = useState<RewardItemDto[] | null>(null);
 
-  const { data: prizes, isPending: prizesLoading } = usePrizes();
+  // `refetch` 도 `mutateAsync` 와 같이 옵저버 생성자에서 한 번 바인딩되는 참조라
+  // 의존성에 넣어도 안전합니다 (`query-core/queryObserver.js:46`).
+  const {
+    data: prizes,
+    isPending: prizesLoading,
+    isError: prizesError,
+    refetch: refetchPrizes,
+  } = usePrizes();
   // 훅이 돌려주는 객체는 렌더마다 새로 만들어지지만 `mutateAsync` 는 같은 참조입니다.
   // 객체째로 의존성에 넣으면 아래 `value` 메모가 매 렌더 무효화됩니다.
   const { mutateAsync: postRegister } = useRegisterReward();
@@ -211,6 +225,11 @@ export function ShellProvider({ children }: { children: React.ReactNode }) {
     setMyRewards(null);
   }, []);
 
+  /** `refetch` 는 Promise 를 돌려주지만 화면은 결과를 기다리지 않습니다 — 상태는 훅이 알립니다. */
+  const retryPrizes = useCallback(() => {
+    void refetchPrizes();
+  }, [refetchPrizes]);
+
   const prizeList = useMemo(() => prizes ?? [], [prizes]);
 
   const sheetPrize = useMemo(
@@ -228,6 +247,8 @@ export function ShellProvider({ children }: { children: React.ReactNode }) {
       closeAll,
       prizes: prizeList,
       prizesLoading,
+      prizesError,
+      retryPrizes,
       sheetPrize,
       sheetOpen,
       openSheet,
@@ -253,6 +274,8 @@ export function ShellProvider({ children }: { children: React.ReactNode }) {
       closeAll,
       prizeList,
       prizesLoading,
+      prizesError,
+      retryPrizes,
       sheetPrize,
       sheetOpen,
       openSheet,
