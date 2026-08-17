@@ -1,6 +1,7 @@
 "use client";
 
 import ProductImage from "@/components/prize/ProductImage";
+import { useDialog } from "@/hooks/useDialog";
 import { useShell } from "./ShellContext";
 
 const CONFETTI_COLORS = ["#5FD39A", "#1E8E5A", "#FFD666", "#FF8A5C", "#7CC4FF"];
@@ -39,12 +40,30 @@ export default function RevealModal() {
   // (실패는 예외로 처리되어 여기까지 오지 않고 토스트로 나갑니다.)
   const on = phase === "revealing" || phase === "result";
 
+  /*
+    ESC 를 `result` 에서만 받습니다.
+
+    `revealing` 은 등록 요청이 날아가 있는 1800ms 구간입니다. 여기서 닫히면 화면은
+    사라졌는데 등록은 그대로 성공해서, 사용자는 무엇에 당첨됐는지 못 본 채 코드만
+    소진됩니다. 되돌릴 방법이 없으므로 아예 닫지 못하게 합니다.
+
+    `focusKey` 에 `phase` 를 넘기는 이유: 열리는 순간(`revealing`)에는 안에 포커스 가능한
+    요소가 없고, 버튼은 `result` 로 넘어가야 생깁니다. phase 를 키로 주면 그때 다시 잡습니다.
+  */
+  const ref = useDialog<HTMLDivElement>({
+    open: on,
+    onEscape: phase === "result" ? closeReveal : null,
+    focusKey: phase,
+  });
+
   return (
     <div
+      ref={ref}
       role="dialog"
       aria-modal={on}
-      aria-hidden={!on}
-      className="absolute inset-0 z-50 flex items-center justify-center p-5 transition-opacity duration-300"
+      tabIndex={-1}
+      inert={!on}
+      className="absolute inset-0 z-50 flex items-center justify-center p-5 outline-none transition-opacity duration-300"
       style={{
         background:
           phase === "result" ? "rgba(23,33,28,.55)" : "rgba(20,102,63,.9)",
@@ -101,7 +120,8 @@ export default function RevealModal() {
             <button
               type="button"
               onClick={closeReveal}
-              autoFocus
+              /* `autoFocus` 제거 — 초기 포커스는 `useDialog` 가 잡습니다. 두 군데가
+                 같은 일을 하면 다음 사람이 어느 쪽이 동작하는지 알 수 없습니다. */
               className="bg-green-600 mt-5 h-[52px] w-full cursor-pointer rounded-[14px] border-none text-[15px] font-extrabold text-white shadow-[0_8px_18px_rgba(30,142,90,.3)] active:scale-[.98]"
             >
               경품함에 담기

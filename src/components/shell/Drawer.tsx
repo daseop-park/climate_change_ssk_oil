@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useDialog } from "@/hooks/useDialog";
 import { useShell } from "./ShellContext";
 
 const MENU_ITEMS = [
@@ -12,11 +13,16 @@ const MENU_ITEMS = [
 
 export default function Drawer() {
   const { menuOpen, closeAll } = useShell();
+  // `aria-hidden` 수동 토글은 `inert` 로 대체했습니다. 둘을 같이 두면
+  // 어느 쪽이 실제로 막고 있는지 다음 사람이 알 수 없습니다.
+  const ref = useDialog<HTMLElement>({ open: menuOpen, onEscape: closeAll });
 
   return (
     <aside
-      aria-hidden={!menuOpen}
-      className="bg-surface absolute top-0 right-0 bottom-0 z-40 flex w-4/5 max-w-[320px] flex-col shadow-[-14px_0_40px_rgba(23,33,28,.18)]"
+      ref={ref}
+      tabIndex={-1}
+      inert={!menuOpen}
+      className="bg-surface absolute top-0 right-0 bottom-0 z-40 flex w-4/5 max-w-[320px] flex-col shadow-[-14px_0_40px_rgba(23,33,28,.18)] outline-none"
       style={{
         transform: menuOpen ? "translateX(0)" : "translateX(102%)",
         transition: "transform .32s cubic-bezier(.22,1,.36,1)",
@@ -45,7 +51,6 @@ export default function Drawer() {
             key={m.href}
             href={m.href}
             onClick={closeAll}
-            tabIndex={menuOpen ? undefined : -1}
             className="flex w-full items-center justify-between rounded-[13px] px-3 py-[15px] text-left hover:bg-[#EEF3EF]"
           >
             <span>

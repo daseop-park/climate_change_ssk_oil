@@ -1,18 +1,29 @@
 "use client";
 
 import ProductImage from "@/components/prize/ProductImage";
+import { useDialog } from "@/hooks/useDialog";
 import { useShell } from "./ShellContext";
 
 export default function PrizeSheet() {
   // sheetPrize 는 닫힌 뒤에도 유지되므로 퇴장 애니메이션 동안 내용이 남습니다.
   const { sheetPrize: shown, sheetOpen: open, closeAll } = useShell();
+  // `aria-hidden` 대신 `inert`. 열린 채로 다른 경품을 열면 내용이 통째로 바뀌므로
+  // `focusKey` 에 상품 id 를 넘겨 초기 포커스를 새 내용에서 다시 잡습니다.
+  const ref = useDialog<HTMLDivElement>({
+    open,
+    onEscape: closeAll,
+    focusKey: shown?.id ?? null,
+  });
 
   return (
     <div
+      ref={ref}
       role="dialog"
       aria-modal={open}
-      aria-hidden={!open}
-      className="ssak-scroll absolute right-0 bottom-0 left-0 z-40 max-h-[88%] overflow-y-auto rounded-t-[26px] bg-white shadow-[0_-14px_40px_rgba(23,33,28,.2)]"
+      tabIndex={-1}
+      inert={!open}
+      aria-label={shown ? `${shown.name} 상세` : undefined}
+      className="ssak-scroll absolute right-0 bottom-0 left-0 z-40 max-h-[88%] overflow-y-auto rounded-t-[26px] bg-white shadow-[0_-14px_40px_rgba(23,33,28,.2)] outline-none"
       style={{
         transform: open ? "translateY(0)" : "translateY(102%)",
         transition: "transform .34s cubic-bezier(.22,1,.36,1)",
@@ -25,7 +36,6 @@ export default function PrizeSheet() {
             type="button"
             onClick={closeAll}
             aria-label="닫기"
-            tabIndex={open ? undefined : -1}
             /*
               z-10 은 장식이 아닙니다. 아래 `ProductImage` 가 next/image 의 `fill` 때문에
               `relative` 로 렌더되는데, DOM 순서상 이 버튼보다 뒤에 와서 같은
@@ -83,7 +93,6 @@ export default function PrizeSheet() {
             <button
               type="button"
               onClick={closeAll}
-              tabIndex={open ? undefined : -1}
               className="bg-green-600 mt-4 h-[54px] w-full cursor-pointer rounded-[15px] border-none text-[16px] font-extrabold text-white shadow-[0_8px_18px_rgba(30,142,90,.3)] active:scale-[.98]"
             >
               코드 입력하러 가기

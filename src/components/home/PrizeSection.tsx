@@ -62,10 +62,17 @@ export default function PrizeSection() {
               key={r.id}
               className="relative overflow-hidden rounded-[14px] border border-[rgba(230,236,231,.62)] bg-white/50"
             >
+              {/*
+                트리거에는 `aria-expanded` 가 아니라 `aria-haspopup="dialog"` 를 답니다.
+                `aria-expanded` 는 제자리에서 펼쳐지는 disclosure 용이고, 여기서 열리는
+                것은 모달 시트입니다. (드로어를 여는 햄버거는 성격이 disclosure 에 가까워
+                `aria-expanded` 를 유지합니다 — `HomeHeader.tsx`)
+              */}
               <button
                 type="button"
                 onClick={() => openSheet(r.id)}
                 aria-label={`${r.name} 자세히 보기`}
+                aria-haspopup="dialog"
                 className="absolute top-2 right-2 z-[2] flex h-[30px] w-[30px] cursor-pointer items-center justify-center rounded-lg border-none bg-white/94 active:scale-90"
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden>
@@ -78,6 +85,7 @@ export default function PrizeSection() {
               <button
                 type="button"
                 onClick={() => openSheet(r.id)}
+                aria-haspopup="dialog"
                 className="block w-full cursor-pointer border-none bg-transparent p-0 text-left"
               >
                 <ProductImage
