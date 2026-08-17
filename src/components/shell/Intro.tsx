@@ -8,7 +8,7 @@ import { useShell } from "./ShellContext";
  * 앱 패널 뒤 배경으로 남습니다.
  */
 export default function Intro() {
-  const { entered, skipIntro, enterApp, openMenu, menuOpen } = useShell();
+  const { entered, skipIntro, enterApp } = useShell();
 
   return (
     <div
@@ -56,26 +56,11 @@ export default function Intro() {
         />
       </div>
 
-      <button
-        type="button"
-        onClick={openMenu}
-        aria-label="전체 메뉴 열기"
-        aria-expanded={menuOpen}
-        tabIndex={entered ? undefined : -1}
-        className="absolute top-5 right-4 z-[8] flex h-[42px] w-[42px] cursor-pointer items-center justify-center rounded-xl border-none bg-[rgba(10,30,20,.28)] backdrop-blur-[6px] transition-opacity duration-[400ms] delay-[250ms]"
-        style={{
-          opacity: entered ? 1 : 0,
-          pointerEvents: entered ? "auto" : "none",
-        }}
-      >
-        <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden>
-          <g stroke="#ffffff" strokeWidth="2" strokeLinecap="round">
-            <line x1="4" y1="7" x2="20" y2="7" />
-            <line x1="4" y1="12" x2="20" y2="12" />
-            <line x1="4" y1="17" x2="20" y2="17" />
-          </g>
-        </svg>
-      </button>
+      {/*
+        전체 메뉴 버튼은 2026-08-17 에 `components/home/HomeHeader.tsx` 로 옮겼습니다.
+        여기(배경 레이어)에 있으면 모든 페이지에 뜨지만 브랜드 줄과 다른 칸이라 따로 놀았습니다.
+        옮기면서 **홈 전용**이 됐습니다 — 서브페이지는 `SubHeader` 의 뒤로가기를 씁니다.
+      */}
 
       {/* 하단 CTA 블록 — 진입과 함께 아래로 퇴장 */}
       <div
