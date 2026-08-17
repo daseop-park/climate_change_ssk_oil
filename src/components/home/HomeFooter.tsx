@@ -20,7 +20,7 @@ export default function HomeFooter() {
         </span>
       </div>
       <p className="mt-[14px] mb-0 max-w-[22em] text-[12.5px] leading-[1.7] text-white/64">
-        가정에서 버려지는 식용유를 흡수 패드로 처리하고, 그 실천을 즉석 경품으로
+        배달용기에 묻은 기름을 닦아 재활용할 수 있게 만들고, 그 실천을 즉석 경품으로
         돌려드리는 기후행동 프로젝트입니다.
       </p>
       <div className="mt-6 grid grid-cols-2 gap-x-4 gap-y-[10px] border-t border-white/16 pt-5">
