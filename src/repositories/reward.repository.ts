@@ -1,0 +1,290 @@
+/**
+ * reward_codes 테이블 접근.
+ *
+ * 상태 전이(UNUSED → USED → RECEIVED)는 전부 **조건부 updateMany** 로 처리합니다.
+ * 읽어서 확인한 뒤 쓰는 방식은 두 요청이 같은 행을 동시에 읽으면 둘 다 통과하므로,
+ * 현재 상태 조건을 `where` 절 안에 넣어 DB 가 한 번만 성공시키도록 합니다.
+ * 성공 여부는 반환된 `count` 로 판단합니다.
+ */
+import type { DbClient } from "./types";
+import { REWARD_STATUS, type RewardStatus } from "../types/reward";
+
+/** 경품함·등록 응답에 필요한 상품 정보를 함께 싣습니다. */
+const withProduct = {
+  product: {
+    select: {
+      id: true,
+      name: true,
+      description: true,
+      image: true,
+      category: true,
+      rank: true,
+      hue: true,
+    },
+  },
+} as const;
+
+export type RewardWithProduct = Awaited<
+  ReturnType<typeof rewardRepository.findByIdWithProduct>
+>;
+
+export type CreateRewardCodeInput = {
+  rewardCode: string;
+  productId: string;
+  batch: string;
+};
+
+/**
+ * 당첨 내역의 모집단 — 목록과 카운트가 **반드시 같은 조건**을 써야 합니다.
+ * 두 곳에 따로 적으면 한쪽만 고쳐졌을 때 페이지 수가 실제 행 수와 어긋나는데,
+ * 마지막 페이지가 비는 형태로만 드러나 원인을 찾기 어렵습니다.
+ */
+function winsWhere(status?: RewardStatus) {
+  return status
+    ? { status }
+    : { status: { in: [REWARD_STATUS.USED, REWARD_STATUS.RECEIVED] } };
+}
+
+export const rewardRepository = {
+  findByCode(client: DbClient, rewardCode: string) {
+    return client.rewardCode.findUnique({ where: { rewardCode } });
+  },
+
+  findByIdWithProduct(client: DbClient, id: string) {
+    return client.rewardCode.findUnique({ where: { id }, include: withProduct });
+  },
+
+  findByCodeWithProduct(client: DbClient, rewardCode: string) {
+    return client.rewardCode.findUnique({ where: { rewardCode }, include: withProduct });
+  },
+
+  /**
+   * UNUSED 인 코드를 특정 사용자에게 귀속시킵니다. (UNUSED → USED)
+   *
+   * `status: UNUSED` 조건이 동시 등록 방어의 전부입니다. 두 사람이 같은 코드를
+   * 동시에 제출하면 먼저 도달한 쪽만 count 1 을 받고, 나머지는 0 을 받습니다.
+   *
+   * @returns 갱신된 행 수. 0 이면 코드가 없거나 이미 사용된 것입니다.
+   */
+  async claimByCode(
+    client: DbClient,
+    params: { rewardCode: string; userId: string; now: Date },
+  ): Promise<number> {
+    const { count } = await client.rewardCode.updateMany({
+      where: { rewardCode: params.rewardCode, status: REWARD_STATUS.UNUSED },
+      data: {
+        status: REWARD_STATUS.USED,
+        userId: params.userId,
+        usedAt: params.now,
+      },
+    });
+    return count;
+  },
+
+  /**
+   * 선택된 리워드를 실물 지급 완료로 바꿉니다. (USED → RECEIVED)
+   *
+   * 조건 세 가지가 각각 다른 사고를 막습니다.
+   *   - `status: USED`  : 관리자 두 명이 동시에 눌러도 한 번만 처리 (이중 지급 방지)
+   *   - `userId`        : 남의 리워드 id 를 넣어도 통과하지 못함
+   *   - `id: { in }`    : 체크한 것만
+   *
+   * @returns 갱신된 행 수. 요청한 개수와 다르면 호출한 Service 가 롤백합니다.
+   */
+  async markReceived(
+    client: DbClient,
+    params: { ids: string[]; userId: string; now: Date },
+  ): Promise<number> {
+    const { count } = await client.rewardCode.updateMany({
+      where: {
+        id: { in: params.ids },
+        userId: params.userId,
+        status: REWARD_STATUS.USED,
+      },
+      data: { status: REWARD_STATUS.RECEIVED, receivedAt: params.now },
+    });
+    return count;
+  },
+
+  /**
+   * 잘못 지급 처리한 건을 되돌립니다. (RECEIVED → USED)
+   * 같은 조건부 update 패턴이라 두 번 눌러도 한 번만 되돌아갑니다.
+   */
+  async revertReceived(client: DbClient, params: { id: string }): Promise<number> {
+    const { count } = await client.rewardCode.updateMany({
+      where: { id: params.id, status: REWARD_STATUS.RECEIVED },
+      data: { status: REWARD_STATUS.USED, receivedAt: null },
+    });
+    return count;
+  },
+
+  /** 경품함. status 를 주면 그 상태만, 없으면 사용자의 전체 리워드. */
+  findByUserId(client: DbClient, userId: string, status?: RewardStatus) {
+    return client.rewardCode.findMany({
+      where: { userId, ...(status ? { status } : {}) },
+      include: withProduct,
+      orderBy: { usedAt: "desc" },
+    });
+  },
+
+  /* ── 발급 ──────────────────────────────────────────────── */
+
+  countByBatch(client: DbClient, batch: string) {
+    return client.rewardCode.count({ where: { batch } });
+  },
+
+  /** 새로 만든 코드가 기존 코드와 겹치는지 확인합니다. */
+  findExistingCodes(client: DbClient, codes: string[]) {
+    return client.rewardCode.findMany({
+      where: { rewardCode: { in: codes } },
+      select: { rewardCode: true },
+    });
+  },
+
+  createMany(client: DbClient, rows: CreateRewardCodeInput[]) {
+    return client.rewardCode.createMany({ data: rows });
+  },
+
+  findByBatch(client: DbClient, batch?: string) {
+    return client.rewardCode.findMany({
+      where: batch ? { batch } : {},
+      select: { rewardCode: true, productId: true, status: true, userId: true },
+      orderBy: { createdAt: "asc" },
+    });
+  },
+
+  /**
+   * 배치별 · 상태별 집계.
+   *
+   * `batch` 하나로 묶지 않고 **상태까지 함께** 묶습니다. 그래야 "발급 수량"과
+   * "사용 수"를 쿼리 한 번으로 같이 얻습니다 — 따로 세면 두 숫자가 서로 다른
+   * 시점을 보게 되어 합계가 어긋날 수 있습니다.
+   *
+   * `_min.createdAt` 이 곧 발급 시각입니다. 배치는 한 트랜잭션에서 통째로
+   * 만들어지므로 배치 안의 `createdAt` 은 모두 같은 순간입니다.
+   */
+  listBatches(client: DbClient) {
+    return client.rewardCode.groupBy({
+      by: ["batch", "status"],
+      _count: { _all: true },
+      _min: { createdAt: true },
+    });
+  },
+
+  /* ── 집계 ──────────────────────────────────────────────── */
+
+  /** 재고는 저장된 카운터가 아니라 reward_codes 를 세어서 만듭니다. */
+  groupByProductStatus(client: DbClient) {
+    return client.rewardCode.groupBy({
+      by: ["productId", "status"],
+      _count: { _all: true },
+    });
+  },
+
+  countByStatus(client: DbClient, status: RewardStatus) {
+    return client.rewardCode.count({ where: { status } });
+  },
+
+  /** 발급된 코드 전체 수 (상태 무관). 사이드바 '발급 이력' 뱃지의 분모입니다. */
+  countAll(client: DbClient) {
+    return client.rewardCode.count();
+  },
+
+  /** 여러 상태를 한 번에 셉니다. (예: USED + RECEIVED = 당첨 건수) */
+  countByStatuses(client: DbClient, statuses: RewardStatus[]) {
+    return client.rewardCode.count({ where: { status: { in: statuses } } });
+  },
+
+  /** [from, to) 구간에 등록된 건수 */
+  countUsedBetween(client: DbClient, from: Date, to: Date) {
+    return client.rewardCode.count({ where: { usedAt: { gte: from, lt: to } } });
+  },
+
+  /** [from, to) 구간에 지급된 건수 */
+  countReceivedBetween(client: DbClient, from: Date, to: Date) {
+    return client.rewardCode.count({
+      where: { receivedAt: { gte: from, lt: to } },
+    });
+  },
+
+  /**
+   * 최근 **당첨** — 등록된 코드를 최신순으로.
+   *
+   * 정렬 기준은 `receivedAt`(지급) 이 아니라 **`usedAt`(등록)** 입니다.
+   * 현장에서 "방금 누가 뭘 뽑았나" 를 보는 표라, 지급은 그 뒤에 일어나는 별도의 일입니다.
+   * 지급된 것만 모으면 아직 아무도 경품을 받아 가지 않은 행사 초반에 표가 통째로 빕니다.
+   * (5.2 이전의 `recentReceived` 가 그 모양이었고, 이걸로 대체했습니다.)
+   *
+   * 전화번호는 암호문 그대로 꺼냅니다 — 복호화·마스킹은 Service 가 합니다.
+   */
+  recentWins(client: DbClient, limit: number) {
+    return client.rewardCode.findMany({
+      where: { status: { in: [REWARD_STATUS.USED, REWARD_STATUS.RECEIVED] } },
+      orderBy: { usedAt: "desc" },
+      take: limit,
+      select: {
+        id: true,
+        rewardCode: true,
+        batch: true,
+        status: true,
+        usedAt: true,
+        receivedAt: true,
+        product: { select: { name: true } },
+        user: { select: { name: true, phoneEncrypted: true } },
+      },
+    });
+  },
+
+  /**
+   * 당첨 내역 목록 — 필터 + 페이지네이션.
+   *
+   * `recentWins` 와 같은 모집단(등록된 코드)이지만 이쪽은 상태로 좁힐 수 있고
+   * 건너뛰기가 있습니다. `status` 를 주지 않으면 `USED`+`RECEIVED` 전부입니다.
+   */
+  findWins(
+    client: DbClient,
+    params: { status?: RewardStatus; skip: number; take: number },
+  ) {
+    return client.rewardCode.findMany({
+      where: winsWhere(params.status),
+      orderBy: { usedAt: "desc" },
+      skip: params.skip,
+      take: params.take,
+      select: {
+        id: true,
+        rewardCode: true,
+        batch: true,
+        status: true,
+        usedAt: true,
+        receivedAt: true,
+        product: { select: { name: true } },
+        user: { select: { name: true, phoneEncrypted: true } },
+      },
+    });
+  },
+
+  /** 위 목록의 전체 건수. 페이지 수 계산에 씁니다. */
+  countWins(client: DbClient, status?: RewardStatus) {
+    return client.rewardCode.count({ where: winsWhere(status) });
+  },
+
+  /**
+   * 일별 추이 집계용 원자료 — `since` 이후에 등록되거나 지급된 코드의 시각들.
+   *
+   * 일자별 묶기를 SQL 이 아니라 **JS 에서** 합니다. Postgres 의
+   * `AT TIME ZONE 'Asia/Seoul'` 로 `groupBy` 하려면 `$queryRaw` 를 써야 하는데,
+   * 이 레포지토리는 Prisma API 만 쓴 덕분에 SQLite → PostgreSQL 전환 때
+   * **한 줄도 고치지 않았습니다.** 그 성질을 14일치 몇백 행 때문에 버릴 이유가 없습니다.
+   *
+   * ⚠️ 총 발급량이 수만 건대로 커지면 이 판단을 뒤집으세요 — 14일 창이라 상한은
+   *    "최근 14일 안에 움직인 코드 수" 이지 전체 발급량이 아니지만, 그래도 한계는 있습니다.
+   */
+  findUsageSince(client: DbClient, since: Date) {
+    return client.rewardCode.findMany({
+      where: {
+        OR: [{ usedAt: { gte: since } }, { receivedAt: { gte: since } }],
+      },
+      select: { usedAt: true, receivedAt: true },
+    });
+  },
+};

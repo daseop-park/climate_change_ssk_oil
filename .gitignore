@@ -32,6 +32,16 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
+
+# database
+# ⚠️ dev.db 에는 리워드 코드 ↔ 상품 매핑이 들어 있습니다.
+# 커밋되면 어떤 코드가 1등인지 저장소에서 그대로 조회할 수 있으므로 절대 추적하지 않습니다.
+dev.db
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
 
 # vercel
 .vercel
@@ -39,3 +49,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+/src/generated/prisma
+
+# 발급 산출물 (코드↔상품 매핑 포함 — 절대 커밋 금지)
+/out

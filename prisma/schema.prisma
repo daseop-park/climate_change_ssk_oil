@@ -1,0 +1,64 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id             String       @id @default(cuid())
+  name           String
+  phoneEncrypted String
+  phoneHash      String       @unique
+  createdAt      DateTime     @default(now())
+  rewardCodes    RewardCode[]
+
+  @@map("users")
+}
+
+model Product {
+  id          String  @id @default(cuid())
+  name        String
+  description String?
+  image       String? // null이면 프론트에서 hue 기반 스트라이프 플레이스홀더 사용
+
+  category  String // 카페 / 상품권 / 배달 / 굿즈 — 칩 라벨
+  rank      String // 1등 / 2등 / 3등 / 4등 / 참가상
+  hue       Int    @default(150) // 상품 이미지 플레이스홀더 색상 (0-360)
+  sortOrder Int    @default(0)
+
+  // 화면에 노출할 당첨 확률은 기본적으로 "발급 비율"에서 계산한다.
+  // 마케팅상 다른 문구가 필요할 때만 이 값으로 덮어쓴다.
+  oddsLabel String?
+
+  createdAt   DateTime     @default(now())
+  deletedAt   DateTime? // Soft delete support
+  rewardCodes RewardCode[]
+
+  @@index([deletedAt, sortOrder])
+  @@map("products")
+}
+
+model RewardCode {
+  id         String    @id @default(cuid())
+  rewardCode String    @unique
+  productId  String // 발급 시점에 상품이 확정된다 (사전 배정 · 꽝 없음)
+  userId     String?
+  batch      String // 발급 배치 이름. 배치별로 분배를 다르게 가져갈 수 있다
+  status     String    @default("UNUSED") // UNUSED, USED, RECEIVED
+  usedAt     DateTime?
+  receivedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  product Product @relation(fields: [productId], references: [id])
+  user    User?   @relation(fields: [userId], references: [id])
+
+  // 관리자 재고 집계: 상품별 status 카운트
+  @@index([productId, status])
+  @@index([status])
+  @@index([batch])
+  @@index([userId])
+  @@map("reward_codes")
+}
