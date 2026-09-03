@@ -35,7 +35,7 @@ const STATUS_CLASS: Record<RewardStatus, string> = {
 export default function AdminRecentWinsTable({ wins }: { wins: RecentWinDto[] }) {
   return (
     <div className="border-line overflow-hidden rounded-[14px] border bg-white">
-      <div className="flex items-baseline justify-between px-[22px] pt-[18px] pb-[14px]">
+      <div className="flex items-baseline justify-between px-4 pt-[18px] pb-[14px] md:px-[22px]">
         <h3 className="text-ink m-0 text-[14.5px] font-extrabold tracking-[-.02em]">최근 당첨</h3>
         <Link href="/admin/wins" className="text-green-600 text-[11.5px] font-bold">
           당첨 내역 전체
@@ -45,7 +45,10 @@ export default function AdminRecentWinsTable({ wins }: { wins: RecentWinDto[] })
       {wins.length === 0 ? (
         <TableEmpty>아직 등록된 코드가 없습니다.</TableEmpty>
       ) : (
-        <table className="w-full border-collapse">
+        // 좁은 화면에서는 이 표만 옆으로 넘어갑니다 — 예전처럼 콘솔 전체가 밀리지 않습니다
+        // (`docs/polishing/sdd/sdd-responsive-layout.md` §5-1).
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[780px] border-collapse">
           <thead>
             <tr>
               <Th edge="start">시각</Th>
@@ -82,7 +85,8 @@ export default function AdminRecentWinsTable({ wins }: { wins: RecentWinDto[] })
               );
             })}
           </tbody>
-        </table>
+          </table>
+        </div>
       )}
     </div>
   );

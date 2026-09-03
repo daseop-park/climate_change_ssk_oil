@@ -19,8 +19,11 @@ export const metadata: Metadata = { title: "페이지를 찾을 수 없어요 ·
 
 export default function NotFound() {
   return (
-    <div className="bg-page-bg flex min-h-[100dvh] items-start justify-center">
-      <div className="bg-surface flex h-[100dvh] w-full max-w-[440px] flex-col items-center justify-center px-8 text-center">
+    <div className="bg-page-bg flex min-h-[100dvh] items-start justify-center lg:items-center">
+      {/* 배경 연출은 없습니다 — 404 에 캠페인 비주얼까지 얹을 이유가 없습니다.
+          다만 셸 프레임은 `AppShell` 과 맞춰 둡니다. 안 그러면 404 만 데스크톱에서
+          옛 모습(화면을 세로로 가르는 440px 흰 띠)으로 남습니다. */}
+      <div className="bg-surface flex h-[100dvh] w-full max-w-[440px] flex-col items-center justify-center px-8 text-center lg:h-[min(880px,92dvh)] lg:rounded-[32px] lg:shadow-[0_20px_60px_rgba(23,33,28,.14)]">
         <div className="text-green-600 font-mono text-[11px] font-bold tracking-[.14em]">
           404
         </div>

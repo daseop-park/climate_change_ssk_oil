@@ -109,22 +109,29 @@ export default function AdminReceivePanel() {
   const busy = looking || receiving;
 
   return (
-    <div className="border-line rounded-[14px] border bg-white px-[22px] pt-5 pb-[22px]">
+    <div className="border-line rounded-[14px] border bg-white px-4 pt-5 pb-[22px] md:px-[22px]">
       <h3 className="text-ink m-0 text-[15px] font-extrabold tracking-[-.02em]">실물 지급 처리</h3>
       <p className="text-muted-3 mt-[5px] mb-[18px] text-[12px] leading-[1.6]">
         고객에게 <strong className="text-ink">이름과 전화번호를 물어</strong> 입력하세요. 목록의
         성함·연락처는 가려져 있어 눈으로 대조할 수 없습니다.
       </p>
 
-      <form onSubmit={onLookup} noValidate className="grid grid-cols-[1fr_1fr_auto] items-start gap-[14px]">
+      {/* 폰에서는 세로 스택. `md:` 부터 이름·전화·조회가 한 줄입니다. */}
+      <form
+        onSubmit={onLookup}
+        noValidate
+        className="grid grid-cols-1 items-start gap-[14px] md:grid-cols-[1fr_1fr_auto]"
+      >
         {/* 공개 조회 폼과 같은 필드 선언을 씁니다 — 문구가 갈라지지 않도록. */}
         <div className="contents [&_label]:text-ink-70 [&_label]:tracking-normal">
           <FieldSet fields={LOOKUP_FIELDS} form={form} idPrefix="admin-recv" disabled={busy} />
         </div>
+        {/* `md:mt-[25px]` 은 라벨 높이만큼 내려 필드와 밑선을 맞추는 값입니다.
+            세로로 쌓이면 맞출 대상이 없으므로 `md:` 부터만 붙입니다. */}
         <button
           type="submit"
           disabled={busy}
-          className="bg-green-600 mt-[25px] h-[46px] cursor-pointer rounded-[11px] px-6 text-[13.5px] font-extrabold text-white disabled:cursor-not-allowed disabled:opacity-60"
+          className="bg-green-600 h-[46px] w-full cursor-pointer rounded-[11px] px-6 text-[13.5px] font-extrabold text-white disabled:cursor-not-allowed disabled:opacity-60 md:mt-[25px] md:w-auto"
         >
           {looking ? "조회 중…" : "조회"}
         </button>
@@ -162,27 +169,33 @@ export default function AdminReceivePanel() {
               <ul className="m-0 flex list-none flex-col gap-[6px] p-0">
                 {found.pending.map((r) => (
                   <li key={r.id}>
-                    <label className="border-line-3 hover:bg-surface flex cursor-pointer items-center gap-[11px] rounded-[10px] border px-3 py-[10px]">
+                    <label className="border-line-3 hover:bg-surface flex cursor-pointer items-start gap-[11px] rounded-[10px] border px-3 py-[10px] md:items-center">
                       <input
                         type="checkbox"
                         checked={checked.has(r.id)}
                         onChange={() => toggle(r.id)}
                         disabled={busy}
-                        className="accent-green-600 h-4 w-4 cursor-pointer"
+                        className="accent-green-600 mt-[2px] h-4 w-4 cursor-pointer md:mt-0"
                       />
-                      <span className="text-ink flex-1 truncate text-[12.5px] font-bold">
-                        {r.product.name}
-                      </span>
-                      <span className="text-muted font-mono text-[12px]">{r.rewardCode}</span>
-                      <span className="text-muted-3 text-[11.5px] font-semibold">
-                        {formatDate(r.usedAt)}
+                      {/* 폰에서는 경품명 아래로 코드·날짜가 내려갑니다. 한 줄에 넣으면
+                          경품명이 두세 글자만 남습니다. */}
+                      <span className="flex min-w-0 flex-1 flex-col gap-1 md:flex-row md:items-center md:gap-[11px]">
+                        <span className="text-ink truncate text-[12.5px] font-bold md:flex-1">
+                          {r.product.name}
+                        </span>
+                        <span className="flex flex-shrink-0 items-baseline gap-[11px]">
+                          <span className="text-muted font-mono text-[12px]">{r.rewardCode}</span>
+                          <span className="text-muted-3 text-[11.5px] font-semibold">
+                            {formatDate(r.usedAt)}
+                          </span>
+                        </span>
                       </span>
                     </label>
                   </li>
                 ))}
               </ul>
 
-              <div className="mt-[14px] flex items-center justify-between">
+              <div className="mt-[14px] flex flex-col items-stretch gap-3 md:flex-row md:items-center md:justify-between">
                 <span className="text-muted-3 text-[11.5px] font-semibold">
                   {/* 부분 성공이 없다는 것을 누르기 전에 알려 줍니다. */}
                   선택한 {checked.size}건을 한 번에 처리합니다. 하나라도 실패하면 전부 취소됩니다.
@@ -191,7 +204,7 @@ export default function AdminReceivePanel() {
                   type="button"
                   onClick={onReceive}
                   disabled={busy || checked.size === 0}
-                  className="bg-green-800 h-[42px] cursor-pointer rounded-[11px] px-5 text-[13px] font-extrabold text-white disabled:cursor-not-allowed disabled:opacity-50"
+                  className="bg-green-800 h-[42px] w-full flex-shrink-0 cursor-pointer rounded-[11px] px-5 text-[13px] font-extrabold text-white disabled:cursor-not-allowed disabled:opacity-50 md:w-auto"
                 >
                   {receiving ? "처리 중…" : `${checked.size}건 지급 완료`}
                 </button>

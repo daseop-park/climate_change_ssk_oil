@@ -1,12 +1,17 @@
 # 구현 계획
 
-> 최종 갱신 2026-08-17. 디자인 기준은 `front_design/design_spec.md`, 백엔드 기준은 `back_111.md`.
+> **상태: 살아있는 문서 — 계속 갱신합니다.** 확정 결정과 진행 기록이 모이는 곳이며,
+> 다른 문서와 충돌하면 이 문서가 기준입니다.
+>
+> 작성 2026-08-07 · 최종 갱신 2026-09-03
+> 선행 근거: [`front_design/design_spec.md`](../front_design/design_spec.md)(디자인) · [`back_111.md`](../back_111.md)(백엔드·보안)
+> 관련: [`docs/phase5-admin-estimate.md`](./phase5-admin-estimate.md) · [`docs/archive/implementation-plan-original.md`](./archive/implementation-plan-original.md)
 >
 > 📌 **2026-08-17: "배포 단계 제외" 전제를 폐기했습니다.** 배포를 Phase 6 안으로 넣었습니다.
 > 배경과 그로 인해 열린 결정들은 [Phase 6](#phase-6--통합-테스트폴리싱-예상-1425h--마지막-단계--배포-포함) 을 보세요.
 >
 > ⚠️ **이 문서의 1~7단계 번호는 실제 진행 번호와 다릅니다.**
-> 실제 작업은 `implementation_plan.md`(Phase 1~6) 기준으로 진행 중입니다.
+> 실제 작업은 `archive/implementation-plan-original.md`(Phase 1~6) 가 정의한 번호를 따릅니다.
 > 대조표와 현재 진행 상황은 문서 맨 아래 **[진행 현황 및 남은 견적](#진행-현황-및-남은-견적-2026-08-07)** 을 보세요.
 > 아래 1~7단계 본문은 당시 판단을 남겨둔 기록이며, 일부는 이후 결정으로 뒤집혔습니다.
 
@@ -238,7 +243,7 @@ Loading·Skeleton·Empty State·Error Boundary, 모달 포커스 트랩, `aria-e
 
 ## 단계 번호 대조
 
-실제 진행은 [`implementation_plan.md`](./implementation_plan.md)(밑줄)에 정의된 Phase 번호를 따릅니다.
+실제 진행은 [`archive/implementation-plan-original.md`](./archive/implementation-plan-original.md)에 정의된 Phase 번호를 따릅니다.
 그 문서는 **착수 시점의 원안이고 갱신하지 않습니다** — 거기서 가져오는 것은 Phase 번호의 정의뿐이고,
 **현재 기준·확정 결정·진행 상황은 이 문서(하이픈)가 단일 출처**입니다.
 둘의 내용이 어긋나면 이 문서가 맞습니다.
@@ -1228,3 +1233,92 @@ https://<도메인>/admin/login?k=<SITE_ACCESS_TOKEN>
 
 `seedProducts()` 의 upsert 는 `deletedAt: null` 도 함께 씁니다 — **soft delete 한 상품이
 시드 실행으로 되살아납니다.** 카탈로그에서 지운 항목은 DB 에서 사라지지 않는다는 것도 함께 기억하세요.
+
+---
+
+## 정리 로그 — 2026-09-03 디렉터리 클린업
+
+폴리싱 전 군살 제거 패스. **`src/`·`public/`·`scripts/`·`prisma/` 는 손대지 않았습니다**
+(전수 조사 결과 참조 없는 모듈 0개, 미사용 이미지 0개).
+
+**삭제 — `design_handoff_ssakssak/assets/` 8개 (약 6.52MB)**
+
+- 미사용 로고 4개: `logo.png`(4.53MB) · `sslogohanminwoo.png`(1.24MB) · `logo-fruit.jpg` · `logo-fruit2.png`
+- `public/assets/` 와 md5 동일한 중복 4개: `baemin12.png` · `gs5000.png` · `staramericano.png` · `starbucks50,000.png`
+
+**보존 판단 — 지우지 않은 중복이 있습니다.** `photo-greasy.png` · `photo-delivery.png` ·
+`photo-recycle.png` 는 `public/` 사본과 byte 동일하지만 `team_싹싹기름 v4.dc.html` 이
+`url('assets/${name}.png')` 형태로 **동적 참조**합니다 (933행 `heroLayers`, 1028행 `c.img`).
+`logo-r14.png` · `intro-bg.png` · `logo-fruit3.png` · `logo-amiyu.png` 도 같은 캔버스가
+정적 참조합니다. `intro-bg.png` 는 앱에서는 2026-08-12 에 교체돼 죽었지만 캔버스에는 살아 있습니다.
+**핸드오프 폴더의 "미사용" 판정은 정적 grep 만으로 내리면 안 됩니다** — 781행의 `photo-greasy`
+경고와 같은 함정이 이 폴더에도 있습니다.
+
+**삭제 — 중복 런타임 1개 (66KB)**
+
+- `admin_handoff/support.js` (`design_handoff_ssakssak/support.js` 와 md5 동일)
+- 이에 따라 `admin_handoff/Admin Canvas.dc.html:6` 의 스크립트 경로를
+  `./support.js` → `../design_handoff_ssakssak/support.js` 로 **1줄 수정**했습니다.
+  `phase5-admin-estimate.md:104` 의 "읽기 전용 원본" 원칙을 이 한 줄만 의도적으로 깼습니다.
+  프로토타입 동작은 그대로 유지됩니다.
+
+**삭제 — 문서 2건**
+
+- `docs/test-codes.md` — 문서가 스스로 선언한 폐기 조건이 모두 충족됨
+  (`POST /api/reward/register` 존재, `lib/design/redeem.ts` 소멸, `scripts/gen-test-codes.mjs` 이미 삭제).
+  수록 코드는 전부 프론트 데모용 더미였습니다. 178행의 "실제 발급 코드 금지" 원칙은
+  파일과 무관하게 계속 유효합니다.
+- `front_design/분리수거_배출_tip.txt` — 구 축약본. `src/lib/design/content.ts:1` 이 참조하는 원문은
+  `design_handoff_ssakssak/` 쪽 장문 사본이라 영향 없습니다.
+
+**로컬 정리 (미추적, git 영향 없음)**
+
+- `out/codes-2026-demo-01.csv` — 실제 발급 배치의 코드↔경품 매핑. 커밋은 `.gitignore` 로
+  막혀 있었지만 로컬 디스크에 답안지를 남길 이유가 없어 제거했습니다.
+- `tsconfig.tsbuildinfo` — 빌드 캐시, 재생성됨
+
+**추가 — `docs/prd.html`**: 코드베이스에서 역산한 PRD(제품 개요·요구사항·기술 스택·아키텍처).
+
+**유지 판단** — 지우고 싶어 보이지만 지우면 안 되는 것들:
+`archive/implementation-plan-original.md`(이 문서가 Phase 1~6 번호 정의를 위임) ·
+`phase5-admin-estimate.md`(소스 10곳이 설계 근거로 인용) · `back_111.md` ·
+`front_design/design_spec.md` · `scripts/` 8개 전부(`format.ts` 는 `stock-report`·`issue-codes` 가 import) ·
+`public/assets/` 16개 전부.
+
+---
+
+## 정리 로그 — 2026-09-03 문서 구조 정리
+
+디렉터리 클린업(위 로그)에 이어 `docs/` 의 마크다운 배치를 정리했습니다.
+`docs/polishing/` 이 이미 `sdd/` · `review/` 로 나뉘어 있어 그 규칙에 맞췄습니다.
+
+**이동 · 개명 1건**
+
+- `docs/implementation_plan.md` → **`docs/archive/implementation-plan-original.md`**
+
+  하이픈/밑줄 한 글자로만 구분되던 상태를 없앴습니다. 문서 스스로
+  "편집 전에 어느 쪽인지 확인하세요" 라고 경고할 정도의 혼동 요인이었습니다.
+  소스 코드에서 이 파일을 참조하는 곳은 **0건**이라 이동 비용이 가장 쌌습니다
+  (`phase5-admin-estimate.md` 는 소스 9개 파일이 인용하므로 제자리에 뒀습니다).
+
+  갱신한 인바운드 링크 3건 — `implementation-plan.md` 의 상단 배너 · 246행 · 1283행.
+  옮긴 파일 안의 상대 경로 3건(`./implementation-plan.md`, `./phase5-admin-estimate.md`,
+  `../front_design/`·`../back_111.md`)도 한 단계씩 올렸습니다.
+
+**상태 배너 통일**
+
+`implementation-plan.md` · `phase5-admin-estimate.md` · `archive/implementation-plan-original.md`
+세 문서의 머리말을 **상태 / 작성·갱신일 / 선행 근거 / 관련 문서** 네 줄로 맞췄습니다.
+`polishing/sdd/sdd-responsive-layout.md` 가 이미 쓰고 있던 형식입니다.
+문서를 열자마자 "이건 살아있나, 동결됐나" 가 보이게 하는 것이 목적입니다.
+
+**신규 — `docs/README.md`**
+
+문서 인덱스. 성격·상태·읽는 순서를 한 표에 모았습니다.
+
+**본문은 손대지 않았습니다.** 배너와 링크 외에 세 문서의 내용 변경은 없습니다.
+
+**미결로 남긴 것** — `polishing/sdd/sdd-responsive-layout.md` 는 배너에
+"설계 확정, 구현 전" 이라고 적혀 있지만 실제로는 구현이 끝났습니다(소스 12개 수정 + 신규 2개).
+설계와 실제 구현의 차이를 대조해야 하는 작업이라 이번 정리에서는 제외했고,
+`README.md` 인덱스에 그 사실을 표기해 뒀습니다.

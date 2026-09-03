@@ -1,10 +1,15 @@
 # Implementation Plan: Reward & Gift Collection Web App
 
-> ## ⚠️ 이 문서는 착수 시점의 **원안이며 갱신하지 않습니다**
+> **상태: 동결 — 갱신하지 않습니다.** 착수 시점의 원안이며, 여기서 가져오는 것은
+> **Phase 1~6 번호의 정의뿐**입니다. 현재 기준·확정 결정·진행 상황은
+> **[`implementation-plan.md`](../implementation-plan.md)** 를 보세요.
 >
-> 여기서 가져오는 것은 **Phase 1~6 번호의 정의뿐**입니다.
-> 현재 기준·확정 결정·진행 상황은 **[`implementation-plan.md`](./implementation-plan.md)** 를 보세요.
-> (파일명이 하이픈/밑줄 하나 차이입니다. 편집 전에 어느 쪽인지 확인하세요.)
+> 작성 Phase 1 착수 전 (2026-08-07 이전) · 이후 갱신 없음
+> 선행 근거: [`front_design/design_spec.md`](../../front_design/design_spec.md) · [`back_111.md`](../../back_111.md)
+> 관련: [`docs/implementation-plan.md`](../implementation-plan.md) · [`docs/phase5-admin-estimate.md`](../phase5-admin-estimate.md)
+>
+> 📌 **2026-09-03: `docs/implementation_plan.md` 에서 이 경로로 옮기며 이름을 바꿨습니다.**
+> 하이픈/밑줄 한 글자 차이로 살아있는 문서와 구분되던 상태를 없애기 위해서입니다.
 >
 > 아래 본문에는 이후 결정으로 **뒤집힌 내용이 그대로 남아 있습니다.** 당시 판단을 지우지 않고
 > 남겨두는 편이 "왜 이렇게 됐는지" 를 설명해 주기 때문입니다. 대표적인 것:
@@ -12,7 +17,7 @@
 > - **Phase 5 의 범위**는 2026-08-09 에 **조회 전용**으로 축소됐습니다.
 >   아래 "상품 등록(Soft Delete) · 리워드 코드 일괄 생성기" 는 **폐기된 계획**입니다 —
 >   상품 CRUD 와 코드 발급은 관리자 화면이 아니라 백엔드(CLI)에서 합니다.
->   현재 범위와 견적은 [`phase5-admin-estimate.md`](./phase5-admin-estimate.md).
+>   현재 범위와 견적은 [`phase5-admin-estimate.md`](../phase5-admin-estimate.md).
 > - **로컬 SQLite** 는 2026-08-07 Railway PostgreSQL 전면 전환으로 폐기됐습니다.
 > - **배경 이미지(`clean_oil_bg.jpg`)** 조항은 디자인 핸드오프 반영 시 폐기됐습니다.
 > - **`Sidebar.tsx` · `ProductModal.tsx`** 는 실제로 `shell/Drawer.tsx` · `shell/PrizeSheet.tsx`
@@ -20,7 +25,7 @@
 > - **"미들웨어 검증"** 은 `src/proxy.ts` 입니다. Next 16 에서 middleware 는 Edge 런타임이라
 >   `jsonwebtoken`·`node:crypto` 를 쓸 수 없습니다.
 
-이 문서는 [design_spec.md](../front_design/design_spec.md)의 프론트엔드 디자인 기획과 [back_111.md](../back_111.md)의 백엔드/보안 요구사항을 결합하여 작성한 **단계별 작업 계획서**입니다.
+이 문서는 [design_spec.md](../../front_design/design_spec.md)의 프론트엔드 디자인 기획과 [back_111.md](../../back_111.md)의 백엔드/보안 요구사항을 결합하여 작성한 **단계별 작업 계획서**입니다.
 
 ---
 

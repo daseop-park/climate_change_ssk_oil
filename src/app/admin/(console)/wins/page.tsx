@@ -2,6 +2,12 @@ import Link from "next/link";
 import AdminPage, { AdminPanel } from "@/components/admin/AdminPage";
 import AdminReceivePanel from "@/components/admin/AdminReceivePanel";
 import { TableEmpty, Td, Th, Tr } from "@/components/admin/AdminTable";
+// 상태 라벨·색은 카드 쪽에 두고 여기서 가져다 씁니다. 두 벌로 두면 한쪽만 고쳐진 채
+// 표와 카드가 서로 다른 말을 하게 됩니다.
+import AdminWinCards, {
+  WIN_STATUS_CLASS,
+  WIN_STATUS_LABEL,
+} from "@/components/admin/AdminWinCards";
 import { formatDateTime } from "@/lib/format-date";
 import { adminService } from "@/services/admin.service";
 import { REWARD_STATUS, type RewardStatus } from "@/types/reward";
@@ -24,18 +30,6 @@ const FILTERS: { label: string; status?: RewardStatus }[] = [
   { label: "수령 대기", status: REWARD_STATUS.USED },
   { label: "수령 완료", status: REWARD_STATUS.RECEIVED },
 ];
-
-const STATUS_LABEL: Record<RewardStatus, string> = {
-  UNUSED: "미등록",
-  USED: "수령 대기",
-  RECEIVED: "수령 완료",
-};
-
-const STATUS_CLASS: Record<RewardStatus, string> = {
-  UNUSED: "text-muted-3 bg-line-2",
-  USED: "text-green-600 bg-chip-bg",
-  RECEIVED: "text-muted-3 bg-line-2",
-};
 
 /** `?status=` 는 주소창에서 아무 값이나 올 수 있습니다. 아는 값만 통과시킵니다. */
 function parseStatus(raw: string | string[] | undefined): RewardStatus | undefined {
@@ -72,7 +66,7 @@ export default async function AdminWinsPage(props: PageProps<"/admin/wins">) {
       <AdminReceivePanel />
 
       <AdminPanel className="overflow-hidden">
-        <div className="flex items-center justify-between px-[22px] pt-[18px] pb-[14px]">
+        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-[10px] px-4 pt-[18px] pb-[14px] md:px-[22px]">
           <h3 className="text-ink m-0 text-[14.5px] font-extrabold tracking-[-.02em]">전체 목록</h3>
           <div className="flex items-center gap-[6px]">
             {FILTERS.map((f) => {
@@ -101,52 +95,67 @@ export default async function AdminWinsPage(props: PageProps<"/admin/wins">) {
             {status ? "이 상태의 당첨 내역이 없습니다." : "아직 등록된 코드가 없습니다."}
           </TableEmpty>
         ) : (
-          <table className="w-full border-collapse">
-            <thead>
-              <tr>
-                <Th edge="start">당첨 시각</Th>
-                <Th>코드</Th>
-                <Th>배치</Th>
-                <Th>경품</Th>
-                <Th>성함</Th>
-                <Th>연락처</Th>
-                <Th>지급 시각</Th>
-                <Th edge="end">상태</Th>
-              </tr>
-            </thead>
-            <tbody>
-              {items.map((w) => {
-                const s = w.status as RewardStatus;
-                return (
-                  <Tr key={w.rewardId}>
-                    <Td edge="start" className="text-muted font-mono">
-                      {formatDateTime(w.wonAt)}
-                    </Td>
-                    <Td className="text-ink font-mono font-bold">{w.rewardCode}</Td>
-                    <Td className="text-muted">{w.batch}</Td>
-                    {/* 1280px 에서 줄어드는 유일한 가변 폭 컬럼입니다. */}
-                    <Td className="text-ink max-w-0 truncate font-bold">{w.productName}</Td>
-                    <Td className="text-ink font-bold">{w.userNameMasked}</Td>
-                    <Td className="text-muted font-mono">{w.phoneMasked}</Td>
-                    <Td className="text-muted-3 font-mono">
-                      {w.receivedAt ? formatDateTime(w.receivedAt) : "-"}
-                    </Td>
-                    <Td edge="end">
-                      <span
-                        className={`rounded-[20px] px-[9px] py-1 text-[10.5px] font-extrabold ${STATUS_CLASS[s] ?? STATUS_CLASS.UNUSED}`}
-                      >
-                        {STATUS_LABEL[s] ?? s}
-                      </span>
-                    </Td>
-                  </Tr>
-                );
-              })}
-            </tbody>
-          </table>
+          <>
+            {/*
+              표는 `lg:` 이상에서만 그립니다. 8컬럼이라 좁은 화면에서는 어떻게 접어도
+              읽을 수 없고, 컬럼을 지우면 현장에서 대조할 값이 사라집니다.
+              `lg:` 이상에서도 사이드바를 뺀 폭이 880px 아래로 내려갈 수 있어
+              표 자체는 가로 스크롤합니다 (레이아웃의 `min-w-[1120px]` 을 여기로 내린 것).
+            */}
+            <div className="hidden overflow-x-auto lg:block">
+              <table className="w-full min-w-[880px] border-collapse">
+                <thead>
+                  <tr>
+                    <Th edge="start">당첨 시각</Th>
+                    <Th>코드</Th>
+                    <Th>배치</Th>
+                    <Th>경품</Th>
+                    <Th>성함</Th>
+                    <Th>연락처</Th>
+                    <Th>지급 시각</Th>
+                    <Th edge="end">상태</Th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {items.map((w) => {
+                    const s = w.status as RewardStatus;
+                    return (
+                      <Tr key={w.rewardId}>
+                        <Td edge="start" className="text-muted font-mono">
+                          {formatDateTime(w.wonAt)}
+                        </Td>
+                        <Td className="text-ink font-mono font-bold">{w.rewardCode}</Td>
+                        <Td className="text-muted">{w.batch}</Td>
+                        {/* 1280px 에서 줄어드는 유일한 가변 폭 컬럼입니다. */}
+                        <Td className="text-ink max-w-0 truncate font-bold">{w.productName}</Td>
+                        <Td className="text-ink font-bold">{w.userNameMasked}</Td>
+                        <Td className="text-muted font-mono">{w.phoneMasked}</Td>
+                        <Td className="text-muted-3 font-mono">
+                          {w.receivedAt ? formatDateTime(w.receivedAt) : "-"}
+                        </Td>
+                        <Td edge="end">
+                          <span
+                            className={`rounded-[20px] px-[9px] py-1 text-[10.5px] font-extrabold ${WIN_STATUS_CLASS[s] ?? WIN_STATUS_CLASS.UNUSED}`}
+                          >
+                            {WIN_STATUS_LABEL[s] ?? s}
+                          </span>
+                        </Td>
+                      </Tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            {/* 같은 데이터를 두 번 그립니다 — 페이지네이션으로 잘려 있어 비용은 무시할 수준입니다. */}
+            <div className="lg:hidden">
+              <AdminWinCards items={items} />
+            </div>
+          </>
         )}
 
         {lastPage > 1 ? (
-          <div className="border-line bg-surface flex items-center justify-between border-t px-[22px] py-[14px]">
+          <div className="border-line bg-surface flex flex-wrap items-center justify-between gap-x-4 gap-y-[10px] border-t px-4 py-[14px] md:px-[22px]">
             <span className="text-muted-3 text-[11.5px] font-semibold">
               {(page - 1) * pageSize + 1}–{Math.min(page * pageSize, total)} / {total}건
             </span>

@@ -11,12 +11,17 @@ import { adminService } from "@/services/admin.service";
  * **로그인 화면을 이 레이아웃 밖에 두는 것** 하나입니다 — 여기 들어오면
  * 아래 가드에 걸려 로그인 화면이 로그인 화면으로 무한히 리다이렉트됩니다.
  *
- * ## 1280px
+ * ## 폭
  *
- * 셸을 `min-w-[1120px]` 로 잡고 그보다 좁으면 가로 스크롤을 냅니다.
- * 1440 을 하드코딩하지 않는 것이 요점입니다 — 내부 그리드는 전부 `fr` 이라
- * 1280 에서도 그대로 접히고, 유일한 병목인 최근 당첨 테이블은 경품명 `truncate` 로
- * 들어갑니다 (`docs/phase5-admin-estimate.md` §8).
+ * 원래 셸에 `min-w-[1120px]` 을 걸어 좁으면 **화면 전체**가 가로로 밀렸습니다.
+ * 사이드바까지 같이 밀려서 폰에서는 쓸 수가 없었습니다. 그 하한을 걷어내고
+ * 가로 스크롤을 **넓은 표 컨테이너로 내렸습니다** — 이제 좁은 화면에서도 헤더와
+ * 내비게이션은 제자리에 있고 표만 옆으로 넘어갑니다.
+ *
+ * `lg:` 미만에서는 사이드바가 상단 바 + 드로어로 바뀌므로 세로로 쌓고(`flex-col`),
+ * `lg:` 이상에서만 좌우로 놓습니다(`lg:flex-row`).
+ * 내부 그리드는 전부 `fr` 이라 1280px 에서도 그대로 접힙니다
+ * (`docs/phase5-admin-estimate.md` §8 · `docs/polishing/sdd/sdd-responsive-layout.md` §5).
  */
 export default async function AdminConsoleLayout({
   children,
@@ -32,11 +37,9 @@ export default async function AdminConsoleLayout({
   const counts = await adminService.getNavCounts();
 
   return (
-    <div className="min-h-[100dvh] overflow-x-auto">
-      <div className="flex min-h-[100dvh] min-w-[1120px]">
-        <AdminSidebar counts={counts} />
-        <div className="flex min-w-0 flex-1 flex-col">{children}</div>
-      </div>
+    <div className="flex min-h-[100dvh] flex-col lg:flex-row">
+      <AdminSidebar counts={counts} />
+      <div className="flex min-w-0 flex-1 flex-col">{children}</div>
     </div>
   );
 }
