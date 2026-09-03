@@ -1,7 +1,14 @@
 # Phase 5 — 관리자 화면 견적 및 `admin_handoff` 반영 전략
 
-> 작성 2026-08-08 · 개정 2026-08-09 (**조회 전용 전환**). 기준 핸드오프 `admin_handoff/README.md` + `Admin Canvas.dc.html`.
-> `docs/implementation-plan.md` 의 "Phase 5 — 관리자 화면" 을 대체하는 정식 견적입니다.
+> **상태: 확정 · 구현 완료. 설계 근거로 계속 인용됩니다.**
+> [`implementation-plan.md`](./implementation-plan.md) 의 "Phase 5 — 관리자 화면" 을 대체하는 정식 견적이며,
+> 소스 9개 파일(`mask.ts`, `admin.service.ts`, `dto.ts`, `product.repository.ts`,
+> `AdminStockGauges.tsx` 등)이 주석에서 이 문서의 절 번호를 직접 인용합니다.
+> **절 번호를 바꾸면 그 주석들이 함께 깨집니다.**
+>
+> 작성 2026-08-08 · 개정 2026-08-09 (**조회 전용 전환**)
+> 선행 근거: `admin_handoff/README.md` + `Admin Canvas.dc.html`(핸드오프 원본)
+> 관련: [`docs/implementation-plan.md`](./implementation-plan.md) · [`docs/polishing/sdd/sdd-responsive-layout.md`](./polishing/sdd/sdd-responsive-layout.md)(§8 의 1120px 판단을 이어받음)
 
 ## 요약
 

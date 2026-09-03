@@ -28,7 +28,7 @@ export default async function AdminCodesPage() {
       }
     >
       <AdminPanel className="overflow-hidden">
-        <div className="text-ink px-[22px] pt-4 pb-3 text-[14.5px] font-extrabold tracking-[-.02em]">
+        <div className="text-ink px-4 pt-4 pb-3 text-[14.5px] font-extrabold tracking-[-.02em] md:px-[22px]">
           배치 목록
         </div>
 
@@ -37,51 +37,56 @@ export default async function AdminCodesPage() {
             발급된 배치가 없습니다. <code className="font-mono">npm run db:issue</code> 로 발급하세요.
           </TableEmpty>
         ) : (
-          <table className="w-full border-collapse">
-            <thead>
-              <tr>
-                <Th edge="start">배치</Th>
-                <Th numeric>수량</Th>
-                <Th numeric>사용</Th>
-                <Th numeric>잔여</Th>
-                <Th>발급일</Th>
-                <Th edge="end">상태</Th>
-              </tr>
-            </thead>
-            <tbody>
-              {batches.map((b) => {
-                // 상태는 저장된 값이 아니라 파생입니다. 유효 기간 컬럼이 없으므로
-                // "만료"라는 상태는 존재할 수 없고, 남은 코드가 없으면 자연히 끝납니다.
-                const depleted = b.unused === 0;
-                return (
-                  <Tr key={b.batch}>
-                    <Td edge="start" className="text-ink font-bold">
-                      {b.batch}
-                    </Td>
-                    <Td numeric className="text-muted">
-                      {b.quantity.toLocaleString("ko-KR")}
-                    </Td>
-                    <Td numeric className="text-muted">
-                      {b.used.toLocaleString("ko-KR")}
-                    </Td>
-                    <Td numeric className="text-ink font-bold">
-                      {b.unused.toLocaleString("ko-KR")}
-                    </Td>
-                    <Td className="text-muted">{formatDate(b.issuedAt)}</Td>
-                    <Td edge="end">
-                      <span
-                        className={`rounded-[20px] px-[9px] py-1 text-[10.5px] font-extrabold ${
-                          depleted ? "text-muted-3 bg-line-2" : "text-green-600 bg-chip-bg"
-                        }`}
-                      >
-                        {depleted ? "소진" : "진행 중"}
-                      </span>
-                    </Td>
-                  </Tr>
-                );
-              })}
-            </tbody>
-          </table>
+          // 조회 전용 화면이라 카드 전환까지 가지 않습니다. 가로 스크롤을
+          // **레이아웃에서 이 컨테이너로 내리는 것**까지가 T2 범위입니다 — 폰에서도
+          // 사이드바와 헤더는 제자리에 있고 표만 옆으로 넘어갑니다.
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[620px] border-collapse">
+              <thead>
+                <tr>
+                  <Th edge="start">배치</Th>
+                  <Th numeric>수량</Th>
+                  <Th numeric>사용</Th>
+                  <Th numeric>잔여</Th>
+                  <Th>발급일</Th>
+                  <Th edge="end">상태</Th>
+                </tr>
+              </thead>
+              <tbody>
+                {batches.map((b) => {
+                  // 상태는 저장된 값이 아니라 파생입니다. 유효 기간 컬럼이 없으므로
+                  // "만료"라는 상태는 존재할 수 없고, 남은 코드가 없으면 자연히 끝납니다.
+                  const depleted = b.unused === 0;
+                  return (
+                    <Tr key={b.batch}>
+                      <Td edge="start" className="text-ink font-bold">
+                        {b.batch}
+                      </Td>
+                      <Td numeric className="text-muted">
+                        {b.quantity.toLocaleString("ko-KR")}
+                      </Td>
+                      <Td numeric className="text-muted">
+                        {b.used.toLocaleString("ko-KR")}
+                      </Td>
+                      <Td numeric className="text-ink font-bold">
+                        {b.unused.toLocaleString("ko-KR")}
+                      </Td>
+                      <Td className="text-muted">{formatDate(b.issuedAt)}</Td>
+                      <Td edge="end">
+                        <span
+                          className={`rounded-[20px] px-[9px] py-1 text-[10.5px] font-extrabold ${
+                            depleted ? "text-muted-3 bg-line-2" : "text-green-600 bg-chip-bg"
+                          }`}
+                        >
+                          {depleted ? "소진" : "진행 중"}
+                        </span>
+                      </Td>
+                    </Tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         )}
       </AdminPanel>
 

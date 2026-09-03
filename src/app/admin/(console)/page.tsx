@@ -16,6 +16,11 @@ import { adminService } from "@/services/admin.service";
  *
  * 그리드는 전부 분수(`1fr`·`1.55fr`)입니다. 1440px 을 하드코딩하지 않아 1280px 에서
  * 그대로 접힙니다 (`docs/phase5-admin-estimate.md` §8).
+ *
+ * 폰에서는 세로로 쌓습니다. 분수 그리드는 폭이 줄면 접히는 것이 아니라 **찌그러져서**,
+ * 360px 에서 KPI 카드 한 장이 100px 이 됩니다 — 숫자가 줄바꿈되어 읽을 수 없습니다.
+ * 이 화면은 조회 전용이라 여기까지가 T2 대응 범위입니다
+ * (`docs/polishing/sdd/sdd-responsive-layout.md` §5-1).
  */
 export default async function AdminDashboardPage() {
   const d = await adminService.getDashboard();
@@ -27,7 +32,7 @@ export default async function AdminDashboardPage() {
       // 재고가 5분 늦게 보이면 같은 경품을 두 번 꺼냅니다. 매 요청 렌더라 새로고침이 곧 최신입니다.
       subtitle={`${formatDateTime(new Date().toISOString())} 기준 · 새로고침하면 최신`}
     >
-      <div className="grid grid-cols-3 gap-[14px]">
+      <div className="grid grid-cols-1 gap-[14px] md:grid-cols-3">
         <AdminKpiCard
           label="코드 사용률"
           value={`${d.usedRate.toFixed(1)}%`}
@@ -65,7 +70,7 @@ export default async function AdminDashboardPage() {
         />
       </div>
 
-      <div className="grid grid-cols-[1.55fr_1fr] gap-[14px]">
+      <div className="grid grid-cols-1 gap-[14px] lg:grid-cols-[1.55fr_1fr]">
         <AdminUsageChart daily={d.daily} />
         <AdminStockGauges stock={d.stock} />
       </div>

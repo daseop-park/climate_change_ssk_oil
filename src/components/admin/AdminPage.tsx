@@ -8,6 +8,9 @@
  * 핸드오프 헤더 우측의 **기간 필터**와 **CSV 내보내기**는 없습니다 —
  * CSV 는 CLI(`npm run db:issue --csv`)로 넘겼고 기간 필터는 조회 범위가 고정이라
  * 기각했습니다. 자리는 `actions` 로 남겨 둡니다.
+ *
+ * 좌우 여백은 폰에서 16px, `md:` 부터 28px 입니다. 28px 을 그대로 두면 360px 화면에서
+ * 본문 폭이 304px 밖에 남지 않아 표와 카드가 눈에 띄게 좁아집니다.
  */
 export default function AdminPage({
   title,
@@ -22,7 +25,7 @@ export default function AdminPage({
 }) {
   return (
     <>
-      <header className="border-line flex items-center justify-between border-b bg-white px-7 py-5">
+      <header className="border-line flex flex-wrap items-center justify-between gap-x-4 gap-y-3 border-b bg-white px-4 py-4 md:px-7 md:py-5">
         <div className="flex flex-col gap-1">
           <h1 className="text-ink m-0 text-[19px] font-extrabold tracking-[-.025em]">{title}</h1>
           {subtitle ? (
@@ -32,7 +35,7 @@ export default function AdminPage({
         {actions ? <div className="flex items-center gap-[9px]">{actions}</div> : null}
       </header>
 
-      <div className="flex flex-1 flex-col gap-5 px-7 pt-6 pb-8">{children}</div>
+      <div className="flex flex-1 flex-col gap-5 px-4 pt-5 pb-8 md:px-7 md:pt-6">{children}</div>
     </>
   );
 }
